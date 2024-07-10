@@ -1,4 +1,6 @@
 'use client';
+import LoginForm from '@/components/auth/loginForm';
+import RegisterForm from '@/components/auth/registerForm';
 import {useState} from 'react';
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -19,7 +21,7 @@ export default function Login() {
                   👋
                 </span>
               </h2>
-              <p className="text-gray-500">
+              <p className="text-accent">
                 Preencha o formulário com suas credenciais e crie uma nova conta
                 na nossa plataforma.
               </p>
@@ -52,103 +54,9 @@ export default function Login() {
           </button>
         </div>
         {isRegister ? (
-          <form>
-            <div className="mb-4">
-              <label className="block text-dark" htmlFor="name">
-                Nome completo
-              </label>
-              <input
-                className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                type="text"
-                id="name"
-                placeholder="Informe seu nome completo"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-dark" htmlFor="login">
-                Login
-              </label>
-              <input
-                className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                type="text"
-                id="login"
-                placeholder="insira seu email ou telefone"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-dark" htmlFor="password">
-                Senha
-              </label>
-              <input
-                className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                type="password"
-                id="password"
-                placeholder="Insira sua senha"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-dark" htmlFor="confirm-password">
-                Confirme senha
-              </label>
-              <input
-                className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                type="password"
-                id="confirm-password"
-                placeholder="Confirme sua senha"
-              />
-            </div>
-            <div className="flex justify-between mb-4">
-              <span
-                onClick={handleRegister}
-                className="text-sm text-dark cursor-pointer">
-                Já tem uma conta? Inicie sua sessão
-              </span>
-            </div>
-            <button
-              type="submit"
-              className="w-full px-4 py-2 font-semibold text-white bg-yellow-500 rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-              Entrar
-            </button>
-          </form>
+          <RegisterForm handleRegister={handleRegister} />
         ) : (
-          <form>
-            <div className="mb-4">
-              <label className="block text-dark" htmlFor="login">
-                Email
-              </label>
-              <input
-                className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                type="text"
-                id="login"
-                placeholder="insira seu email ou telefone"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-dark" htmlFor="password">
-                Senha
-              </label>
-              <input
-                className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                type="password"
-                id="password"
-                placeholder="Insira sua senha"
-              />
-            </div>
-            <div className="flex items-center justify-between mb-4">
-              <label className="inline-flex items-center">
-                <input type="checkbox" className="form-checkbox" />
-                <span className="ml-2 text-sm text-dark">Manter conectado</span>
-              </label>
-              <a href="#" className="text-sm text-dark">
-                Esqueceu sua senha?
-              </a>
-            </div>
-            <button
-              type="submit"
-              className="w-full px-4 py-2 font-semibold text-white bg-yellow-500 rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-              Entrar
-            </button>
-          </form>
+          <LoginForm />
         )}
       </div>
     </div>
