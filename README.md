@@ -3,6 +3,8 @@
 ## Description
 E-Shop is an e-commerce portfolio developed with Next.js.
 
+**Live application link:** [E-Shop on Vercel](https://e-shop-plum.vercel.app)
+
 ## Features
 - [X] Initial project setup
 - [ ] User authentication
