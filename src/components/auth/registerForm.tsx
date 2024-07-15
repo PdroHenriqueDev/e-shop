@@ -60,14 +60,14 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
     <form onSubmit={form.handleSubmit(onSubmit)}>
       <div className="mb-4">
         <label className="block text-dark" htmlFor="name">
-          Nome completo
+          Full Name
         </label>
         <input
           {...form.register('username')}
           className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
           type="text"
           id="name"
-          placeholder="Informe seu nome completo"
+          placeholder="Enter your full name"
         />
         <p>{form.formState.errors.username?.message}</p>
       </div>
@@ -80,26 +80,26 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
           className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
           type="text"
           id="login"
-          placeholder="insira seu email"
+          placeholder="Enter your email"
         />
         <p>{form.formState.errors.email?.message}</p>
       </div>
       <div className="mb-4">
         <label className="block text-dark" htmlFor="password">
-          Senha
+          Password
         </label>
         <input
           {...form.register('password')}
           className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
           type="password"
           id="password"
-          placeholder="Insira sua senha"
+          placeholder="Enter your password"
         />
         <p>{form.formState.errors.password?.message}</p>
       </div>
       <div className="mb-4">
         <label className="block text-dark" htmlFor="confirm-password">
-          Confirme senha
+          Confirm Password
         </label>
         <input
           {...form.register('confirmPassword')}
@@ -114,13 +114,13 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
         <span
           onClick={handleRegister}
           className="text-sm text-dark cursor-pointer">
-          Já tem uma conta? Inicie sua sessão
+          Already have an account? Log in.
         </span>
       </div>
       <button
         type="submit"
         className="w-full px-4 py-2 font-semibold text-dark bg-secondary rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-secondary">
-        Entrar
+        Register
       </button>
     </form>
   );
