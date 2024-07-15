@@ -9,7 +9,7 @@ export default function LoginForm() {
           className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
           type="text"
           id="login"
-          placeholder="insira seu email ou telefone"
+          placeholder="Enter your email "
         />
       </div>
       <div className="mb-4">
@@ -20,22 +20,22 @@ export default function LoginForm() {
           className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
           type="password"
           id="password"
-          placeholder="Insira sua senha"
+          placeholder="Enter your password "
         />
       </div>
       <div className="flex items-center justify-between mb-4">
         <label className="inline-flex items-center">
           <input type="checkbox" className="form-checkbox" />
-          <span className="ml-2 text-sm text-dark">Manter conectado</span>
+          <span className="ml-2 text-sm text-dark">Keep me signed in</span>
         </label>
         <a href="#" className="text-sm text-dark">
-          Esqueceu sua senha?
+          Forgot your password?
         </a>
       </div>
       <button
         type="submit"
         className="w-full px-4 py-2 font-semibold text-dark bg-secondary rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-secondary">
-        Entrar
+        Sign in
       </button>
     </form>
   );
