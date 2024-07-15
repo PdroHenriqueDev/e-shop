@@ -1,29 +1,13 @@
 'use client';
 import LoginForm from '@/components/auth/loginForm';
 import RegisterForm from '@/components/auth/registerForm';
-import {Session, getServerSession} from 'next-auth';
-import {redirect} from 'next/navigation';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
-  const [session, setSession] = useState<Session | null>(null);
 
   const handleRegister = () => {
     setIsRegister(!isRegister);
   };
-
-  useEffect(() => {
-    const session = async () => {
-      const session = await getServerSession();
-      setSession(session);
-    };
-
-    session();
-  }, []);
-
-  if (session) {
-    redirect('/');
-  }
 
   return (
     <div className="flex items-center justify-center min-h-screen p-5">
