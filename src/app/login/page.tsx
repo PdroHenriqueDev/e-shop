@@ -2,6 +2,7 @@
 import LoginForm from '@/components/auth/loginForm';
 import RegisterForm from '@/components/auth/registerForm';
 import {useState} from 'react';
+
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
 
