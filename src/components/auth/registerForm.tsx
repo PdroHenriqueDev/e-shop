@@ -4,10 +4,9 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
 import * as z from 'zod';
 import axios from 'axios';
-
-interface RegisterFormProps {
-  handleRegister: () => void;
-}
+import {RegisterFormProps} from '@/interfaces/registerForm';
+import CustomButton from '../customButtton';
+import CustomInput from '../customInput';
 
 const FormSchema = z
   .object({
@@ -58,58 +57,42 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="name">
-          Full Name
-        </label>
-        <input
-          {...form.register('username')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="text"
-          id="name"
-          placeholder="Enter your full name"
-        />
-        <p>{form.formState.errors.username?.message}</p>
-      </div>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="email">
-          Email
-        </label>
-        <input
-          {...form.register('email')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="text"
-          id="login"
-          placeholder="Enter your email"
-        />
-        <p>{form.formState.errors.email?.message}</p>
-      </div>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="password">
-          Password
-        </label>
-        <input
-          {...form.register('password')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="password"
-          id="password"
-          placeholder="Enter your password"
-        />
-        <p>{form.formState.errors.password?.message}</p>
-      </div>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="confirm-password">
-          Confirm Password
-        </label>
-        <input
-          {...form.register('confirmPassword')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="password"
-          id="confirm-password"
-          placeholder="Confirme sua senha"
-        />
-        <p>{form.formState.errors.confirmPassword?.message}</p>
-      </div>
+      <CustomInput
+        label="Full Name"
+        id="name"
+        type="text"
+        placeholder="Enter your full name"
+        register={form.register}
+        name="username"
+        errorMessage={form.formState.errors.username?.message}
+      />
+      <CustomInput
+        label="Email"
+        id="email"
+        type="text"
+        placeholder="Enter your email"
+        register={form.register}
+        name="email"
+        errorMessage={form.formState.errors.email?.message}
+      />
+      <CustomInput
+        label="Password"
+        id="password"
+        type="password"
+        placeholder="Enter your password"
+        register={form.register}
+        name="password"
+        errorMessage={form.formState.errors.password?.message}
+      />
+      <CustomInput
+        label="Confirm Password"
+        id="confirm-password"
+        type="password"
+        placeholder="Confirm your password"
+        register={form.register}
+        name="confirmPassword"
+        errorMessage={form.formState.errors.confirmPassword?.message}
+      />
       <div className="flex justify-between mb-4">
         <span
           onClick={handleRegister}
@@ -117,11 +100,7 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
           Already have an account? Log in.
         </span>
       </div>
-      <button
-        type="submit"
-        className="w-full px-4 py-2 font-semibold text-dark bg-secondary rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-secondary">
-        Register
-      </button>
+      <CustomButton type="submit" buttonText="Register" />
     </form>
   );
 }
