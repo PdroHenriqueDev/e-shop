@@ -4,10 +4,8 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
 import * as z from 'zod';
 import axios from 'axios';
-
-interface RegisterFormProps {
-  handleRegister: () => void;
-}
+import {RegisterFormProps} from '@/interfaces/registerForm';
+import CustomButton from '../customButtton';
 
 const FormSchema = z
   .object({
@@ -117,11 +115,7 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
           Already have an account? Log in.
         </span>
       </div>
-      <button
-        type="submit"
-        className="w-full px-4 py-2 font-semibold text-dark bg-secondary rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-secondary">
-        Register
-      </button>
+      <CustomButton type="submit" buttonText="Register" />
     </form>
   );
 }
