@@ -6,7 +6,7 @@ import * as z from 'zod';
 import axios from 'axios';
 import {RegisterFormProps} from '@/interfaces/registerForm';
 import CustomButton from '../customButtton';
-import ErrorMessage from '../errorMessage';
+import CustomInput from '../customInput';
 
 const FormSchema = z
   .object({
@@ -57,60 +57,42 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="name">
-          Full Name
-        </label>
-        <input
-          {...form.register('username')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="text"
-          id="name"
-          placeholder="Enter your full name"
-        />
-        <ErrorMessage message={form.formState.errors.username?.message} />
-      </div>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="email">
-          Email
-        </label>
-        <input
-          {...form.register('email')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="text"
-          id="login"
-          placeholder="Enter your email"
-        />
-        <ErrorMessage message={form.formState.errors.email?.message} />
-      </div>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="password">
-          Password
-        </label>
-        <input
-          {...form.register('password')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="password"
-          id="password"
-          placeholder="Enter your password"
-        />
-        <ErrorMessage message={form.formState.errors.password?.message} />
-      </div>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="confirm-password">
-          Confirm Password
-        </label>
-        <input
-          {...form.register('confirmPassword')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="password"
-          id="confirm-password"
-          placeholder="Confirme sua senha"
-        />
-        <ErrorMessage
-          message={form.formState.errors.confirmPassword?.message}
-        />
-      </div>
+      <CustomInput
+        label="Full Name"
+        id="name"
+        type="text"
+        placeholder="Enter your full name"
+        register={form.register}
+        name="username"
+        errorMessage={form.formState.errors.username?.message}
+      />
+      <CustomInput
+        label="Email"
+        id="email"
+        type="text"
+        placeholder="Enter your email"
+        register={form.register}
+        name="email"
+        errorMessage={form.formState.errors.email?.message}
+      />
+      <CustomInput
+        label="Password"
+        id="password"
+        type="password"
+        placeholder="Enter your password"
+        register={form.register}
+        name="password"
+        errorMessage={form.formState.errors.password?.message}
+      />
+      <CustomInput
+        label="Confirm Password"
+        id="confirm-password"
+        type="password"
+        placeholder="Confirm your password"
+        register={form.register}
+        name="confirmPassword"
+        errorMessage={form.formState.errors.confirmPassword?.message}
+      />
       <div className="flex justify-between mb-4">
         <span
           onClick={handleRegister}

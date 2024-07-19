@@ -1,10 +1,9 @@
-import {UserProps} from '@/interfaces/user';
 import {zodResolver} from '@hookform/resolvers/zod';
-import axios from 'axios';
 import {signIn} from 'next-auth/react';
 import {useForm} from 'react-hook-form';
 import z from 'zod';
-import ErrorMessage from '../errorMessage';
+import CustomInput from '../customInput';
+import CustomButton from '../customButtton';
 
 const FormSchema = z.object({
   email: z.string().email({
@@ -25,6 +24,12 @@ export default function LoginForm() {
     },
   });
 
+  const {
+    register,
+    handleSubmit,
+    formState: {errors},
+  } = form;
+
   const onSubmit = async (user: FormData) => {
     const {email, password} = user;
 
@@ -36,32 +41,24 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="login">
-          Email
-        </label>
-        <input
-          {...form.register('email')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="text"
-          id="login"
-          placeholder="Enter your email "
-        />
-        <ErrorMessage message={form.formState.errors.email?.message} />
-      </div>
-      <div className="mb-4">
-        <label className="block text-dark" htmlFor="password">
-          Senha
-        </label>
-        <input
-          {...form.register('password')}
-          className="w-full px-4 py-2 mt-2 text-sm bg-primary border rounded-md focus:outline-none focus:ring-2 focus:ring-secondary"
-          type="password"
-          id="password"
-          placeholder="Enter your password "
-        />
-        <ErrorMessage message={form.formState.errors.password?.message} />
-      </div>
+      <CustomInput
+        label="Email"
+        id="email"
+        type="text"
+        placeholder="Enter your email"
+        register={register}
+        name="email"
+        errorMessage={errors.email?.message}
+      />
+      <CustomInput
+        label="Password"
+        id="password"
+        type="password"
+        placeholder="Enter your password"
+        register={register}
+        name="password"
+        errorMessage={errors.password?.message}
+      />
       <div className="flex items-center justify-between mb-4">
         <label className="inline-flex items-center">
           <input type="checkbox" className="form-checkbox" />
@@ -71,11 +68,8 @@ export default function LoginForm() {
           Forgot your password?
         </a>
       </div>
-      <button
-        type="submit"
-        className="w-full px-4 py-2 font-semibold text-dark bg-secondary rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-secondary">
-        Sign in
-      </button>
+
+      <CustomButton type="submit" buttonText="Sign in" />
     </form>
   );
 }
