@@ -4,6 +4,7 @@ import axios from 'axios';
 import {signIn} from 'next-auth/react';
 import {useForm} from 'react-hook-form';
 import z from 'zod';
+import ErrorMessage from '../errorMessage';
 
 const FormSchema = z.object({
   email: z.string().email({
@@ -46,7 +47,7 @@ export default function LoginForm() {
           id="login"
           placeholder="Enter your email "
         />
-        <p>{form.formState.errors.email?.message}</p>
+        <ErrorMessage message={form.formState.errors.email?.message} />
       </div>
       <div className="mb-4">
         <label className="block text-dark" htmlFor="password">
@@ -59,7 +60,7 @@ export default function LoginForm() {
           id="password"
           placeholder="Enter your password "
         />
-        <p>{form.formState.errors.password?.message}</p>
+        <ErrorMessage message={form.formState.errors.password?.message} />
       </div>
       <div className="flex items-center justify-between mb-4">
         <label className="inline-flex items-center">

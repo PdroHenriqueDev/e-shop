@@ -6,6 +6,7 @@ import * as z from 'zod';
 import axios from 'axios';
 import {RegisterFormProps} from '@/interfaces/registerForm';
 import CustomButton from '../customButtton';
+import ErrorMessage from '../errorMessage';
 
 const FormSchema = z
   .object({
@@ -67,7 +68,7 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
           id="name"
           placeholder="Enter your full name"
         />
-        <p>{form.formState.errors.username?.message}</p>
+        <ErrorMessage message={form.formState.errors.username?.message} />
       </div>
       <div className="mb-4">
         <label className="block text-dark" htmlFor="email">
@@ -80,7 +81,7 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
           id="login"
           placeholder="Enter your email"
         />
-        <p>{form.formState.errors.email?.message}</p>
+        <ErrorMessage message={form.formState.errors.email?.message} />
       </div>
       <div className="mb-4">
         <label className="block text-dark" htmlFor="password">
@@ -93,7 +94,7 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
           id="password"
           placeholder="Enter your password"
         />
-        <p>{form.formState.errors.password?.message}</p>
+        <ErrorMessage message={form.formState.errors.password?.message} />
       </div>
       <div className="mb-4">
         <label className="block text-dark" htmlFor="confirm-password">
@@ -106,7 +107,9 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
           id="confirm-password"
           placeholder="Confirme sua senha"
         />
-        <p>{form.formState.errors.confirmPassword?.message}</p>
+        <ErrorMessage
+          message={form.formState.errors.confirmPassword?.message}
+        />
       </div>
       <div className="flex justify-between mb-4">
         <span
