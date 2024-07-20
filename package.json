@@ -10,10 +10,7 @@
     "db": "prisma db push"
   },
   "dependencies": {
-    "@emotion/cache": "^11.11.0",
-    "@emotion/react": "^11.11.4",
     "@hookform/resolvers": "^3.9.0",
-    "@mui/material-nextjs": "^5.15.11",
     "@prisma/client": "^5.16.2",
     "@vercel/postgres": "^0.9.0",
     "axios": "^1.7.2",
