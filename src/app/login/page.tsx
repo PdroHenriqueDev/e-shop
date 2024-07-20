@@ -35,7 +35,7 @@ export default function Login() {
                   👋
                 </span>
               </h2>
-              <p className="text-gray-500">
+              <p className="text-accent">
                 Fill in the form with your credentials to log in to your
                 account.
               </p>
