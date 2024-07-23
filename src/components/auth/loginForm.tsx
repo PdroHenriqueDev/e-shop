@@ -1,9 +1,11 @@
+import {useRouter} from 'next/navigation';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {signIn} from 'next-auth/react';
 import {useForm} from 'react-hook-form';
 import z from 'zod';
 import CustomInput from '../customInput';
 import CustomButton from '../customButtton';
+import {useNotification} from '@/contexts/notificationContext';
 
 const FormSchema = z.object({
   email: z.string().email({
@@ -16,6 +18,9 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 export default function LoginForm() {
+  const {notify} = useNotification();
+  const router = useRouter();
+
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -33,14 +38,22 @@ export default function LoginForm() {
   const onSubmit = async (user: FormData) => {
     const {email, password} = user;
 
-    await signIn('credentials', {
+    const result = await signIn('credentials', {
+      redirect: false,
       email,
       password,
+    });
+
+    if (!result?.error) return router.push('/');
+
+    notify({
+      type: 'error',
+      msg: 'Login failed. Please check your credentials and try again',
     });
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <CustomInput
         label="Email"
         id="email"
