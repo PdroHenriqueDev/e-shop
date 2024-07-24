@@ -7,7 +7,7 @@ import {useState} from 'react';
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
 
-  const handleRegister = () => {
+  const handleIsRegister = () => {
     setIsRegister(!isRegister);
   };
 
@@ -47,17 +47,17 @@ export default function Login() {
           <div className="flex justify-center mb-4 bg-border p-2 rounded-2xl">
             <button
               className={`w-1/2 py-2 text-sm font-semibold ${isRegister ? 'text-dark bg-transparent' : 'text-dark bg-primary'} rounded-lg`}
-              onClick={handleRegister}>
+              onClick={handleIsRegister}>
               Login
             </button>
             <button
               className={`w-1/2 py-2 text-sm font-semibold ${isRegister ? 'text-dark bg-primary' : 'text-dark bg-transparent'} rounded-lg`}
-              onClick={handleRegister}>
+              onClick={handleIsRegister}>
               Register
             </button>
           </div>
           {isRegister ? (
-            <RegisterForm handleRegister={handleRegister} />
+            <RegisterForm handleIsRegister={handleIsRegister} />
           ) : (
             <LoginForm />
           )}

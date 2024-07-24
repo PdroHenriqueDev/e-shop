@@ -1,3 +1,3 @@
 export interface RegisterFormProps {
-  handleRegister: () => void;
+  handleIsRegister: () => void;
 }

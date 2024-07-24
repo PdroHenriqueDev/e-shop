@@ -28,7 +28,7 @@ const FormSchema = z
 
 type FormData = z.infer<typeof FormSchema>;
 
-export default function RegisterForm({handleRegister}: RegisterFormProps) {
+export default function RegisterForm({handleIsRegister}: RegisterFormProps) {
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -48,6 +48,8 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
         email,
         password,
       });
+
+      handleIsRegister();
     } catch (error: any) {
       console.error('Registration Failed:', error);
     }
@@ -93,7 +95,7 @@ export default function RegisterForm({handleRegister}: RegisterFormProps) {
       />
       <div className="flex justify-between mb-4">
         <span
-          onClick={handleRegister}
+          onClick={handleIsRegister}
           className="text-sm text-dark cursor-pointer">
           Already have an account? Log in.
         </span>
