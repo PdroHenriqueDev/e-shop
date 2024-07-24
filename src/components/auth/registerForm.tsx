@@ -7,6 +7,7 @@ import axios from 'axios';
 import {RegisterFormProps} from '@/interfaces/registerForm';
 import CustomButton from '../customButtton';
 import CustomInput from '../customInput';
+import {useNotification} from '@/contexts/notificationContext';
 
 const FormSchema = z
   .object({
@@ -29,6 +30,8 @@ const FormSchema = z
 type FormData = z.infer<typeof FormSchema>;
 
 export default function RegisterForm({handleIsRegister}: RegisterFormProps) {
+  const {notify} = useNotification();
+
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -51,7 +54,19 @@ export default function RegisterForm({handleIsRegister}: RegisterFormProps) {
 
       handleIsRegister();
     } catch (error: any) {
-      console.error('Registration Failed:', error);
+      if (error?.response?.status === 400) {
+        const {error: message} = error.response.data;
+
+        return notify({
+          type: 'error',
+          msg: message,
+        });
+      }
+
+      notify({
+        type: 'error',
+        msg: 'Register failed. Please try again',
+      });
     }
   };
 
