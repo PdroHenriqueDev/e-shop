@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "db": "prisma db push",
-    "test": "vitest"
+    "test": "vitest run --coverage"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -32,6 +32,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-istanbul": "^2.0.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.4",
     "eslint-config-prettier": "^9.1.0",
