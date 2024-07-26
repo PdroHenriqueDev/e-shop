@@ -15,6 +15,7 @@ export default defineConfig({
         './.prettierrc.js',
         './postcss.config.mjs',
         './tailwind.config.ts',
+        '**/*test.tsx',
       ],
     },
   },
