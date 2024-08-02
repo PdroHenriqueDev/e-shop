@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
