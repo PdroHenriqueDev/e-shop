@@ -80,16 +80,16 @@ describe('useNotification', () => {
 
   it('calls appropriate message function based on type', () => {
     const TestComponent = () => {
-      const { notify } = useNotification();
-      notify({ type: 'success', msg: 'Success message' });
-      notify({ type: 'error', msg: 'Error message' });
+      const {notify} = useNotification();
+      notify({type: 'success', msg: 'Success message'});
+      notify({type: 'error', msg: 'Error message'});
       return null;
     };
 
     render(
       <NotificationProvider>
         <TestComponent />
-      </NotificationProvider>
+      </NotificationProvider>,
     );
 
     expect(message.success).toHaveBeenCalledWith('Success message', 3);
