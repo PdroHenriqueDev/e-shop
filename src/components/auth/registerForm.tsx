@@ -5,9 +5,10 @@ import {useForm} from 'react-hook-form';
 import * as z from 'zod';
 import axios from 'axios';
 import {RegisterFormProps} from '@/interfaces/registerForm';
-import CustomButton from '../customButtton';
+import CustomButton from '../customButtton/customButton';
 import CustomInput from '../customInput';
 import {useNotification} from '@/contexts/notificationContext';
+import {useState} from 'react';
 
 const FormSchema = z
   .object({
@@ -30,6 +31,7 @@ const FormSchema = z
 type FormData = z.infer<typeof FormSchema>;
 
 export default function RegisterForm({handleIsRegister}: RegisterFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
   const {notify} = useNotification();
 
   const form = useForm<FormData>({
@@ -43,6 +45,7 @@ export default function RegisterForm({handleIsRegister}: RegisterFormProps) {
   });
 
   const onSubmit = async (data: FormData) => {
+    setIsLoading(true);
     const {username, email, password} = data;
 
     try {
@@ -67,6 +70,8 @@ export default function RegisterForm({handleIsRegister}: RegisterFormProps) {
         type: 'error',
         msg: 'Register failed. Please try again',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -115,7 +120,7 @@ export default function RegisterForm({handleIsRegister}: RegisterFormProps) {
           Already have an account? Log in.
         </span>
       </div>
-      <CustomButton type="submit" buttonText="Register" />
+      <CustomButton type="submit" buttonText="Register" isLoading={isLoading} />
     </form>
   );
 }
