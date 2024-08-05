@@ -4,8 +4,9 @@ import {signIn} from 'next-auth/react';
 import {useForm} from 'react-hook-form';
 import z from 'zod';
 import CustomInput from '../customInput';
-import CustomButton from '../customButtton';
+import CustomButton from '../customButtton/customButton';
 import {useNotification} from '@/contexts/notificationContext';
+import {useState} from 'react';
 
 const FormSchema = z.object({
   email: z.string().email({
@@ -18,6 +19,7 @@ const FormSchema = z.object({
 type FormData = z.infer<typeof FormSchema>;
 
 export default function LoginForm() {
+  const [isLoading, setIsLoading] = useState(false);
   const {notify} = useNotification();
   const router = useRouter();
 
@@ -36,6 +38,7 @@ export default function LoginForm() {
   } = form;
 
   const onSubmit = async (user: FormData) => {
+    setIsLoading(true);
     const {email, password} = user;
 
     const result = await signIn('credentials', {
@@ -43,6 +46,8 @@ export default function LoginForm() {
       email,
       password,
     });
+
+    setIsLoading(false);
 
     if (!result?.error) return router.push('/');
 
@@ -82,7 +87,7 @@ export default function LoginForm() {
         </a>
       </div>
 
-      <CustomButton type="submit" buttonText="Sign in" />
+      <CustomButton type="submit" buttonText="Sign in" isLoading={isLoading} />
     </form>
   );
 }

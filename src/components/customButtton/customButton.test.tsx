@@ -1,6 +1,6 @@
 import {describe, it, expect, vitest} from 'vitest';
 import {render, screen, fireEvent} from '@testing-library/react';
-import CustomButton from './index';
+import CustomButton from './customButton';
 
 describe('CustomButton component', () => {
   it('renders with the correct text', () => {
