@@ -117,7 +117,7 @@ export default function RegisterForm({handleIsRegister}: RegisterFormProps) {
         <span
           onClick={handleIsRegister}
           className="text-sm text-dark cursor-pointer">
-          Already have an account? Log in.
+          Already have an account? <span className="underline">Log in</span>.
         </span>
       </div>
       <CustomButton type="submit" buttonText="Register" isLoading={isLoading} />
