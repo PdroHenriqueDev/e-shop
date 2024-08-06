@@ -78,10 +78,6 @@ export default function LoginForm() {
         errorMessage={errors.password?.message}
       />
       <div className="flex items-center justify-between mb-4">
-        <label className="inline-flex items-center">
-          <input type="checkbox" className="form-checkbox" />
-          <span className="ml-2 text-sm text-dark">Keep me signed in</span>
-        </label>
         <a href="#" className="text-sm text-dark">
           Forgot your password?
         </a>
