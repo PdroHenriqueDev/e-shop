@@ -55,6 +55,11 @@ export default function RegisterForm({handleIsRegister}: RegisterFormProps) {
         password,
       });
 
+      notify({
+        type: 'success',
+        msg: 'Registration completed successfully. Please log in.',
+      });
+
       handleIsRegister();
     } catch (error: any) {
       if (error?.response?.status === 400) {
