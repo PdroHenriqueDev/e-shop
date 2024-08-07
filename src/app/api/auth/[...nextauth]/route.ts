@@ -49,7 +49,12 @@ const handler = NextAuth({
             },
           );
 
-          return result.data;
+          if (result.data) {
+            const {user} = result.data;
+            return user;
+          }
+
+          return null;
         } catch (error) {
           return null;
         }
