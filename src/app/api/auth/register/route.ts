@@ -1,6 +1,5 @@
 import {NextResponse} from 'next/server';
 import {hash} from 'bcrypt';
-import {sql} from '@vercel/postgres';
 import {UserProps} from '@/interfaces/user';
 import prisma from '@/lib/prisma';
 

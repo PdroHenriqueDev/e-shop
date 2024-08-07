@@ -78,7 +78,7 @@ export default function LoginForm() {
         errorMessage={errors.password?.message}
       />
       <div className="flex items-center justify-between mb-4">
-        <a href="#" className="text-sm text-dark">
+        <a href="password-reset" className="text-sm text-dark">
           Forgot your password?
         </a>
       </div>

@@ -1,3 +1,5 @@
+'use client';
+
 import React, {createContext, useContext, ReactNode} from 'react';
 import {message} from 'antd';
 import {NoticeType} from 'antd/es/message/interface';
