@@ -3,6 +3,7 @@ import {Inter} from 'next/font/google';
 import './globals.css';
 import {NotificationProvider} from '@/contexts/notificationContext';
 import {NextAuthProvider} from '@/components/nexAuthProvider/nextAuthProvider';
+import {Session} from 'next-auth';
 
 const inter = Inter({subsets: ['latin']});
 
@@ -15,7 +16,7 @@ export default function RootLayout({
   session,
 }: Readonly<{
   children: React.ReactNode;
-  session: any;
+  session: Session | null;
 }>) {
   return (
     <html lang="en">
