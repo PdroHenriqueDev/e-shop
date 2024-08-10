@@ -13,14 +13,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  session,
 }: Readonly<{
   children: React.ReactNode;
-  session: Session | null;
 }>) {
   return (
     <html lang="en">
-      <NextAuthProvider session={session}>
+      <NextAuthProvider>
         <body className={`${inter.className} bg-gray-100`}>
           <NotificationProvider>{children}</NotificationProvider>
         </body>
