@@ -15,8 +15,8 @@ export default function CustomButton({
 }: CustomButtonProps) {
   const buttonClasses = classNames(
     'w-full px-4 py-2 font-semibold rounded-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-secondary',
-    `text-${textColor}`,
-    `bg-${backgroundColor}`,
+    textColor === 'dark' ? 'text-dark' : `text-${textColor}`,
+    backgroundColor === 'secondary' ? 'bg-secondary' : `bg-${backgroundColor}`,
   );
 
   return (
