@@ -7,6 +7,7 @@ import CustomInput from '../customInput';
 import CustomButton from '../customButtton/customButton';
 import {useNotification} from '@/contexts/notificationContext';
 import {useState} from 'react';
+import {GithubOutlined} from '@ant-design/icons';
 
 const FormSchema = z.object({
   email: z.string().email({
@@ -43,8 +44,26 @@ export default function LoginForm() {
 
     const result = await signIn('credentials', {
       redirect: false,
+      callbackUrl: '/',
       email,
       password,
+    });
+
+    setIsLoading(false);
+
+    if (!result?.error) return router.push('/login');
+
+    notify({
+      type: 'error',
+      msg: 'Login failed. Please check your credentials and try again',
+    });
+  };
+
+  const handleGitHubSignIn = async () => {
+    setIsLoading(true);
+
+    const result = await signIn('github', {
+      redirect: false,
     });
 
     setIsLoading(false);
@@ -53,7 +72,7 @@ export default function LoginForm() {
 
     notify({
       type: 'error',
-      msg: 'Login failed. Please check your credentials and try again',
+      msg: 'GitHub login failed. Please try again.',
     });
   };
 
@@ -84,6 +103,20 @@ export default function LoginForm() {
       </div>
 
       <CustomButton type="submit" buttonText="Sign in" isLoading={isLoading} />
+
+      <div className="text-center">
+        <p className="text-sm text-accent my-2 ">or</p>
+      </div>
+
+      <CustomButton
+        type="button"
+        buttonText="Sign in with GitHub"
+        isLoading={isLoading}
+        onClick={handleGitHubSignIn}
+        backgroundColor="dark"
+        textColor="primary"
+        icon={<GithubOutlined className="text-primary text-2xl" />}
+      />
     </form>
   );
 }
