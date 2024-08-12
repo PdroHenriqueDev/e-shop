@@ -43,7 +43,6 @@ export default function LoginForm() {
     const {email, password} = user;
 
     const result = await signIn('credentials', {
-      redirect: false,
       callbackUrl: '/',
       email,
       password,
