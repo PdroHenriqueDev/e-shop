@@ -114,6 +114,7 @@ export default function LoginForm() {
         onClick={handleGitHubSignIn}
         backgroundColor="dark"
         textColor="primary"
+        spinColor="primary"
         icon={<GithubOutlined className="text-primary text-2xl" />}
       />
     </form>

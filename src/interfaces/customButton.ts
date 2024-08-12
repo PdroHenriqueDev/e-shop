@@ -6,6 +6,7 @@ export interface CustomButtonProps {
   buttonText: string;
   isLoading?: boolean;
   textColor?: 'primary' | 'secondary' | 'accent' | 'danger' | 'dark' | 'border';
+  spinColor?: 'primary' | 'secondary' | 'accent' | 'danger' | 'dark' | 'border';
   backgroundColor?:
     | 'primary'
     | 'secondary'

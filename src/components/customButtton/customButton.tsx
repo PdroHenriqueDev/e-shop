@@ -11,6 +11,7 @@ export default function CustomButton({
   isLoading,
   backgroundColor = 'secondary',
   textColor = 'dark',
+  spinColor = 'dark',
   icon,
 }: CustomButtonProps) {
   const buttonClasses = classNames(
@@ -23,6 +24,11 @@ export default function CustomButton({
     },
   );
 
+  const spinClasses = classNames({
+    'text-dark': spinColor === 'dark',
+    'text-primary': spinColor === 'primary',
+  });
+
   return (
     <button
       type={type}
@@ -30,7 +36,7 @@ export default function CustomButton({
       disabled={isLoading}
       className={buttonClasses}>
       {isLoading ? (
-        <Spin indicator={<LoadingOutlined spin />} className="text-dark" />
+        <Spin indicator={<LoadingOutlined spin />} className={spinClasses} />
       ) : (
         <div className="relative flex items-center justify-center w-full">
           {icon && <span className="absolute left-4">{icon}</span>}
