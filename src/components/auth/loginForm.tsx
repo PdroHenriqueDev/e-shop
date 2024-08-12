@@ -43,7 +43,6 @@ export default function LoginForm() {
     const {email, password} = user;
 
     const result = await signIn('credentials', {
-      redirect: false,
       callbackUrl: '/',
       email,
       password,
@@ -115,6 +114,7 @@ export default function LoginForm() {
         onClick={handleGitHubSignIn}
         backgroundColor="dark"
         textColor="primary"
+        spinColor="primary"
         icon={<GithubOutlined className="text-primary text-2xl" />}
       />
     </form>
