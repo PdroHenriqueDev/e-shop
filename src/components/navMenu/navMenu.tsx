@@ -1,8 +1,9 @@
 'use client';
 import React, {useState} from 'react';
 import type {MenuProps} from 'antd';
-import {Avatar, ConfigProvider, Menu} from 'antd';
+import {Avatar, ConfigProvider, Dropdown, Menu} from 'antd';
 import {MailOutlined, AppstoreOutlined, UserOutlined} from '@ant-design/icons';
+import {signOut} from 'next-auth/react';
 
 const items = [
   {
@@ -37,6 +38,24 @@ const items = [
 
 export default function NavMenu() {
   const [current, setCurrent] = useState('home');
+
+  const handleLogOut: MenuProps['onClick'] = (e: any) => {
+    if (e.key === '1') {
+      signOut();
+    }
+  };
+
+  const itemsDropDown: MenuProps['items'] = [
+    {
+      label: 'Log In',
+      key: '0',
+    },
+    {
+      label: 'Log Out',
+      key: '1',
+      onClick: handleLogOut,
+    },
+  ];
 
   const handleClick: MenuProps['onClick'] = e => {
     console.log('click ', e);
@@ -76,7 +95,16 @@ export default function NavMenu() {
       </div>
 
       <div className="flex-1 text-right">
-        <Avatar size="large" icon={<UserOutlined />} />
+        <Dropdown
+          menu={{items: itemsDropDown}}
+          trigger={['click']}
+          placement="bottomLeft">
+          <Avatar
+            className="bg-accent hover:bg-border cursor-pointer p-1 rounded-full transition duration-300 ease-in-out"
+            size="large"
+            icon={<UserOutlined />}
+          />
+        </Dropdown>
       </div>
     </header>
   );
