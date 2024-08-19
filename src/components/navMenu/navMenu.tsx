@@ -3,13 +3,17 @@ import React, {useState} from 'react';
 import type {MenuProps} from 'antd';
 import {Avatar, ConfigProvider, Dropdown, Menu} from 'antd';
 import {MailOutlined, AppstoreOutlined, UserOutlined} from '@ant-design/icons';
-import {signOut} from 'next-auth/react';
+import {signOut, signIn} from 'next-auth/react';
+import {useRouter} from 'next/navigation';
+import {MenuInfo} from 'rc-menu/lib/interface';
+import {MenuItemWithPathProps} from '@/interfaces/navBar';
 
 const items = [
   {
     label: 'Home',
     key: 'home',
     icon: <MailOutlined />,
+    path: '/',
   },
   {
     label: 'Categories',
@@ -20,7 +24,11 @@ const items = [
         type: 'group',
         label: 'Category 1',
         children: [
-          {label: 'Subcategory 1', key: 'subcategory:1'},
+          {
+            label: 'Subcategory 1',
+            key: 'subcategory:1',
+            path: '/categories',
+          },
           {label: 'Subcategory 2', key: 'subcategory:2'},
         ],
       },
@@ -38,28 +46,50 @@ const items = [
 
 export default function NavMenu() {
   const [current, setCurrent] = useState('home');
+  const router = useRouter();
 
-  const handleLogOut: MenuProps['onClick'] = (e: any) => {
-    if (e.key === '1') {
-      signOut();
-    }
+  const handleAuthAction: MenuProps['onClick'] = (e: any) => {
+    e.key === '1' ? signOut() : signIn();
   };
 
   const itemsDropDown: MenuProps['items'] = [
     {
       label: 'Log In',
       key: '0',
+      onClick: handleAuthAction,
     },
     {
       label: 'Log Out',
       key: '1',
-      onClick: handleLogOut,
+      onClick: handleAuthAction,
     },
   ];
 
   const handleClick: MenuProps['onClick'] = e => {
-    console.log('click ', e);
     setCurrent(e.key);
+    handlePath(e);
+  };
+
+  const handlePath = (e: MenuInfo) => {
+    const findPath = (
+      menuItems: MenuItemWithPathProps[] = [],
+      key: string,
+    ): string | undefined => {
+      for (const item of menuItems) {
+        if (!item) return;
+        if (item.key === key) return item.path;
+        const childPath = findPath(
+          item.children?.flatMap(group => group.children ?? []) ?? [],
+          key,
+        );
+        if (childPath) return childPath;
+      }
+    };
+
+    const path = findPath(items as MenuItemWithPathProps[], e.key);
+    if (path) {
+      router.push(path);
+    }
   };
 
   return (
