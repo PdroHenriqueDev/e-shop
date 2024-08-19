@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import type {MenuProps} from 'antd';
 import {Avatar, ConfigProvider, Dropdown, Menu} from 'antd';
 import {MailOutlined, AppstoreOutlined, UserOutlined} from '@ant-design/icons';
-import {signOut} from 'next-auth/react';
+import {signOut, signIn} from 'next-auth/react';
 
 const items = [
   {
@@ -39,21 +39,20 @@ const items = [
 export default function NavMenu() {
   const [current, setCurrent] = useState('home');
 
-  const handleLogOut: MenuProps['onClick'] = (e: any) => {
-    if (e.key === '1') {
-      signOut();
-    }
+  const handleAuthAction: MenuProps['onClick'] = (e: any) => {
+    e.key === '1' ? signOut() : signIn();
   };
 
   const itemsDropDown: MenuProps['items'] = [
     {
       label: 'Log In',
       key: '0',
+      onClick: handleAuthAction,
     },
     {
       label: 'Log Out',
       key: '1',
-      onClick: handleLogOut,
+      onClick: handleAuthAction,
     },
   ];
 
