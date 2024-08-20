@@ -9,6 +9,7 @@ export default function CustomButton({
   type = 'button',
   buttonText,
   isLoading,
+  disabled = false,
   backgroundColor = 'secondary',
   textColor = 'dark',
   spinColor = 'dark',
@@ -33,7 +34,7 @@ export default function CustomButton({
     <button
       type={type}
       onClick={onClick}
-      disabled={isLoading}
+      disabled={disabled || isLoading}
       className={buttonClasses}>
       {isLoading ? (
         <Spin indicator={<LoadingOutlined spin />} className={spinClasses} />

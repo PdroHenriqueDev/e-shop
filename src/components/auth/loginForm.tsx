@@ -110,7 +110,7 @@ export default function LoginForm() {
       <CustomButton
         type="button"
         buttonText="Sign in with GitHub"
-        isLoading={isLoading}
+        disabled={isLoading}
         onClick={handleGitHubSignIn}
         backgroundColor="dark"
         textColor="primary"

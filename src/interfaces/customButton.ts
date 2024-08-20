@@ -5,6 +5,7 @@ export interface CustomButtonProps {
   type?: 'button' | 'submit' | 'reset';
   buttonText: string;
   isLoading?: boolean;
+  disabled?: boolean;
   textColor?: 'primary' | 'secondary' | 'accent' | 'danger' | 'dark' | 'border';
   spinColor?: 'primary' | 'secondary' | 'accent' | 'danger' | 'dark' | 'border';
   backgroundColor?:
