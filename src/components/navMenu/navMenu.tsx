@@ -1,8 +1,13 @@
 'use client';
 import React, {useState} from 'react';
 import type {MenuProps} from 'antd';
-import {Avatar, ConfigProvider, Dropdown, Menu} from 'antd';
-import {MailOutlined, AppstoreOutlined, UserOutlined} from '@ant-design/icons';
+import {Avatar, Badge, ConfigProvider, Dropdown, Menu} from 'antd';
+import {
+  MailOutlined,
+  AppstoreOutlined,
+  UserOutlined,
+  ShoppingCartOutlined,
+} from '@ant-design/icons';
 import {signOut, signIn} from 'next-auth/react';
 import {useRouter} from 'next/navigation';
 import {MenuInfo} from 'rc-menu/lib/interface';
@@ -124,7 +129,7 @@ export default function NavMenu() {
         <h1 className="text-dark font-semibold text-xl">E-shop</h1>
       </div>
 
-      <div className="flex-1 text-right">
+      <div className="flex-1 flex items-center justify-end">
         <Dropdown
           menu={{items: itemsDropDown}}
           trigger={['click']}
@@ -135,6 +140,10 @@ export default function NavMenu() {
             icon={<UserOutlined />}
           />
         </Dropdown>
+
+        <Badge count={5} className="cursor-pointer mx-5 mt-1">
+          <ShoppingCartOutlined className="text-xl" />
+        </Badge>
       </div>
     </header>
   );
