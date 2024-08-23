@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <NextAuthProvider>
-        <body className={`${inter.className} bg-gray-100`}>
+        <body className={`${inter.className} bg-priamry`}>
           <NotificationProvider>{children}</NotificationProvider>
         </body>
       </NextAuthProvider>

@@ -13,15 +13,23 @@ export default async function Home() {
     redirect('/login');
   }
 
+  const currentYear = new Date().getFullYear();
+
   return (
     <div>
-      <Row className="bg-border text-center py-12">
+      <Row className="bg-secondary text-center py-12">
         <Col span={24}>
           <h1 className="text-4xl font-bold">Welcome to E-Shop!</h1>
           <p className="mt-4 text-xl">Check out our exclusive offers!</p>
           <div className="flex justify-center mt-6">
             <div className="max-w-40">
-              <CustomButton buttonText={'Shop Now'} />
+              <Link href="/product-catalog">
+                <CustomButton
+                  backgroundColor={'dark'}
+                  textColor={'primary'}
+                  buttonText={'Shop Now'}
+                />
+              </Link>
             </div>
           </div>
         </Col>
@@ -80,10 +88,10 @@ export default async function Home() {
 
       <Footer className="bg-dark text-white py-6">
         <div className="text-center">
-          <p>© 2024 E-Shop. All rights reserved.</p>
+          <p>© {currentYear} E-Shop. All rights reserved.</p>
           <div className="flex justify-center space-x-4 mt-4">
-            <Link href="/terms">Terms of Service</Link>
-            <Link href="/privacy">Privacy Policy</Link>
+            <Link href="/">Terms of Service</Link>
+            <Link href="/">Privacy Policy</Link>
           </div>
         </div>
       </Footer>
