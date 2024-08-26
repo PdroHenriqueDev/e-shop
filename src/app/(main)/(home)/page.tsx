@@ -1,17 +1,42 @@
+'use client';
 import CustomButton from '@/components/customButtton/customButton';
-import {Button, Card, Col, Row} from 'antd';
+import {Card, Col, Row} from 'antd';
 import {getServerSession} from 'next-auth';
 import {redirect} from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import {Footer} from 'antd/es/layout/layout';
+import {useEffect, useState} from 'react';
+import axios from 'axios';
+import {ProductProps} from '@/interfaces/product';
 
-export default async function Home() {
-  const session = await getServerSession();
+export default function Home() {
+  const [products, setProducts] = useState<ProductProps[]>([]);
 
-  if (!session) {
-    redirect('/login');
-  }
+  useEffect(() => {
+    const fetchSession = async () => {
+      const session = await getServerSession();
+      if (!session) {
+        redirect('/login');
+      }
+    };
+
+    fetchSession();
+  }, []);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('/api/products');
+        const {data} = response;
+        setProducts(data);
+      } catch (err) {
+      } finally {
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const currentYear = new Date().getFullYear();
 
@@ -42,15 +67,17 @@ export default async function Home() {
         <Row
           gutter={[16, 16]}
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {[1, 2, 3, 4].map(product => (
-            <Col key={product}>
+          {products.map(product => (
+            <Col key={product.id}>
               <Card
                 hoverable
                 cover={
                   <div className="w-full h-48 relative">
                     <Image
-                      alt="Product"
-                      src="https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                      alt={product.name}
+                      src={
+                        product.imageUrl || 'https://via.placeholder.com/300'
+                      }
                       layout="fill"
                       objectFit="cover"
                       className="rounded-lg"
@@ -58,8 +85,10 @@ export default async function Home() {
                   </div>
                 }
                 className="bg-primary p-4 shadow">
-                <h3 className="mt-4 text-xl">Product {product}</h3>
-                <p className="mt-2 text-gray-700">$199.90</p>
+                <h3 className="mt-4 text-xl">{product.name}</h3>
+                <p className="mt-2 text-gray-700">
+                  ${product.price.toFixed(2)}
+                </p>
                 <div className="mt-4">
                   <CustomButton buttonText={'Add to Cart'} />
                 </div>

@@ -18,3 +18,15 @@ model User {
 
   @@map("users")
 }
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  price       Float
+  imageUrl    String?  @db.VarChar(255) @map(name: "image_url")
+  createdAt   DateTime @default(now()) @map(name: "created_at")
+  updatedAt   DateTime? @updatedAt @map(name: "updated_at")
+
+  @@map("products")
+}
