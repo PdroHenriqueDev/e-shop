@@ -14,17 +14,6 @@ export default function Home() {
   const [products, setProducts] = useState<ProductProps[]>([]);
 
   useEffect(() => {
-    const fetchSession = async () => {
-      const session = await getServerSession();
-      if (!session) {
-        redirect('/login');
-      }
-    };
-
-    fetchSession();
-  }, []);
-
-  useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get('/api/products');
