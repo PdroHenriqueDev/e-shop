@@ -90,8 +90,8 @@ export default function ProductCatalog() {
   );
 
   return (
-    <div className="container mx-auto py-12 px-5">
-      <Row className="mb-8 p-6 text-center bg-secondary rounded-2xl">
+    <div>
+      <Row className="mb-8 py-12 text-center bg-secondary">
         <Col span={24}>
           <h1 className="text-4xl font-bold">Product Catalog</h1>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -127,7 +127,7 @@ export default function ProductCatalog() {
 
       <Row
         gutter={[16, 16]}
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
         {paginatedProducts.map(product => (
           <Col key={product.id}>
             <Card
@@ -155,7 +155,7 @@ export default function ProductCatalog() {
       </Row>
 
       <Row className="mt-12">
-        <Col span={24} className="flex justify-end">
+        <Col span={24} className="flex justify-end py-5">
           <Pagination
             current={currentPage}
             pageSize={pageSize}
