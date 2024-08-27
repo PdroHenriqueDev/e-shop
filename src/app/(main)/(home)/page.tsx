@@ -1,17 +1,17 @@
 'use client';
 import CustomButton from '@/components/customButtton/customButton';
 import {Card, Col, Row} from 'antd';
-import {getServerSession} from 'next-auth';
-import {redirect} from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import {Footer} from 'antd/es/layout/layout';
 import {useEffect, useState} from 'react';
 import axios from 'axios';
 import {ProductProps} from '@/interfaces/product';
+import Loading from '@/components/loading/loading';
 
 export default function Home() {
   const [products, setProducts] = useState<ProductProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -21,6 +21,7 @@ export default function Home() {
         setProducts(data);
       } catch (err) {
       } finally {
+        setIsLoading(false);
       }
     };
 
@@ -53,38 +54,44 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center mb-8">
           Featured Products
         </h2>
-        <Row
-          gutter={[16, 16]}
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products.map(product => (
-            <Col key={product.id}>
-              <Card
-                hoverable
-                cover={
-                  <div className="w-full h-48 relative">
-                    <Image
-                      alt={product.name}
-                      src={
-                        product.imageUrl || 'https://via.placeholder.com/300'
-                      }
-                      layout="fill"
-                      objectFit="cover"
-                      className="rounded-lg"
-                    />
+        {isLoading ? (
+          <div className="flex items-center justify-center w-full">
+            <Loading />
+          </div>
+        ) : (
+          <Row
+            gutter={[16, 16]}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {products.map(product => (
+              <Col key={product.id}>
+                <Card
+                  hoverable
+                  cover={
+                    <div className="w-full h-48 relative">
+                      <Image
+                        alt={product.name}
+                        src={
+                          product.imageUrl || 'https://via.placeholder.com/300'
+                        }
+                        layout="fill"
+                        objectFit="cover"
+                        className="rounded-lg"
+                      />
+                    </div>
+                  }
+                  className="bg-primary p-4 shadow">
+                  <h3 className="mt-4 text-xl">{product.name}</h3>
+                  <p className="mt-2 text-gray-700">
+                    ${product.price.toFixed(2)}
+                  </p>
+                  <div className="mt-4">
+                    <CustomButton buttonText={'Add to Cart'} />
                   </div>
-                }
-                className="bg-primary p-4 shadow">
-                <h3 className="mt-4 text-xl">{product.name}</h3>
-                <p className="mt-2 text-gray-700">
-                  ${product.price.toFixed(2)}
-                </p>
-                <div className="mt-4">
-                  <CustomButton buttonText={'Add to Cart'} />
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
       </div>
 
       <Row className="py-12">
