@@ -1,4 +1,5 @@
 import NavMenu from '@/components/navMenu/navMenu';
+import {CartProvider} from '@/contexts/cartContext';
 
 export default function RootLayout({
   children,
@@ -6,9 +7,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
+    <CartProvider>
       <NavMenu />
       {children}
-    </div>
+    </CartProvider>
   );
 }

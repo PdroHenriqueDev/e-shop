@@ -12,6 +12,7 @@ import {signOut, signIn} from 'next-auth/react';
 import {useRouter} from 'next/navigation';
 import {MenuInfo} from 'rc-menu/lib/interface';
 import {MenuItemWithPathProps} from '@/interfaces/navBar';
+import {useCart} from '@/contexts/cartContext';
 
 const items = [
   {
@@ -52,6 +53,7 @@ const items = [
 export default function NavMenu() {
   const [current, setCurrent] = useState('home');
   const router = useRouter();
+  const {cart} = useCart();
 
   const handleAuthAction: MenuProps['onClick'] = (e: any) => {
     e.key === '1' ? signOut() : signIn();
@@ -141,7 +143,7 @@ export default function NavMenu() {
           />
         </Dropdown>
 
-        <Badge count={5} className="cursor-pointer mx-5 mt-1">
+        <Badge count={cart.length} className="cursor-pointer mx-5 mt-1">
           <ShoppingCartOutlined className="text-xl" />
         </Badge>
       </div>
