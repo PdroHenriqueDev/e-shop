@@ -8,10 +8,12 @@ import {useEffect, useState} from 'react';
 import axios from 'axios';
 import {ProductProps} from '@/interfaces/product';
 import Loading from '@/components/loading/loading';
+import {useCart} from '@/contexts/cartContext';
 
 export default function Home() {
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const {addToCart} = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -85,7 +87,10 @@ export default function Home() {
                     ${product.price.toFixed(2)}
                   </p>
                   <div className="mt-4">
-                    <CustomButton buttonText={'Add to Cart'} />
+                    <CustomButton
+                      buttonText={'Add to Cart'}
+                      onClick={() => addToCart(product)}
+                    />
                   </div>
                 </Card>
               </Col>
