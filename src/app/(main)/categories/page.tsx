@@ -1,5 +1,5 @@
 'use client';
-import {useEffect, useState} from 'react';
+import {Suspense, useEffect, useState} from 'react';
 import {ProductProps} from '@/interfaces/product';
 import axios from 'axios';
 import {Row, Col, Card} from 'antd';
@@ -16,7 +16,7 @@ export default function CategoryPage() {
 
   const searchParams = useSearchParams();
   const {addToCart} = useCart();
-  //
+
   useEffect(() => {
     const category = searchParams?.get('category');
     if (!category) return;
@@ -41,48 +41,50 @@ export default function CategoryPage() {
 
   return (
     <div className="container mx-auto py-12 px-5">
-      <h2 className="text-3xl font-bold text-center mb-8">{categoryName}</h2>
-      {isLoading ? (
-        <div className="flex items-center justify-center w-full">
-          <Loading />
-        </div>
-      ) : (
-        <Row
-          gutter={[16, 16]}
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products.map(product => (
-            <Col key={product.id}>
-              <Card
-                hoverable
-                cover={
-                  <div className="w-full h-48 relative">
-                    <Image
-                      alt={product.name}
-                      src={
-                        product.imageUrl || 'https://via.placeholder.com/300'
-                      }
-                      layout="fill"
-                      objectFit="cover"
-                      className="rounded-lg"
+      <Suspense fallback={<Loading />}>
+        <h2 className="text-3xl font-bold text-center mb-8">{categoryName}</h2>
+        {isLoading ? (
+          <div className="flex items-center justify-center w-full">
+            <Loading />
+          </div>
+        ) : (
+          <Row
+            gutter={[16, 16]}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {products.map(product => (
+              <Col key={product.id}>
+                <Card
+                  hoverable
+                  cover={
+                    <div className="w-full h-48 relative">
+                      <Image
+                        alt={product.name}
+                        src={
+                          product.imageUrl || 'https://via.placeholder.com/300'
+                        }
+                        layout="fill"
+                        objectFit="cover"
+                        className="rounded-lg"
+                      />
+                    </div>
+                  }
+                  className="bg-primary p-4 shadow">
+                  <h3 className="mt-4 text-xl">{product.name}</h3>
+                  <p className="mt-2 text-gray-700">
+                    ${product.price.toFixed(2)}
+                  </p>
+                  <div className="mt-4">
+                    <CustomButton
+                      buttonText={'Add to Cart'}
+                      onClick={() => addToCart(product)}
                     />
                   </div>
-                }
-                className="bg-primary p-4 shadow">
-                <h3 className="mt-4 text-xl">{product.name}</h3>
-                <p className="mt-2 text-gray-700">
-                  ${product.price.toFixed(2)}
-                </p>
-                <div className="mt-4">
-                  <CustomButton
-                    buttonText={'Add to Cart'}
-                    onClick={() => addToCart(product)}
-                  />
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      )}
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
+      </Suspense>
     </div>
   );
 }
