@@ -13,11 +13,15 @@ export default function CategoryPage() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [category, setCategory] = useState<string | null>(null);
+
+  const searchParams = useSearchParams();
   const {addToCart} = useCart();
 
   useEffect(() => {
     const category = searchParams?.get('category');
     if (!category) return;
+    setCategory(category);
 
     const fetchProducts = async () => {
       try {
@@ -31,7 +35,7 @@ export default function CategoryPage() {
     };
 
     fetchProducts();
-  }, [category]);
+  }, [searchParams]);
 
   const categoryName =
     category && category.charAt(0).toUpperCase() + category.slice(1);
