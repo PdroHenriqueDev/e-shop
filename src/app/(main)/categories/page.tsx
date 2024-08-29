@@ -10,19 +10,21 @@ import {useCart} from '@/contexts/cartContext';
 import {useSearchParams} from 'next/navigation';
 
 export default function CategoryPage() {
-  const searchParams = useSearchParams();
-  const category = searchParams?.get('category');
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [category, setCategory] = useState<string | null>(null);
+
+  const searchParams = useSearchParams();
   const {addToCart} = useCart();
 
   useEffect(() => {
+    const category = searchParams?.get('category');
     if (!category) return;
+    setCategory(category);
 
     const fetchProducts = async () => {
       try {
         const response = await axios.get(`/api/products`, {params: {category}});
-        console.log('got here', response);
         const {data} = response;
         setProducts(data);
       } catch (err) {
@@ -32,7 +34,7 @@ export default function CategoryPage() {
     };
 
     fetchProducts();
-  }, [category]);
+  }, [searchParams]);
 
   const categoryName =
     category && category.charAt(0).toUpperCase() + category.slice(1);
