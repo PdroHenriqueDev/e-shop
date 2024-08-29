@@ -16,7 +16,7 @@ export default function CategoryPage() {
 
   const searchParams = useSearchParams();
   const {addToCart} = useCart();
-
+  //
   useEffect(() => {
     const category = searchParams?.get('category');
     if (!category) return;
