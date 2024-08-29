@@ -11,18 +11,17 @@ import {useSearchParams} from 'next/navigation';
 
 export default function CategoryPage() {
   const searchParams = useSearchParams();
-  const category = searchParams?.get('category');
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const {addToCart} = useCart();
 
   useEffect(() => {
+    const category = searchParams?.get('category');
     if (!category) return;
 
     const fetchProducts = async () => {
       try {
         const response = await axios.get(`/api/products`, {params: {category}});
-        console.log('got here', response);
         const {data} = response;
         setProducts(data);
       } catch (err) {
