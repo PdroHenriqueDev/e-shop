@@ -10,6 +10,7 @@ import {useCart} from '@/contexts/cartContext';
 import {useSearchParams} from 'next/navigation';
 
 export default function CategoryPage() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [category, setCategory] = useState<string | null>(null);
