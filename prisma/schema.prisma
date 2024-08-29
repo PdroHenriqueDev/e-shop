@@ -19,12 +19,24 @@ model User {
   @@map("users")
 }
 
+model Category {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(255)
+  createdAt   DateTime  @default(now()) @map(name: "created_at")
+  updatedAt   DateTime? @updatedAt @map(name: "updated_at")
+  products    Product[]
+
+  @@map("categories")
+}
+
 model Product {
   id          Int      @id @default(autoincrement())
   name        String   @db.VarChar(255)
   description String?  @db.Text
   price       Float
   imageUrl    String?  @db.VarChar(255) @map(name: "image_url")
+  categoryId  Int       @map(name: "category_id")
+  category    Category  @relation(fields: [categoryId], references: [id])
   createdAt   DateTime @default(now()) @map(name: "created_at")
   updatedAt   DateTime? @updatedAt @map(name: "updated_at")
 
