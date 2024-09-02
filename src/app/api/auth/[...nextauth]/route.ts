@@ -5,7 +5,7 @@ import {UserProps} from '@/interfaces/user';
 import GithubProvider from 'next-auth/providers/github';
 import {NextAuthOptions} from 'next-auth';
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
@@ -78,3 +78,5 @@ export const authOptions: NextAuthOptions = {
 const handler = NextAuth(authOptions);
 
 export {handler as GET, handler as POST};
+
+export {authOptions};
