@@ -3,42 +3,68 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL")
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   name      String?
-  email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  createdAt DateTime @default(now()) @map(name: "created_at")
+  email     String    @unique @db.VarChar(255)
+  password  String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map(name: "created_at")
   updatedAt DateTime? @updatedAt @map(name: "updated_at")
+  cart      Cart?
 
   @@map("users")
 }
 
 model Category {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique @db.VarChar(255)
-  createdAt   DateTime  @default(now()) @map(name: "created_at")
-  updatedAt   DateTime? @updatedAt @map(name: "updated_at")
-  products    Product[]
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map(name: "created_at")
+  updatedAt DateTime? @updatedAt @map(name: "updated_at")
+  products  Product[]
 
   @@map("categories")
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(255)
-  description String?  @db.Text
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  description String?    @db.Text
   price       Float
-  imageUrl    String?  @db.VarChar(255) @map(name: "image_url")
-  categoryId  Int       @map(name: "category_id")
-  category    Category  @relation(fields: [categoryId], references: [id])
-  createdAt   DateTime @default(now()) @map(name: "created_at")
-  updatedAt   DateTime? @updatedAt @map(name: "updated_at")
+  imageUrl    String?    @map(name: "image_url") @db.VarChar(255)
+  categoryId  Int        @map(name: "category_id")
+  category    Category   @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime   @default(now()) @map(name: "created_at")
+  updatedAt   DateTime?  @updatedAt @map(name: "updated_at")
+  cartItems   CartItem[]
 
   @@map("products")
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique @map(name: "user_id")
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now()) @map(name: "created_at")
+  updatedAt DateTime?  @updatedAt @map(name: "updated_at")
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        Int       @id @default(autoincrement())
+  cartId    Int       @map(name: "cart_id")
+  cart      Cart      @relation(fields: [cartId], references: [id])
+  productId Int       @map(name: "product_id")
+  product   Product   @relation(fields: [productId], references: [id])
+  quantity  Int       @default(1)
+  createdAt DateTime  @default(now()) @map(name: "created_at")
+  updatedAt DateTime? @updatedAt @map(name: "updated_at")
+
+  @@map("cart_items")
 }

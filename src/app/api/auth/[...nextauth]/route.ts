@@ -3,14 +3,15 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import axios from 'axios';
 import {UserProps} from '@/interfaces/user';
 import GithubProvider from 'next-auth/providers/github';
+import {NextAuthOptions} from 'next-auth';
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
   jwt: {
     secret: process.env.NEXTAUTH_SECRET,
-    maxAge: 30 * 24 * 60 * 60,
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: '/login',
@@ -25,7 +26,9 @@ const handler = NextAuth({
       return token;
     },
     session: async ({session, token}: any) => {
-      session.user.id = token.id;
+      if (token) {
+        session.user.id = token.id;
+      }
       return session;
     },
     async redirect({baseUrl}) {
@@ -36,11 +39,14 @@ const handler = NextAuth({
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: {},
-        password: {},
+        email: {label: 'Email', type: 'text'},
+        password: {label: 'Password', type: 'password'},
       },
       async authorize(credentials, req) {
         const {email, password} = credentials as UserProps;
+        if (!email || !password) {
+          return null;
+        }
 
         try {
           const result = await axios.post(
@@ -67,6 +73,8 @@ const handler = NextAuth({
       clientSecret: process.env.GITHUB_SECRET ?? '',
     }),
   ],
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export {handler as GET, handler as POST};

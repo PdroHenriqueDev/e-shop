@@ -2,6 +2,7 @@
 import {createContext, useContext, useState, ReactNode} from 'react';
 import {ProductProps} from '@/interfaces/product';
 import {useNotification} from './notificationContext';
+import axios from 'axios';
 
 interface CartContextType {
   cart: ProductProps[];
@@ -16,12 +17,27 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
   const [cart, setCart] = useState<ProductProps[]>([]);
   const {notify} = useNotification();
 
-  const addToCart = (product: ProductProps) => {
-    setCart(prevCart => [...prevCart, product]);
-    notify({
-      type: 'success',
-      msg: `${product.name} has been added to your cart!`,
-    });
+  const addToCart = async (product: ProductProps) => {
+    try {
+      const response = await axios.post('/api/cart', {
+        productId: product.id,
+        quantity: 1,
+      });
+
+      if (response.status === 201) {
+        setCart(prevCart => [...prevCart, product]);
+        notify({
+          type: 'success',
+          msg: `${product.name} has been added to your cart!`,
+        });
+      }
+    } catch (error) {
+      notify({
+        type: 'error',
+        msg: `Failed to add ${product.name} to your cart.`,
+      });
+      console.error('Error adding to cart:', error);
+    }
   };
 
   const removeFromCart = (productId: number) => {

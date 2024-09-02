@@ -39,6 +39,10 @@ export default function CategoryPage() {
   const categoryName =
     category && category.charAt(0).toUpperCase() + category.slice(1);
 
+  const handleAddToCart = (product: ProductProps) => {
+    addToCart(product);
+  };
+
   return (
     <div className="container mx-auto py-12 px-5">
       <h2 className="text-3xl font-bold text-center mb-8">{categoryName}</h2>
@@ -75,7 +79,7 @@ export default function CategoryPage() {
                 <div className="mt-4">
                   <CustomButton
                     buttonText={'Add to Cart'}
-                    onClick={() => addToCart(product)}
+                    onClick={() => handleAddToCart(product)}
                   />
                 </div>
               </Card>
