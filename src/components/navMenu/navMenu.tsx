@@ -8,7 +8,7 @@ import {
   UserOutlined,
   ShoppingCartOutlined,
 } from '@ant-design/icons';
-import {signOut, signIn} from 'next-auth/react';
+import {signOut, signIn, useSession} from 'next-auth/react';
 import {useRouter} from 'next/navigation';
 import {MenuInfo} from 'rc-menu/lib/interface';
 import {MenuItemWithPathProps} from '@/interfaces/navBar';
@@ -55,8 +55,10 @@ export default function NavMenu() {
   const router = useRouter();
   const {cart} = useCart();
 
-  const handleAuthAction: MenuProps['onClick'] = (e: any) => {
-    e.key === '1' ? signOut() : signIn();
+  const {data: dataSession} = useSession();
+
+  const handleAuthAction: MenuProps['onClick'] = async e => {
+    e.key === '1' ? await signOut() : signIn();
   };
 
   const itemsDropDown: MenuProps['items'] = [
@@ -109,10 +111,10 @@ export default function NavMenu() {
             },
             components: {
               Menu: {
-                colorItemBgSelected: 'transparent',
-                colorItemBgHover: 'transparent',
-                colorItemTextHover: '#000000',
-                colorItemTextSelected: '#000000',
+                itemSelectedBg: 'transparent',
+                itemHoverBg: 'transparent',
+                itemHoverColor: '#000000',
+                itemSelectedColor: '#000000',
                 itemColor: '#000000',
               },
             },
@@ -131,17 +133,22 @@ export default function NavMenu() {
         <h1 className="text-dark font-semibold text-xl">E-shop</h1>
       </div>
 
-      <div className="flex-1 flex items-center justify-end">
-        <Dropdown
-          menu={{items: itemsDropDown}}
-          trigger={['click']}
-          placement="bottomLeft">
-          <Avatar
-            className="bg-accent hover:bg-border cursor-pointer p-1 rounded-full transition duration-300 ease-in-out"
-            size="large"
-            icon={<UserOutlined />}
-          />
-        </Dropdown>
+      <div className="flex-1 flex items-start justify-end">
+        <div className="flex flex-col items-center">
+          <Dropdown
+            menu={{items: itemsDropDown}}
+            trigger={['click']}
+            placement="bottomLeft">
+            <Avatar
+              className="bg-accent hover:bg-border cursor-pointer p-1 rounded-full transition duration-300 ease-in-out"
+              size="small"
+              icon={<UserOutlined />}
+            />
+          </Dropdown>
+          <span className="text-xs text-accent">
+            {dataSession?.user?.name?.[0]}
+          </span>
+        </div>
 
         <Badge count={cart.length} className="cursor-pointer mx-5 mt-1">
           <ShoppingCartOutlined className="text-xl" />
