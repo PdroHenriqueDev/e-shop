@@ -109,10 +109,10 @@ export default function NavMenu() {
             },
             components: {
               Menu: {
-                colorItemBgSelected: 'transparent',
-                colorItemBgHover: 'transparent',
-                colorItemTextHover: '#000000',
-                colorItemTextSelected: '#000000',
+                itemSelectedBg: 'transparent',
+                itemHoverBg: 'transparent',
+                itemHoverColor: '#000000',
+                itemSelectedColor: '#000000',
                 itemColor: '#000000',
               },
             },
