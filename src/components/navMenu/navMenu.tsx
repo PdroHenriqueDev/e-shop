@@ -1,7 +1,7 @@
 'use client';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import type {MenuProps} from 'antd';
-import {Avatar, Badge, ConfigProvider, Dropdown, Menu} from 'antd';
+import {Avatar, ConfigProvider, Dropdown, Menu} from 'antd';
 import {
   MailOutlined,
   AppstoreOutlined,
@@ -13,6 +13,8 @@ import {useRouter} from 'next/navigation';
 import {MenuInfo} from 'rc-menu/lib/interface';
 import {MenuItemWithPathProps} from '@/interfaces/navBar';
 import {useCart} from '@/contexts/cartContext';
+import axios from 'axios';
+import CartDrawer from './drawer/drawer';
 
 const items = [
   {
@@ -53,9 +55,21 @@ const items = [
 export default function NavMenu() {
   const [current, setCurrent] = useState('home');
   const router = useRouter();
-  const {cart} = useCart();
+  const {removeFromCart, cartItems, handleSetCartItems} = useCart();
 
   const {data: dataSession} = useSession();
+
+  useEffect(() => {
+    const getItems = async () => {
+      const response = await axios.get('api/cart');
+
+      const {data} = response;
+
+      handleSetCartItems(data);
+    };
+
+    getItems();
+  }, []);
 
   const handleAuthAction: MenuProps['onClick'] = async e => {
     e.key === '1' ? await signOut() : signIn();
@@ -150,9 +164,7 @@ export default function NavMenu() {
           </span>
         </div>
 
-        <Badge count={cart.length} className="cursor-pointer mx-5 mt-1">
-          <ShoppingCartOutlined className="text-xl" />
-        </Badge>
+        <CartDrawer cart={cartItems} removeFromCart={removeFromCart} />
       </div>
     </header>
   );
