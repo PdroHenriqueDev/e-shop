@@ -1,20 +1,20 @@
 'use client';
 import {createContext, useContext, useState, ReactNode} from 'react';
-import {ProductProps} from '@/interfaces/product';
+import {CartItemProps, ProductProps} from '@/interfaces/product';
 import {useNotification} from './notificationContext';
 import axios from 'axios';
 
 interface CartContextType {
-  cart: ProductProps[];
+  cartItems: CartItemProps[];
+  handleSetCartItems: (cartItem: CartItemProps[]) => void;
   addToCart: (product: ProductProps) => void;
-  removeFromCart: (productId: number) => void;
-  clearCart: () => void;
+  removeFromCart: (cartItem: CartItemProps) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({children}: {children: ReactNode}) => {
-  const [cart, setCart] = useState<ProductProps[]>([]);
+  const [cartItems, setCartItems] = useState<CartItemProps[]>([]);
   const {notify} = useNotification();
 
   const addToCart = async (product: ProductProps) => {
@@ -25,7 +25,9 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
       });
 
       if (response.status === 201) {
-        setCart(prevCart => [...prevCart, product]);
+        const {items} = response.data;
+        setCartItems(items);
+
         notify({
           type: 'success',
           msg: `${product.name} has been added to your cart!`,
@@ -40,16 +42,43 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
     }
   };
 
-  const removeFromCart = (productId: number) => {
-    setCart(prevCart => prevCart.filter(product => product.id !== productId));
+  const handleSetCartItems = (cartItems: CartItemProps[]) => {
+    setCartItems(cartItems);
   };
 
-  const clearCart = () => {
-    setCart([]);
+  const removeFromCart = async (cartItem: CartItemProps) => {
+    try {
+      await axios.delete('/api/cart', {
+        data: {
+          cartId: cartItem.cartId,
+          productId: cartItem.productId,
+        },
+      });
+
+      setCartItems(prevCartItems =>
+        prevCartItems.filter(
+          item =>
+            item.cartId !== cartItem.cartId ||
+            item.productId !== cartItem.productId,
+        ),
+      );
+
+      notify({
+        type: 'success',
+        msg: 'Item has been removed from your cart!',
+      });
+    } catch (error) {
+      notify({
+        type: 'error',
+        msg: 'Failed to remove item from your cart.',
+      });
+      console.log('Error adding to cart:', error);
+    }
   };
 
   return (
-    <CartContext.Provider value={{cart, addToCart, removeFromCart, clearCart}}>
+    <CartContext.Provider
+      value={{addToCart, removeFromCart, cartItems, handleSetCartItems}}>
       {children}
     </CartContext.Provider>
   );

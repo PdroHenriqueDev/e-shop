@@ -7,3 +7,11 @@ export interface ProductProps {
   createdAt: string;
   updatedAt?: string;
 }
+
+export interface CartItemProps {
+  cartId: number;
+  cartItemId: number;
+  productId: number;
+  quantity: number;
+  product: ProductProps;
+}
