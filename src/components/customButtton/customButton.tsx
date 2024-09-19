@@ -22,6 +22,7 @@ export default function CustomButton({
       'text-primary': textColor === 'primary',
       'bg-secondary': backgroundColor === 'secondary',
       'bg-dark': backgroundColor === 'dark',
+      'bg-danger': backgroundColor === 'danger',
     },
   );
 

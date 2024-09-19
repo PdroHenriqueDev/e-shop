@@ -9,15 +9,18 @@ interface CartContextType {
   handleSetCartItems: (cartItem: CartItemProps[]) => void;
   addToCart: (product: ProductProps) => void;
   removeFromCart: (cartItem: CartItemProps) => void;
+  isLoading: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({children}: {children: ReactNode}) => {
   const [cartItems, setCartItems] = useState<CartItemProps[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const {notify} = useNotification();
 
   const addToCart = async (product: ProductProps) => {
+    setIsLoading(true);
     try {
       const response = await axios.post('/api/cart', {
         productId: product.id,
@@ -39,6 +42,8 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
         msg: `Failed to add ${product.name} to your cart.`,
       });
       console.error('Error adding to cart:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,6 +52,7 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
   };
 
   const removeFromCart = async (cartItem: CartItemProps) => {
+    setIsLoading(true);
     try {
       await axios.delete('/api/cart', {
         data: {
@@ -73,12 +79,20 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
         msg: 'Failed to remove item from your cart.',
       });
       console.log('Error adding to cart:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <CartContext.Provider
-      value={{addToCart, removeFromCart, cartItems, handleSetCartItems}}>
+      value={{
+        addToCart,
+        removeFromCart,
+        cartItems,
+        handleSetCartItems,
+        isLoading,
+      }}>
       {children}
     </CartContext.Provider>
   );

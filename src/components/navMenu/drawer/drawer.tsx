@@ -2,13 +2,15 @@ import {useState} from 'react';
 import {Drawer, List, Badge, Button} from 'antd';
 import {ShoppingCartOutlined} from '@ant-design/icons';
 import {CartItemProps} from '@/interfaces/product';
+import CustomButton from '@/components/customButtton/customButton';
 
 interface CartProps {
   cart: CartItemProps[];
+  isLoading: boolean;
   removeFromCart: (cartItem: CartItemProps) => void;
 }
 
-const CartDrawer = ({cart, removeFromCart}: CartProps) => {
+const CartDrawer = ({cart, removeFromCart, isLoading}: CartProps) => {
   const [isDrawerVisible, setDrawerVisible] = useState(false);
 
   const showDrawer = () => {
@@ -37,12 +39,14 @@ const CartDrawer = ({cart, removeFromCart}: CartProps) => {
             renderItem={item => (
               <List.Item
                 actions={[
-                  <Button
+                  <CustomButton
                     key={item.cartId}
-                    type="text"
-                    onClick={() => removeFromCart(item)}>
-                    Remove
-                  </Button>,
+                    onClick={() => removeFromCart(item)}
+                    buttonText={'Remove'}
+                    backgroundColor="danger"
+                    textColor="primary"
+                    disabled={isLoading}
+                  />,
                 ]}>
                 <List.Item.Meta
                   title={item.product.name}
