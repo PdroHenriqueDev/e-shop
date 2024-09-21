@@ -24,6 +24,7 @@ export default function CustomButton({
       'bg-dark': backgroundColor === 'dark',
       'bg-danger': backgroundColor === 'danger',
       'bg-accent': backgroundColor === 'accent',
+      'bg-border': backgroundColor === 'border',
     },
   );
 

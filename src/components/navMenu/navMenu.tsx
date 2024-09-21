@@ -55,8 +55,7 @@ const items = [
 export default function NavMenu() {
   const [current, setCurrent] = useState('home');
   const router = useRouter();
-  const {removeFromCart, cartItems, handleSetCartItems, cartIsLoading} =
-    useCart();
+  const {handleSetCartItems} = useCart();
 
   const {data: dataSession} = useSession();
 
@@ -165,11 +164,7 @@ export default function NavMenu() {
           </span>
         </div>
 
-        <CartDrawer
-          cart={cartItems}
-          removeFromCart={removeFromCart}
-          isLoading={cartIsLoading}
-        />
+        <CartDrawer />
       </div>
     </header>
   );

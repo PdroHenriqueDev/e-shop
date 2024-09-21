@@ -6,8 +6,9 @@ import axios from 'axios';
 
 interface CartContextType {
   cartItems: CartItemProps[];
-  handleSetCartItems: (cartItem: CartItemProps[]) => void;
   addToCart: (product: ProductProps) => void;
+  handleSetCartItems: (cartItem: CartItemProps[]) => void;
+  updateCartQuantity: (productId: number, quantity: number) => Promise<void>;
   removeFromCart: (cartItem: CartItemProps) => void;
   cartIsLoading: boolean;
 }
@@ -84,6 +85,26 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
     }
   };
 
+  const updateCartQuantity = async (productId: number, quantity: number) => {
+    try {
+      setCartIsLoading(true);
+      const response = await axios.put('/api/cart', {productId, quantity});
+      const updatedItem = response.data;
+
+      setCartItems(prevItems =>
+        prevItems.map(item =>
+          item.productId === updatedItem.productId
+            ? {...item, quantity: updatedItem.quantity}
+            : item,
+        ),
+      );
+    } catch (error) {
+      console.error('Failed to update cart item quantity:', error);
+    } finally {
+      setCartIsLoading(false);
+    }
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -92,6 +113,7 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
         cartItems,
         handleSetCartItems,
         cartIsLoading,
+        updateCartQuantity,
       }}>
       {children}
     </CartContext.Provider>

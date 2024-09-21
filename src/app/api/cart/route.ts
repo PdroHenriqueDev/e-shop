@@ -103,6 +103,31 @@ export async function GET() {
   }
 }
 
+export async function PUT(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+      return NextResponse.json({error: 'Not authenticated'}, {status: 401});
+    }
+
+    const {productId, quantity} = await request.json();
+    const {id} = session.user as User;
+
+    const updatedItem = await prisma.cartItem.update({
+      where: {cartId_productId: {cartId: id, productId}},
+      data: {quantity},
+    });
+
+    return NextResponse.json(updatedItem, {status: 200});
+  } catch (error) {
+    console.log('Error update cart item:', error);
+    return NextResponse.json(
+      {error: 'Failed to update cart item'},
+      {status: 500},
+    );
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     const session = await getServerSession(authOptions);
