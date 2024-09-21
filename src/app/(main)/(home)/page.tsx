@@ -13,7 +13,8 @@ import {useCart} from '@/contexts/cartContext';
 export default function Home() {
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const {addToCart} = useCart();
+
+  const {addToCart, cartIsLoading} = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -90,6 +91,8 @@ export default function Home() {
                     <CustomButton
                       buttonText={'Add to Cart'}
                       onClick={() => addToCart(product)}
+                      disabled={cartIsLoading}
+                      backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
                     />
                   </div>
                 </Card>

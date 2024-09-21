@@ -6,21 +6,22 @@ import axios from 'axios';
 
 interface CartContextType {
   cartItems: CartItemProps[];
-  handleSetCartItems: (cartItem: CartItemProps[]) => void;
   addToCart: (product: ProductProps) => void;
+  handleSetCartItems: (cartItem: CartItemProps[]) => void;
+  updateCartQuantity: (productId: number, quantity: number) => Promise<void>;
   removeFromCart: (cartItem: CartItemProps) => void;
-  isLoading: boolean;
+  cartIsLoading: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({children}: {children: ReactNode}) => {
   const [cartItems, setCartItems] = useState<CartItemProps[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [cartIsLoading, setCartIsLoading] = useState(false);
   const {notify} = useNotification();
 
   const addToCart = async (product: ProductProps) => {
-    setIsLoading(true);
+    setCartIsLoading(true);
     try {
       const response = await axios.post('/api/cart', {
         productId: product.id,
@@ -43,7 +44,7 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
       });
       console.error('Error adding to cart:', error);
     } finally {
-      setIsLoading(false);
+      setCartIsLoading(false);
     }
   };
 
@@ -52,7 +53,7 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
   };
 
   const removeFromCart = async (cartItem: CartItemProps) => {
-    setIsLoading(true);
+    setCartIsLoading(true);
     try {
       await axios.delete('/api/cart', {
         data: {
@@ -80,7 +81,27 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
       });
       console.log('Error adding to cart:', error);
     } finally {
-      setIsLoading(false);
+      setCartIsLoading(false);
+    }
+  };
+
+  const updateCartQuantity = async (productId: number, quantity: number) => {
+    try {
+      setCartIsLoading(true);
+      const response = await axios.put('/api/cart', {productId, quantity});
+      const updatedItem = response.data;
+
+      setCartItems(prevItems =>
+        prevItems.map(item =>
+          item.productId === updatedItem.productId
+            ? {...item, quantity: updatedItem.quantity}
+            : item,
+        ),
+      );
+    } catch (error) {
+      console.error('Failed to update cart item quantity:', error);
+    } finally {
+      setCartIsLoading(false);
     }
   };
 
@@ -91,7 +112,8 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
         removeFromCart,
         cartItems,
         handleSetCartItems,
-        isLoading,
+        cartIsLoading,
+        updateCartQuantity,
       }}>
       {children}
     </CartContext.Provider>
