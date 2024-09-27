@@ -86,9 +86,9 @@ const CartDrawer = () => {
                         buttonText="-"
                         backgroundColor="border"
                       />
-                      <span className="mx-6 text-center">
-                        Quantidade: {item.quantity}
-                      </span>
+                      <div className="border border-border rounded-lg mx-2 py-2 px-5">
+                        <span className="text-sm">{item.quantity}</span>
+                      </div>
                       <CustomButton
                         onClick={() =>
                           handleIncreaseQuantity(item.productId, item.quantity)
