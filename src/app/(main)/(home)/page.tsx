@@ -8,13 +8,10 @@ import {useEffect, useState} from 'react';
 import axios from 'axios';
 import {ProductProps} from '@/interfaces/product';
 import Loading from '@/components/loading/loading';
-import {useCart} from '@/contexts/cartContext';
 
 export default function Home() {
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const {addToCart, cartIsLoading} = useCart();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -41,7 +38,7 @@ export default function Home() {
           <p className="mt-4 text-xl">Check out our exclusive offers!</p>
           <div className="flex justify-center mt-6">
             <div className="max-w-40">
-              <Link href="/product-catalog">
+              <Link href="/products/catalog">
                 <CustomButton
                   backgroundColor={'dark'}
                   textColor={'primary'}
@@ -67,35 +64,33 @@ export default function Home() {
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
             {products.map(product => (
               <Col key={product.id}>
-                <Card
-                  hoverable
-                  cover={
-                    <div className="w-full h-48 relative">
-                      <Image
-                        alt={product.name}
-                        src={
-                          product.imageUrl || 'https://via.placeholder.com/300'
-                        }
-                        layout="fill"
-                        objectFit="cover"
-                        className="rounded-lg"
-                      />
+                <Link href={`/products/${product.id}`}>
+                  <Card
+                    hoverable
+                    cover={
+                      <div className="w-full h-48 relative">
+                        <Image
+                          alt={product.name}
+                          src={
+                            product.imageUrl ||
+                            'https://via.placeholder.com/300'
+                          }
+                          layout="fill"
+                          objectFit="cover"
+                          className="rounded-lg"
+                        />
+                      </div>
+                    }
+                    className="bg-primary p-4 shadow">
+                    <h3 className="mt-4 text-xl">{product.name}</h3>
+                    <p className="mt-2 text-gray-700">
+                      ${product.price.toFixed(2)}
+                    </p>
+                    <div className="mt-4">
+                      <CustomButton buttonText={'Buy'} />
                     </div>
-                  }
-                  className="bg-primary p-4 shadow">
-                  <h3 className="mt-4 text-xl">{product.name}</h3>
-                  <p className="mt-2 text-gray-700">
-                    ${product.price.toFixed(2)}
-                  </p>
-                  <div className="mt-4">
-                    <CustomButton
-                      buttonText={'Add to Cart'}
-                      onClick={() => addToCart(product)}
-                      disabled={cartIsLoading}
-                      backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
-                    />
-                  </div>
-                </Card>
+                  </Card>
+                </Link>
               </Col>
             ))}
           </Row>
