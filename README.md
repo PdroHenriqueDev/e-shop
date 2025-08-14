@@ -12,7 +12,7 @@ E-Shop is an e-commerce portfolio developed with Next.js.
 - [X] Product catalog
 - [X] Shopping cart
 - [X] Product details page
-- [ ] Checkout
+- [X] Checkout
 - [ ] Admin dashboard
 - [ ] Payment system integration
 - [ ] Unit tests
