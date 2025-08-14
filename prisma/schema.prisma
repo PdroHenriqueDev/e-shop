@@ -16,6 +16,7 @@ model User {
   createdAt DateTime  @default(now()) @map(name: "created_at")
   updatedAt DateTime? @updatedAt @map(name: "updated_at")
   cart      Cart?
+  orders    Order[]
 
   @@map("users")
 }
@@ -41,6 +42,7 @@ model Product {
   createdAt   DateTime   @default(now()) @map(name: "created_at")
   updatedAt   DateTime?  @updatedAt @map(name: "updated_at")
   cartItems   CartItem[]
+  orderItems  OrderItem[]
 
   @@map("products")
 }
@@ -68,4 +70,34 @@ model CartItem {
 
   @@unique([cartId, productId])
   @@map("cart_items")
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  userId        Int         @map(name: "user_id")
+  user          User        @relation(fields: [userId], references: [id])
+  items         OrderItem[]
+  status        String      @default("pending") @db.VarChar(50)
+  total         Float
+  shippingAddress String?    @map(name: "shipping_address") @db.Text
+  paymentMethod String?     @map(name: "payment_method") @db.VarChar(50)
+  paymentStatus String      @default("pending") @map(name: "payment_status") @db.VarChar(50)
+  createdAt     DateTime    @default(now()) @map(name: "created_at")
+  updatedAt     DateTime?   @updatedAt @map(name: "updated_at")
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int       @id @default(autoincrement())
+  orderId   Int       @map(name: "order_id")
+  order     Order     @relation(fields: [orderId], references: [id])
+  productId Int       @map(name: "product_id")
+  product   Product   @relation(fields: [productId], references: [id])
+  quantity  Int       @default(1)
+  price     Float
+  createdAt DateTime  @default(now()) @map(name: "created_at")
+  updatedAt DateTime? @updatedAt @map(name: "updated_at")
+
+  @@map("order_items")
 }
