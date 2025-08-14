@@ -26,7 +26,7 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
   const [orders, setOrders] = useState<OrderProps[]>([]);
   const [currentOrder, setCurrentOrder] = useState<OrderProps | null>(null);
   const [orderIsLoading, setOrderIsLoading] = useState<boolean>(false);
-  const {showNotification} = useNotification();
+  const {notify} = useNotification();
 
   const placeOrder = async (
     shippingAddress: string,
@@ -42,11 +42,10 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
       });
 
       setCurrentOrder(response.data);
-      showNotification('Order placed successfully!', 'success');
+      notify({type: 'success', msg: 'Order placed successfully!'});
       return response.data;
     } catch (error) {
-      console.error('Error placing order:', error);
-      showNotification('Failed to place order. Please try again.', 'error');
+      notify({type: 'error', msg: 'Failed to place order. Please try again.'});
       return null;
     } finally {
       setOrderIsLoading(false);
@@ -59,8 +58,7 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
       const response = await axios.get('/api/orders');
       setOrders(response.data);
     } catch (error) {
-      console.error('Error fetching orders:', error);
-      showNotification('Failed to fetch orders', 'error');
+      notify({type: 'error', msg: 'Failed to fetch orders'});
     } finally {
       setOrderIsLoading(false);
     }
@@ -72,8 +70,7 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
       const response = await axios.get(`/api/orders/${id}`);
       setCurrentOrder(response.data);
     } catch (error) {
-      console.error(`Error fetching order ${id}:`, error);
-      showNotification('Failed to fetch order details', 'error');
+      notify({type: 'error', msg: 'Failed to fetch order details'});
     } finally {
       setOrderIsLoading(false);
     }

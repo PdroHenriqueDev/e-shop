@@ -42,7 +42,6 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
         type: 'error',
         msg: `Failed to add ${product.name} to your cart.`,
       });
-      console.error('Error adding to cart:', error);
     } finally {
       setCartIsLoading(false);
     }
@@ -79,7 +78,6 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
         type: 'error',
         msg: 'Failed to remove item from your cart.',
       });
-      console.log('Error adding to cart:', error);
     } finally {
       setCartIsLoading(false);
     }
@@ -99,7 +97,10 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
         ),
       );
     } catch (error) {
-      console.error('Failed to update cart item quantity:', error);
+      notify({
+        type: 'error',
+        msg: 'Failed to update cart item quantity.',
+      });
     } finally {
       setCartIsLoading(false);
     }

@@ -79,7 +79,6 @@ export default function Checkout() {
         type: 'error',
         msg: 'Failed to place order. Please try again.',
       });
-      console.error('Error placing order:', error);
     } finally {
       setIsSubmitting(false);
     }

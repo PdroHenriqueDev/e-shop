@@ -7,6 +7,7 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import z from 'zod';
 import CustomInput from '@/components/customInput';
+import {useNotification} from '@/contexts/notificationContext';
 
 const FormSchema = z.object({
   searchQuery: z.string().optional(),
@@ -18,6 +19,7 @@ export default function ProductCatalog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const {notify} = useNotification();
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -33,7 +35,12 @@ export default function ProductCatalog() {
   } = form;
 
   const onSubmit = (data: FormData) => {
-    console.log('Search Query:', data.searchQuery);
+    setSearchQuery(data.searchQuery || '');
+    notify({
+      type: 'info',
+      msg: `Searching for: ${data.searchQuery || 'all products'}`,
+      duration: 3,
+    });
   };
 
   const handleCategoryChange = (category: string) => {
