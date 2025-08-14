@@ -1,4 +1,5 @@
 export interface ProductProps {
+  image: string;
   id: number;
   name: string;
   description?: string;

@@ -50,6 +50,12 @@ const items = [
       },
     ],
   },
+  {
+    label: 'Products',
+    key: 'products',
+    icon: <ShoppingCartOutlined />,
+    path: '/products/catalog',
+  },
 ];
 
 export default function NavMenu() {
@@ -80,11 +86,19 @@ export default function NavMenu() {
       label: 'Log In',
       key: '0',
       onClick: handleAuthAction,
+      style: {display: dataSession ? 'none' : 'block'},
+    },
+    {
+      label: 'My Orders',
+      key: 'orders',
+      onClick: () => router.push('/orders'),
+      style: {display: dataSession ? 'block' : 'none'},
     },
     {
       label: 'Log Out',
       key: '1',
       onClick: handleAuthAction,
+      style: {display: dataSession ? 'block' : 'none'},
     },
   ];
 
