@@ -21,33 +21,18 @@ export async function POST(request: Request) {
     const {id} = session.user as User;
     const userId = Number(id);
 
-    const cart = await prisma.cart.upsert({
+    // First, verify the user exists to prevent foreign key constraint error
+    const userExists = await prisma.user.findUnique({
+      where: {id: userId},
+    });
+
+    if (!userExists) {
+      return NextResponse.json({error: 'User not found'}, {status: 404});
+    }
+
+    // Find or create the cart
+    let cart = await prisma.cart.findUnique({
       where: {userId},
-      update: {
-        items: {
-          upsert: {
-            where: {cartId_productId: {productId, cartId: userId}},
-            update: {
-              quantity: {
-                increment: quantity,
-              },
-            },
-            create: {
-              productId,
-              quantity,
-            },
-          },
-        },
-      },
-      create: {
-        userId: userId,
-        items: {
-          create: {
-            productId,
-            quantity,
-          },
-        },
-      },
       include: {
         items: {
           include: {
@@ -57,7 +42,54 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(cart, {status: 201});
+    if (!cart) {
+      cart = await prisma.cart.create({
+        data: {
+          userId,
+        },
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
+    }
+
+    // Now upsert the cart item with the correct cartId
+    await prisma.cartItem.upsert({
+      where: {
+        cartId_productId: {
+          cartId: cart.id,
+          productId,
+        },
+      },
+      update: {
+        quantity: {
+          increment: quantity,
+        },
+      },
+      create: {
+        cartId: cart.id,
+        productId,
+        quantity,
+      },
+    });
+
+    // Fetch the updated cart
+    const updatedCart = await prisma.cart.findUnique({
+      where: {userId},
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(updatedCart, {status: 201});
   } catch (error) {
     console.error('Cart POST error:', error);
     return NextResponse.json(
