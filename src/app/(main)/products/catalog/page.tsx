@@ -8,6 +8,8 @@ import {zodResolver} from '@hookform/resolvers/zod';
 import z from 'zod';
 import CustomInput from '@/components/customInput';
 import {useNotification} from '@/contexts/notificationContext';
+import {useCart} from '@/contexts/cartContext';
+import {ProductProps} from '@/interfaces/product';
 
 const FormSchema = z.object({
   searchQuery: z.string().optional(),
@@ -20,6 +22,7 @@ export default function ProductCatalog() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const {notify} = useNotification();
+  const {addToCart, cartIsLoading} = useCart();
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -38,7 +41,7 @@ export default function ProductCatalog() {
     setSearchQuery(data.searchQuery || '');
     notify({
       type: 'info',
-      msg: `Searching for: ${data.searchQuery || 'all products'}`
+      msg: `Searching for: ${data.searchQuery || 'all products'}`,
     });
   };
 
@@ -46,47 +49,51 @@ export default function ProductCatalog() {
     setSelectedCategory(category);
   };
 
-  const products = [
+  const handleAddToCart = (product: ProductProps) => {
+    addToCart(product);
+  };
+
+  const products: ProductProps[] = [
     {
       id: 1,
       name: 'Product 1',
       price: 199.9,
-      category: 'Clothing',
+      image: '',
       imageUrl:
         'https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      createdAt: new Date().toISOString(),
     },
     {
       id: 2,
       name: 'Product 2',
       price: 299.9,
-      category: 'Electronics',
+      image: '',
       imageUrl:
         'https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      createdAt: new Date().toISOString(),
     },
     {
       id: 3,
       name: 'Product 3',
       price: 399.9,
-      category: 'Accessories',
+      image: '',
       imageUrl:
         'https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      createdAt: new Date().toISOString(),
     },
     {
       id: 4,
       name: 'Product 4',
       price: 499.9,
-      category: 'Clothing',
+      image: '',
       imageUrl:
         'https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      createdAt: new Date().toISOString(),
     },
   ];
 
-  const filteredProducts = products.filter(
-    product =>
-      product.name
-        .toLowerCase()
-        .includes(form.getValues('searchQuery')?.toLowerCase() || '') &&
-      (selectedCategory === 'All' || product.category === selectedCategory),
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const pageSize = 8;
@@ -142,7 +149,7 @@ export default function ProductCatalog() {
                 <div className="w-full h-48 relative">
                   <Image
                     alt={product.name}
-                    src={product.imageUrl}
+                    src={product.imageUrl || product.image}
                     layout="fill"
                     objectFit="cover"
                     className="rounded-lg"
@@ -153,7 +160,12 @@ export default function ProductCatalog() {
               <h3 className="mt-4 text-xl">{product.name}</h3>
               <p className="mt-2 text-accent">${product.price}</p>
               <div className="mt-4">
-                <CustomButton buttonText={'Add to Cart'} />
+                <CustomButton
+                  buttonText={'Add to Cart'}
+                  onClick={() => handleAddToCart(product)}
+                  disabled={cartIsLoading}
+                  backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
+                />
               </div>
             </Card>
           </Col>

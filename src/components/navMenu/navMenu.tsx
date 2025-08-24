@@ -72,7 +72,7 @@ export default function NavMenu() {
       }
 
       try {
-        const response = await axios.get('api/cart');
+        const response = await axios.get('/api/cart');
         const {data} = response;
         handleSetCartItems(data);
       } catch (error) {
