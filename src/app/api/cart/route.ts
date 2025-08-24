@@ -59,6 +59,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(cart, {status: 201});
   } catch (error) {
+    console.error('Cart POST error:', error);
     return NextResponse.json(
       {error: 'Failed to add product to cart'},
       {status: 500},
@@ -94,6 +95,7 @@ export async function GET() {
 
     return NextResponse.json(cart.items, {status: 200});
   } catch (error) {
+    console.error('Cart GET error:', error);
     return NextResponse.json(
       {error: 'Failed to fetch cart items'},
       {status: 500},
@@ -119,6 +121,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updatedItem, {status: 200});
   } catch (error) {
+    console.error('Cart PUT error:', error);
     return NextResponse.json(
       {error: 'Failed to update cart item'},
       {status: 500},
@@ -167,6 +170,7 @@ export async function DELETE(request: Request) {
       {status: 200},
     );
   } catch (error) {
+    console.error('Cart DELETE error:', error);
     return NextResponse.json(
       {error: 'Failed to delete cart item'},
       {status: 500},
