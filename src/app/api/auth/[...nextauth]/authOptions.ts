@@ -3,6 +3,7 @@ import axios from 'axios';
 import {NextAuthOptions} from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GithubProvider from 'next-auth/providers/github';
+import prisma from '@/lib/prisma';
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -18,6 +19,32 @@ export const authOptions: NextAuthOptions = {
     signOut: '/login',
   },
   callbacks: {
+    async signIn({user, account, profile}) {
+      if (account?.provider === 'github') {
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: {email: user.email!},
+          });
+
+          if (!existingUser) {
+            const newUser = await prisma.user.create({
+              data: {
+                name: user.name!,
+                email: user.email!,
+                password: '',
+              },
+            });
+            user.id = newUser.id.toString();
+          } else {
+            user.id = existingUser.id.toString();
+          }
+        } catch (error) {
+          console.error('Error creating/finding user:', error);
+          return false;
+        }
+      }
+      return true;
+    },
     jwt: async ({token, user}) => {
       if (user) {
         token.id = user.id;
