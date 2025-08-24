@@ -67,15 +67,21 @@ export default function NavMenu() {
 
   useEffect(() => {
     const getItems = async () => {
-      const response = await axios.get('api/cart');
+      if (!dataSession?.user) {
+        return;
+      }
 
-      const {data} = response;
-
-      handleSetCartItems(data);
+      try {
+        const response = await axios.get('api/cart');
+        const {data} = response;
+        handleSetCartItems(data);
+      } catch (error) {
+        console.error('Failed to fetch cart items:', error);
+      }
     };
 
     getItems();
-  }, []);
+  }, [dataSession, handleSetCartItems]);
 
   const handleAuthAction: MenuProps['onClick'] = async e => {
     e.key === '1' ? await signOut() : signIn();

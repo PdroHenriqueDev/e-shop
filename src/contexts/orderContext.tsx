@@ -1,6 +1,6 @@
 'use client';
 
-import React, {createContext, useContext, useState} from 'react';
+import React, {createContext, useContext, useState, useCallback} from 'react';
 import axios from 'axios';
 import {OrderProps} from '@/interfaces/order';
 import {useNotification} from './notificationContext';
@@ -28,31 +28,37 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
   const [orderIsLoading, setOrderIsLoading] = useState<boolean>(false);
   const {notify} = useNotification();
 
-  const placeOrder = async (
-    shippingAddress: string,
-    paymentMethod: string,
-    total: number,
-  ): Promise<OrderProps | null> => {
-    setOrderIsLoading(true);
-    try {
-      const response = await axios.post('/api/orders', {
-        shippingAddress,
-        paymentMethod,
-        total,
-      });
+  const placeOrder = useCallback(
+    async (
+      shippingAddress: string,
+      paymentMethod: string,
+      total: number,
+    ): Promise<OrderProps | null> => {
+      setOrderIsLoading(true);
+      try {
+        const response = await axios.post('/api/orders', {
+          shippingAddress,
+          paymentMethod,
+          total,
+        });
 
-      setCurrentOrder(response.data);
-      notify({type: 'success', msg: 'Order placed successfully!'});
-      return response.data;
-    } catch (error) {
-      notify({type: 'error', msg: 'Failed to place order. Please try again.'});
-      return null;
-    } finally {
-      setOrderIsLoading(false);
-    }
-  };
+        setCurrentOrder(response.data);
+        notify({type: 'success', msg: 'Order placed successfully!'});
+        return response.data;
+      } catch (error) {
+        notify({
+          type: 'error',
+          msg: 'Failed to place order. Please try again.',
+        });
+        return null;
+      } finally {
+        setOrderIsLoading(false);
+      }
+    },
+    [notify],
+  );
 
-  const fetchOrders = async (): Promise<void> => {
+  const fetchOrders = useCallback(async (): Promise<void> => {
     setOrderIsLoading(true);
     try {
       const response = await axios.get('/api/orders');
@@ -63,20 +69,23 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
     } finally {
       setOrderIsLoading(false);
     }
-  };
+  }, [notify]);
 
-  const fetchOrderById = async (id: number): Promise<void> => {
-    setOrderIsLoading(true);
-    try {
-      const response = await axios.get(`/api/orders/${id}`);
-      setCurrentOrder(response.data);
-    } catch (error) {
-      console.error(`Error fetching order ${id}:`, error);
-      notify({type: 'error', msg: 'Failed to fetch order details'});
-    } finally {
-      setOrderIsLoading(false);
-    }
-  };
+  const fetchOrderById = useCallback(
+    async (id: number): Promise<void> => {
+      setOrderIsLoading(true);
+      try {
+        const response = await axios.get(`/api/orders/${id}`);
+        setCurrentOrder(response.data);
+      } catch (error) {
+        console.error(`Error fetching order ${id}:`, error);
+        notify({type: 'error', msg: 'Failed to fetch order details'});
+      } finally {
+        setOrderIsLoading(false);
+      }
+    },
+    [notify],
+  );
 
   return (
     <OrderContext.Provider

@@ -137,7 +137,7 @@ const OrderDetailsPage = ({params}: OrderDetailsProps) => {
                   className="flex flex-col md:flex-row items-start md:items-center py-4 border-b last:border-b-0">
                   <div className="flex-shrink-0 w-20 h-20 relative mb-2 md:mb-0 md:mr-4">
                     <Image
-                      src={item.product.image || '/placeholder.png'}
+                      src={item.product.image || '/placeholder.svg'}
                       alt={item.product.name}
                       fill
                       className="object-cover rounded"
@@ -193,7 +193,6 @@ const OrderDetailsPage = ({params}: OrderDetailsProps) => {
                 buttonText="Continue Shopping"
                 onClick={() => router.push('/products/catalog')}
                 backgroundColor="accent"
-                fullWidth
               />
             </div>
           </div>

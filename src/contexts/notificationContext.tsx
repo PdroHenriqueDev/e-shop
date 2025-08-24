@@ -1,6 +1,6 @@
 'use client';
-import React, {createContext, useContext, ReactNode} from 'react';
-import {message} from 'antd';
+import React, {createContext, useContext, ReactNode, useCallback} from 'react';
+import {App} from 'antd';
 import {NoticeType} from 'antd/es/message/interface';
 
 type NotifyFunction = (options: {
@@ -31,9 +31,14 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
 }) => {
-  const notify: NotifyFunction = ({type, msg, duration = 3}) => {
-    message[type](msg, duration);
-  };
+  const {message} = App.useApp();
+
+  const notify: NotifyFunction = useCallback(
+    ({type, msg, duration = 3}) => {
+      message[type](msg, duration);
+    },
+    [message],
+  );
 
   return (
     <NotificationContext.Provider value={{notify}}>

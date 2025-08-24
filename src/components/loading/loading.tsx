@@ -3,11 +3,13 @@ import {LoadingOutlined} from '@ant-design/icons';
 
 export default function Loading() {
   return (
-    <Spin
-      indicator={<LoadingOutlined spin />}
-      tip="loading"
-      className="text-secondary"
-      size="large"
-    />
+    <div className="flex flex-col items-center justify-center">
+      <Spin
+        indicator={<LoadingOutlined spin />}
+        className="text-secondary"
+        size="large">
+        <div className="mt-4 text-secondary">Loading...</div>
+      </Spin>
+    </div>
   );
 }

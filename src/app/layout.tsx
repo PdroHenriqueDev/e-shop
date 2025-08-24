@@ -3,6 +3,7 @@ import {Inter} from 'next/font/google';
 import './globals.css';
 import {NotificationProvider} from '@/contexts/notificationContext';
 import {NextAuthProvider} from '@/components/nexAuthProvider/nextAuthProvider';
+import {App} from 'antd';
 
 const inter = Inter({subsets: ['latin']});
 
@@ -19,7 +20,9 @@ export default function RootLayout({
     <html lang="en">
       <NextAuthProvider>
         <body className={`${inter.className} bg-priamry`}>
-          <NotificationProvider>{children}</NotificationProvider>
+          <App>
+            <NotificationProvider>{children}</NotificationProvider>
+          </App>
         </body>
       </NextAuthProvider>
     </html>
