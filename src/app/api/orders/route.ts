@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     }
 
     const {id} = session.user as User;
-    const userId = id;
+    const userId = Number(id);
 
     // Get request body
     const {shippingAddress, paymentMethod, total} = await request.json();
@@ -94,7 +94,7 @@ export async function GET() {
     }
 
     const {id} = session.user as User;
-    const userId = id;
+    const userId = Number(id);
 
     const orders = await prisma.order.findMany({
       where: {userId},

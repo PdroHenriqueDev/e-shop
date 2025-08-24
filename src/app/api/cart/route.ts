@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     }
 
     const {id} = session.user as User;
-    const userId = id;
+    const userId = Number(id);
 
     const cart = await prisma.cart.upsert({
       where: {userId},
@@ -75,7 +75,7 @@ export async function GET() {
     }
 
     const {id} = session.user as User;
-    const userId = id;
+    const userId = Number(id);
 
     const cart = await prisma.cart.findUnique({
       where: {userId},
@@ -110,9 +110,10 @@ export async function PUT(request: Request) {
 
     const {productId, quantity} = await request.json();
     const {id} = session.user as User;
+    const userId = Number(id);
 
     const updatedItem = await prisma.cartItem.update({
-      where: {cartId_productId: {cartId: id, productId}},
+      where: {cartId_productId: {cartId: userId, productId}},
       data: {quantity},
     });
 

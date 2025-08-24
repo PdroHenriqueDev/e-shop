@@ -13,7 +13,7 @@ export async function GET(request: Request, {params}: {params: {id: string}}) {
     }
 
     const {id} = session.user as User;
-    const userId = id;
+    const userId = Number(id);
     const orderId = parseInt(params.id);
 
     if (isNaN(orderId)) {
