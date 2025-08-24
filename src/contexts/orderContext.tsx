@@ -58,6 +58,7 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
       const response = await axios.get('/api/orders');
       setOrders(response.data);
     } catch (error) {
+      console.error('Error fetching orders:', error);
       notify({type: 'error', msg: 'Failed to fetch orders'});
     } finally {
       setOrderIsLoading(false);
@@ -70,6 +71,7 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
       const response = await axios.get(`/api/orders/${id}`);
       setCurrentOrder(response.data);
     } catch (error) {
+      console.error(`Error fetching order ${id}:`, error);
       notify({type: 'error', msg: 'Failed to fetch order details'});
     } finally {
       setOrderIsLoading(false);

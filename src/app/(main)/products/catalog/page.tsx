@@ -38,8 +38,7 @@ export default function ProductCatalog() {
     setSearchQuery(data.searchQuery || '');
     notify({
       type: 'info',
-      msg: `Searching for: ${data.searchQuery || 'all products'}`,
-      duration: 3,
+      msg: `Searching for: ${data.searchQuery || 'all products'}`
     });
   };
 

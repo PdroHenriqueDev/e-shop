@@ -312,7 +312,7 @@ export default function Checkout() {
                   </div>
                 )}
 
-                <div className="mt-6 flex justify-between">
+                <div className="mt-6 flex justify-between gap-4">
                   <CustomButton
                     buttonText="Back to Shipping"
                     onClick={() => setCurrentStep('shipping')}
@@ -372,7 +372,7 @@ export default function Checkout() {
                 ))}
               </div>
 
-              <div className="mt-6 flex justify-between">
+              <div className="mt-6 flex justify-between gap-4">
                 <CustomButton
                   buttonText="Back to Payment"
                   onClick={() => setCurrentStep('payment')}

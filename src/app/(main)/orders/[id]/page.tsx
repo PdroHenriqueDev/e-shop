@@ -108,14 +108,10 @@ const OrderDetailsPage = ({params}: OrderDetailsProps) => {
               <div>
                 <p className="text-gray-600">Payment Method:</p>
                 <p className="font-medium">
-                  {currentOrder.paymentMethod === 'credit_card'
-                    ? 'Credit Card'
-                    : currentOrder.paymentMethod
-                        .split('_')
-                        .map(
-                          word => word.charAt(0).toUpperCase() + word.slice(1),
-                        )
-                        .join(' ')}
+                  {currentOrder.paymentMethod
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ')}
                 </p>
               </div>
               <div>
@@ -197,6 +193,7 @@ const OrderDetailsPage = ({params}: OrderDetailsProps) => {
                 buttonText="Continue Shopping"
                 onClick={() => router.push('/products/catalog')}
                 backgroundColor="accent"
+                fullWidth
               />
             </div>
           </div>

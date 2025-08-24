@@ -101,10 +101,7 @@ const OrdersPage = () => {
                 <div>
                   <p className="font-bold">Total: ${order.total.toFixed(2)}</p>
                   <p className="text-sm text-gray-600">
-                    Payment:{' '}
-                    {order.paymentMethod === 'credit_card'
-                      ? 'Credit Card'
-                      : order.paymentMethod}
+                    Payment: {order.paymentMethod}
                   </p>
                 </div>
                 <CustomButton

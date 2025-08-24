@@ -97,10 +97,7 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
         ),
       );
     } catch (error) {
-      notify({
-        type: 'error',
-        msg: 'Failed to update cart item quantity.',
-      });
+      console.error('Failed to update cart item quantity:', error);
     } finally {
       setCartIsLoading(false);
     }
