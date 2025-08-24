@@ -2,7 +2,7 @@
 import {zodResolver} from '@hookform/resolvers/zod';
 import {useForm} from 'react-hook-form';
 import * as z from 'zod';
-import axios from 'axios';
+import axios from '@/lib/axios';
 import {RegisterFormProps} from '@/interfaces/registerForm';
 import CustomButton from '../customButtton/customButton';
 import CustomInput from '../customInput';

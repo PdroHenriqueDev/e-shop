@@ -1,5 +1,11 @@
 'use client';
-import React, {createContext, useContext, ReactNode, useCallback} from 'react';
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useCallback,
+  useEffect,
+} from 'react';
 import {App} from 'antd';
 import {NoticeType} from 'antd/es/message/interface';
 
@@ -39,6 +45,22 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     },
     [message],
   );
+
+  useEffect(() => {
+    const handleAuthError = (event: CustomEvent) => {
+      const {message: errorMessage, type} = event.detail;
+      notify({type, msg: errorMessage});
+    };
+
+    window.addEventListener('auth-error', handleAuthError as EventListener);
+
+    return () => {
+      window.removeEventListener(
+        'auth-error',
+        handleAuthError as EventListener,
+      );
+    };
+  }, [notify]);
 
   return (
     <NotificationContext.Provider value={{notify}}>

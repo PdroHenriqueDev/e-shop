@@ -1,7 +1,7 @@
 'use client';
 
 import React, {createContext, useContext, useState, useCallback} from 'react';
-import axios from 'axios';
+import axios from '@/lib/axios';
 import {OrderProps} from '@/interfaces/order';
 import {useNotification} from './notificationContext';
 

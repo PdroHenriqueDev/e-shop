@@ -1,8 +1,14 @@
 'use client';
-import {createContext, useContext, useState, ReactNode} from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+} from 'react';
 import {CartItemProps, ProductProps} from '@/interfaces/product';
 import {useNotification} from './notificationContext';
-import axios from 'axios';
+import axios from '@/lib/axios';
 
 interface CartContextType {
   cartItems: CartItemProps[];
@@ -20,88 +26,96 @@ export const CartProvider = ({children}: {children: ReactNode}) => {
   const [cartIsLoading, setCartIsLoading] = useState(false);
   const {notify} = useNotification();
 
-  const addToCart = async (product: ProductProps) => {
-    setCartIsLoading(true);
-    try {
-      const response = await axios.post('/api/cart', {
-        productId: product.id,
-        quantity: 1,
-      });
+  const addToCart = useCallback(
+    async (product: ProductProps) => {
+      setCartIsLoading(true);
+      try {
+        const response = await axios.post('/api/cart', {
+          productId: product.id,
+          quantity: 1,
+        });
 
-      if (response.status === 201) {
-        const {items} = response.data;
-        setCartItems(items);
+        if (response.status === 201) {
+          const {items} = response.data;
+          setCartItems(items);
+
+          notify({
+            type: 'success',
+            msg: `${product.name} has been added to your cart!`,
+          });
+        }
+      } catch (error) {
+        notify({
+          type: 'error',
+          msg: `Failed to add ${product.name} to your cart.`,
+        });
+      } finally {
+        setCartIsLoading(false);
+      }
+    },
+    [notify],
+  );
+
+  const handleSetCartItems = useCallback((cartItems: CartItemProps[]) => {
+    setCartItems(cartItems);
+  }, []);
+
+  const removeFromCart = useCallback(
+    async (cartItem: CartItemProps) => {
+      setCartIsLoading(true);
+      try {
+        await axios.delete('/api/cart', {
+          data: {
+            cartId: cartItem.cartId,
+            productId: cartItem.productId,
+          },
+        });
+
+        setCartItems(prevItems =>
+          prevItems.filter(item => item.productId !== cartItem.productId),
+        );
 
         notify({
           type: 'success',
-          msg: `${product.name} has been added to your cart!`,
+          msg: `${cartItem.product.name} has been removed from your cart!`,
         });
+      } catch (error) {
+        notify({
+          type: 'error',
+          msg: `Failed to remove ${cartItem.product.name} from your cart.`,
+        });
+      } finally {
+        setCartIsLoading(false);
       }
-    } catch (error) {
-      notify({
-        type: 'error',
-        msg: `Failed to add ${product.name} to your cart.`,
-      });
-    } finally {
-      setCartIsLoading(false);
-    }
-  };
+    },
+    [notify],
+  );
 
-  const handleSetCartItems = (cartItems: CartItemProps[]) => {
-    setCartItems(cartItems);
-  };
+  const updateCartQuantity = useCallback(
+    async (productId: number, quantity: number) => {
+      try {
+        setCartIsLoading(true);
+        const response = await axios.put('/api/cart', {
+          productId,
+          quantity,
+        });
 
-  const removeFromCart = async (cartItem: CartItemProps) => {
-    setCartIsLoading(true);
-    try {
-      await axios.delete('/api/cart', {
-        data: {
-          cartId: cartItem.cartId,
-          productId: cartItem.productId,
-        },
-      });
-
-      setCartItems(prevCartItems =>
-        prevCartItems.filter(
-          item =>
-            item.cartId !== cartItem.cartId ||
-            item.productId !== cartItem.productId,
-        ),
-      );
-
-      notify({
-        type: 'success',
-        msg: 'Item has been removed from your cart!',
-      });
-    } catch (error) {
-      notify({
-        type: 'error',
-        msg: 'Failed to remove item from your cart.',
-      });
-    } finally {
-      setCartIsLoading(false);
-    }
-  };
-
-  const updateCartQuantity = async (productId: number, quantity: number) => {
-    try {
-      setCartIsLoading(true);
-      const response = await axios.put('/api/cart', {productId, quantity});
-      const updatedItem = response.data;
-
-      setCartItems(prevItems =>
-        prevItems.map(item =>
-          item.productId === updatedItem.productId
-            ? {...item, quantity: updatedItem.quantity}
-            : item,
-        ),
-      );
-    } catch (error) {
-      console.error('Failed to update cart item quantity:', error);
-    } finally {
-      setCartIsLoading(false);
-    }
-  };
+        const updatedItem = response.data;
+        setCartItems(prevItems =>
+          prevItems.map(item =>
+            item.productId === updatedItem.productId
+              ? {...item, quantity: updatedItem.quantity}
+              : item,
+          ),
+        );
+      } catch (error) {
+        console.error('Failed to update cart item quantity:', error);
+      } finally {
+        setCartIsLoading(false);
+      }
+    },
+    [],
+  );
 
   return (
     <CartContext.Provider

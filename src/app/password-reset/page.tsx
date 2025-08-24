@@ -7,7 +7,7 @@ import {useState} from 'react';
 import CustomInput from '@/components/customInput';
 import CustomButton from '@/components/customButtton/customButton';
 import {useNotification} from '@/contexts/notificationContext';
-import axios from 'axios';
+import axios from '@/lib/axios';
 
 const FormSchema = z.object({
   email: z.string().email({

@@ -13,7 +13,7 @@ import {useRouter} from 'next/navigation';
 import {MenuInfo} from 'rc-menu/lib/interface';
 import {MenuItemWithPathProps} from '@/interfaces/navBar';
 import {useCart} from '@/contexts/cartContext';
-import axios from 'axios';
+import axios from '@/lib/axios';
 import CartDrawer from './drawer/drawer';
 
 const items = [
@@ -81,7 +81,7 @@ export default function NavMenu() {
     };
 
     getItems();
-  }, [dataSession, handleSetCartItems]);
+  }, [dataSession?.user?.email, handleSetCartItems]);
 
   const handleAuthAction: MenuProps['onClick'] = async e => {
     e.key === '1' ? await signOut() : signIn();
