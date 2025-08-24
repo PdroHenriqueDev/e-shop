@@ -392,7 +392,6 @@ export default function Checkout() {
           )}
         </div>
 
-        {/* Order summary */}
         <div className="md:col-span-1">
           <div className="bg-primary p-6 rounded-lg shadow sticky top-4">
             <h2 className="text-xl font-bold mb-4">Order Summary</h2>
