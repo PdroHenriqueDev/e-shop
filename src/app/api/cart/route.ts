@@ -58,24 +58,35 @@ export async function POST(request: Request) {
     }
 
     // Now upsert the cart item with the correct cartId
-    await prisma.cartItem.upsert({
+    const existingCartItem = await prisma.cartItem.findUnique({
       where: {
         cartId_productId: {
           cartId: cart.id,
           productId,
         },
       },
-      update: {
-        quantity: {
-          increment: quantity,
-        },
-      },
-      create: {
-        cartId: cart.id,
-        productId,
-        quantity,
-      },
     });
+
+    if (existingCartItem) {
+      await prisma.cartItem.update({
+        where: {
+          id: existingCartItem.id,
+        },
+        data: {
+          quantity: {
+            increment: quantity,
+          },
+        },
+      });
+    } else {
+      await prisma.cartItem.create({
+        data: {
+          cartId: cart.id,
+          productId,
+          quantity,
+        },
+      });
+    }
 
     // Fetch the updated cart
     const updatedCart = await prisma.cart.findUnique({
