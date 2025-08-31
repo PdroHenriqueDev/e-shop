@@ -3,7 +3,7 @@ import {validateUserAccess} from '@/lib/adminMiddleware';
 import prisma from '@/lib/prisma';
 import {User} from '@prisma/client';
 import {auth} from '../../../../../auth';
-import {SessionUser} from '@/types/auth';
+import {SessionUser} from '@/interfaces/auth';
 
 export async function GET(
   request: Request,

@@ -1,7 +1,7 @@
 import {NextResponse} from 'next/server';
 import prisma from '@/lib/prisma';
 import {auth} from '../../../../auth';
-import {SessionUser} from '@/types/auth';
+import {SessionUser} from '@/interfaces/auth';
 
 const CART_INCLUDE = {
   items: {

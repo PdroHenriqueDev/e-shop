@@ -15,7 +15,7 @@ import {MenuInfo} from 'rc-menu/lib/interface';
 import {MenuItemWithPathProps} from '@/interfaces/navBar';
 import {useCart} from '@/contexts/cartContext';
 import axios from '@/lib/axios';
-import {SessionUser} from '@/types/auth';
+import {SessionUser} from '@/interfaces/auth';
 import CartDrawer from './drawer/drawer';
 
 const items = [

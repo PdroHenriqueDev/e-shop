@@ -1,4 +1,3 @@
-// Shared authentication types
 export interface SessionUser {
   id: string;
   name?: string | null;
@@ -7,7 +6,6 @@ export interface SessionUser {
   role?: string;
 }
 
-// Extend NextAuth module types
 declare module 'next-auth' {
   interface Session {
     user: SessionUser;

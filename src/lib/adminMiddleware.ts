@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {auth} from '../../auth';
 import prisma from '@/lib/prisma';
 import {User} from '@prisma/client';
-import {SessionUser} from '@/types/auth';
+import {SessionUser} from '@/interfaces/auth';
 
 export async function validateAdminAccess() {
   try {
