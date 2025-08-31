@@ -1,16 +1,15 @@
+import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import GitHub from 'next-auth/providers/github';
 import {UserProps} from '@/interfaces/user';
 import axios from 'axios';
-import {NextAuthOptions} from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import GithubProvider from 'next-auth/providers/github';
 import prisma from '@/lib/prisma';
 
-export const authOptions: NextAuthOptions = {
+export const {auth, handlers, signIn, signOut} = NextAuth({
   session: {
     strategy: 'jwt',
   },
   jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
@@ -62,7 +61,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    CredentialsProvider({
+    Credentials({
       name: 'Credentials',
       credentials: {
         email: {label: 'Email', type: 'text'},
@@ -94,9 +93,9 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
-    GithubProvider({
+    GitHub({
       clientId: process.env.GITHUB_ID ?? '',
       clientSecret: process.env.GITHUB_SECRET ?? '',
     }),
   ],
-};
+});

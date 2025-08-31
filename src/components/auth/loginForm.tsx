@@ -43,14 +43,17 @@ export default function LoginForm() {
     const {email, password} = user;
 
     const result = await signIn('credentials', {
-      callbackUrl: '/',
+      redirect: false,
       email,
       password,
     });
 
     setIsLoading(false);
 
-    if (!result?.error) return router.push('/login');
+    if (result?.ok) {
+      router.push('/');
+      return;
+    }
 
     notify({
       type: 'error',
