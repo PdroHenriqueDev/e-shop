@@ -1,18 +1,11 @@
 import {useState} from 'react';
-import {Drawer, List, Badge, Button, Divider} from 'antd';
+import {Drawer, List, Badge, Divider} from 'antd';
 import {ShoppingCartOutlined} from '@ant-design/icons';
 import {CartItemProps, ProductProps} from '@/interfaces/product';
 import CustomButton from '@/components/customButtton/customButton';
 import {useCart} from '@/contexts/cartContext';
 import {DeleteOutlined} from '@ant-design/icons';
 import {useRouter} from 'next/navigation';
-
-interface CartProps {
-  cart: CartItemProps[];
-  isLoading: boolean;
-  removeFromCart: (cartItem: CartItemProps) => void;
-  addToCart: (product: ProductProps) => void;
-}
 
 const CartDrawer = () => {
   const [isDrawerVisible, setDrawerVisible] = useState(false);

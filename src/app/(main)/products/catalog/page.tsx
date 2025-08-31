@@ -21,7 +21,6 @@ type FormData = z.infer<typeof FormSchema>;
 export default function ProductCatalog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const {notify} = useNotification();
   const {addToCart, cartIsLoading} = useCart();
 
@@ -44,10 +43,6 @@ export default function ProductCatalog() {
       type: 'info',
       msg: `Searching for: ${data.searchQuery || 'all products'}`,
     });
-  };
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
   };
 
   const handleAddToCart = (product: ProductProps) => {
@@ -125,10 +120,7 @@ export default function ProductCatalog() {
           <div className="flex justify-center mt-4">
             {['All', 'Clothing', 'Electronics', 'Accessories'].map(category => (
               <div key={category} className="mx-2">
-                <CustomButton
-                  buttonText={category}
-                  onClick={() => handleCategoryChange(category)}
-                />
+                <CustomButton buttonText={category} onClick={() => {}} />
               </div>
             ))}
           </div>

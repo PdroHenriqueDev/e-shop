@@ -18,7 +18,7 @@ export const {auth, handlers, signIn, signOut} = NextAuth({
     signOut: '/login',
   },
   callbacks: {
-    async signIn({user, account, profile}) {
+    async signIn({user, account, profile: _profile}) {
       if (account?.provider === 'github') {
         try {
           const existingUser = await prisma.user.findUnique({
@@ -67,7 +67,7 @@ export const {auth, handlers, signIn, signOut} = NextAuth({
         email: {label: 'Email', type: 'text'},
         password: {label: 'Password', type: 'password'},
       },
-      async authorize(credentials, req) {
+      async authorize(credentials, _req) {
         const {email, password} = credentials as UserProps;
         if (!email || !password) {
           return null;

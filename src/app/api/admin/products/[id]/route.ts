@@ -3,7 +3,7 @@ import {validateAdminAccess} from '@/lib/adminMiddleware';
 import prisma from '@/lib/prisma';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   {params}: {params: Promise<{id: string}>},
 ) {
   const authResult = await validateAdminAccess();
@@ -104,7 +104,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   {params}: {params: Promise<{id: string}>},
 ) {
   const authResult = await validateAdminAccess();

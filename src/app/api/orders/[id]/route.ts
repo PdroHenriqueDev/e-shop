@@ -1,12 +1,10 @@
-import {NextRequest, NextResponse} from 'next/server';
-import {validateUserAccess} from '@/lib/adminMiddleware';
+import {NextResponse} from 'next/server';
 import prisma from '@/lib/prisma';
-import {User} from '@prisma/client';
 import {auth} from '../../../../../auth';
 import {SessionUser} from '@/interfaces/auth';
 
 export async function GET(
-  request: Request,
+  _request: Request,
   {params}: {params: Promise<{id: string}>},
 ) {
   try {
