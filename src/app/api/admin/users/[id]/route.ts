@@ -2,17 +2,63 @@ import {NextRequest, NextResponse} from 'next/server';
 import {validateAdminAccess} from '@/lib/adminMiddleware';
 import prisma from '@/lib/prisma';
 
-export async function PUT(
+// GET: Retrieve a specific user
+export async function GET(
   request: NextRequest,
-  {params}: {params: {id: string}},
+  {params}: {params: Promise<{id: string}>},
 ) {
   const authResult = await validateAdminAccess();
-  if (authResult) {
-    return authResult;
+  if (authResult.error) {
+    return authResult.error;
   }
 
   try {
-    const userId = parseInt(params.id);
+    const resolvedParams = await params;
+    const userId = parseInt(resolvedParams.id);
+    if (isNaN(userId)) {
+      return NextResponse.json({error: 'Invalid user ID'}, {status: 400});
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {id: userId},
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        _count: {
+          select: {
+            orders: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return NextResponse.json({error: 'User not found'}, {status: 404});
+    }
+
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+    return NextResponse.json({error: 'Failed to fetch user'}, {status: 500});
+  }
+}
+
+// PUT: Update a specific user
+export async function PUT(
+  request: NextRequest,
+  {params}: {params: Promise<{id: string}>},
+) {
+  const authResult = await validateAdminAccess();
+  if (authResult.error) {
+    return authResult.error;
+  }
+
+  try {
+    const resolvedParams = await params;
+    const userId = parseInt(resolvedParams.id);
     if (isNaN(userId)) {
       return NextResponse.json({error: 'Invalid user ID'}, {status: 400});
     }
@@ -79,17 +125,19 @@ export async function PUT(
   }
 }
 
+// DELETE: Delete a specific user
 export async function DELETE(
   request: NextRequest,
-  {params}: {params: {id: string}},
+  {params}: {params: Promise<{id: string}>},
 ) {
   const authResult = await validateAdminAccess();
-  if (authResult) {
-    return authResult;
+  if (authResult.error) {
+    return authResult.error;
   }
 
   try {
-    const userId = parseInt(params.id);
+    const resolvedParams = await params;
+    const userId = parseInt(resolvedParams.id);
     if (isNaN(userId)) {
       return NextResponse.json({error: 'Invalid user ID'}, {status: 400});
     }
