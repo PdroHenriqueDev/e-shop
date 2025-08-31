@@ -3,6 +3,7 @@ import {validateUserAccess} from '@/lib/adminMiddleware';
 import prisma from '@/lib/prisma';
 import {User} from '@prisma/client';
 import {auth} from '../../../../../auth';
+import {SessionUser} from '@/types/auth';
 
 export async function GET(
   request: Request,
@@ -15,7 +16,7 @@ export async function GET(
       return NextResponse.json({error: 'Not authenticated'}, {status: 401});
     }
 
-    const {id} = session.user as any;
+    const {id} = session.user as SessionUser;
     const userId = Number(id);
     const resolvedParams = await params;
     const orderId = parseInt(resolvedParams.id);

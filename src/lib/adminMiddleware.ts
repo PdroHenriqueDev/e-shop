@@ -2,6 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {auth} from '../../auth';
 import prisma from '@/lib/prisma';
 import {User} from '@prisma/client';
+import {SessionUser} from '@/types/auth';
 
 export async function validateAdminAccess() {
   try {
@@ -16,7 +17,7 @@ export async function validateAdminAccess() {
       };
     }
 
-    const userId = Number((session.user as any).id);
+    const userId = Number((session.user as SessionUser).id);
 
     const user = await prisma.user.findUnique({
       where: {id: userId},
@@ -59,7 +60,7 @@ export async function validateUserAccess() {
       };
     }
 
-    const userId = Number((session.user as any).id);
+    const userId = Number((session.user as SessionUser).id);
 
     const user = await prisma.user.findUnique({
       where: {id: userId},

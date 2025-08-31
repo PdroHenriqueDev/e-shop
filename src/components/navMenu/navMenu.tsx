@@ -15,6 +15,7 @@ import {MenuInfo} from 'rc-menu/lib/interface';
 import {MenuItemWithPathProps} from '@/interfaces/navBar';
 import {useCart} from '@/contexts/cartContext';
 import axios from '@/lib/axios';
+import {SessionUser} from '@/types/auth';
 import CartDrawer from './drawer/drawer';
 
 const items = [
@@ -108,7 +109,7 @@ export default function NavMenu() {
       onClick: () => router.push('/admin'),
       style: {
         display:
-          dataSession && (dataSession.user as any)?.role === 'admin'
+          dataSession && (dataSession.user as SessionUser)?.role === 'admin'
             ? 'block'
             : 'none',
       },

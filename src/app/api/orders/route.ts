@@ -3,6 +3,7 @@ import {validateUserAccess} from '@/lib/adminMiddleware';
 import prisma from '@/lib/prisma';
 import {User} from '@prisma/client';
 import {auth} from '../../../../auth';
+import {SessionUser} from '@/types/auth';
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json({error: 'Not authenticated'}, {status: 401});
     }
 
-    const {id} = session.user as any;
+    const {id} = session.user as SessionUser;
     const userId = Number(id);
 
     const {shippingAddress, paymentMethod, total} = await request.json();
@@ -89,7 +90,7 @@ export async function GET() {
       return NextResponse.json({error: 'Not authenticated'}, {status: 401});
     }
 
-    const {id} = session.user as any;
+    const {id} = session.user as SessionUser;
     const userId = Number(id);
 
     const orders = await prisma.order.findMany({
