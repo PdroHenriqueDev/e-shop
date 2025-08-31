@@ -5,8 +5,8 @@ import {validateAdminAccess} from '@/lib/adminMiddleware';
 
 export async function GET() {
   const authResult = await validateAdminAccess();
-  if (authResult) {
-    return authResult;
+  if (authResult.error) {
+    return authResult.error;
   }
 
   try {
@@ -36,8 +36,8 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const authResult = await validateAdminAccess();
-  if (authResult) {
-    return authResult;
+  if (authResult.error) {
+    return authResult.error;
   }
 
   try {

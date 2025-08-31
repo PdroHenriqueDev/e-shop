@@ -4,8 +4,8 @@ import prisma from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   const authResult = await validateAdminAccess();
-  if (authResult) {
-    return authResult;
+  if (authResult.error) {
+    return authResult.error;
   }
 
   try {

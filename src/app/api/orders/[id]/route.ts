@@ -4,7 +4,10 @@ import {User} from '@prisma/client';
 import {getServerSession} from 'next-auth';
 import {authOptions} from '../../auth/[...nextauth]/authOptions';
 
-export async function GET(request: Request, {params}: {params: {id: string}}) {
+export async function GET(
+  request: Request,
+  {params}: {params: Promise<{id: string}>},
+) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -14,7 +17,8 @@ export async function GET(request: Request, {params}: {params: {id: string}}) {
 
     const {id} = session.user as User;
     const userId = Number(id);
-    const orderId = parseInt(params.id);
+    const resolvedParams = await params;
+    const orderId = parseInt(resolvedParams.id);
 
     if (isNaN(orderId)) {
       return NextResponse.json({error: 'Invalid order ID'}, {status: 400});

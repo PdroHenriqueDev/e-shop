@@ -4,15 +4,16 @@ import prisma from '@/lib/prisma';
 
 export async function PUT(
   request: NextRequest,
-  {params}: {params: {id: string}},
+  {params}: {params: Promise<{id: string}>},
 ) {
   const authResult = await validateAdminAccess();
-  if (authResult) {
-    return authResult;
+  if (authResult.error) {
+    return authResult.error;
   }
 
   try {
-    const orderId = parseInt(params.id);
+    const resolvedParams = await params;
+    const orderId = parseInt(resolvedParams.id);
     if (isNaN(orderId)) {
       return NextResponse.json({error: 'Invalid order ID'}, {status: 400});
     }

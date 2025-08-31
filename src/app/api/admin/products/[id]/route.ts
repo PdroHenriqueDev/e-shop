@@ -2,17 +2,53 @@ import {NextRequest, NextResponse} from 'next/server';
 import {validateAdminAccess} from '@/lib/adminMiddleware';
 import prisma from '@/lib/prisma';
 
-export async function PUT(
+// GET: Retrieve a specific product
+export async function GET(
   request: NextRequest,
-  {params}: {params: {id: string}},
+  {params}: {params: Promise<{id: string}>},
 ) {
   const authResult = await validateAdminAccess();
-  if (authResult) {
-    return authResult;
+  if (authResult.error) {
+    return authResult.error;
   }
 
   try {
-    const productId = parseInt(params.id);
+    const resolvedParams = await params;
+    const productId = parseInt(resolvedParams.id);
+    if (isNaN(productId)) {
+      return NextResponse.json({error: 'Invalid product ID'}, {status: 400});
+    }
+
+    const product = await prisma.product.findUnique({
+      where: {id: productId},
+      include: {
+        category: true,
+      },
+    });
+
+    if (!product) {
+      return NextResponse.json({error: 'Product not found'}, {status: 404});
+    }
+
+    return NextResponse.json(product);
+  } catch (error) {
+    console.error('Failed to fetch product:', error);
+    return NextResponse.json({error: 'Failed to fetch product'}, {status: 500});
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  {params}: {params: Promise<{id: string}>},
+) {
+  const authResult = await validateAdminAccess();
+  if (authResult.error) {
+    return authResult.error;
+  }
+
+  try {
+    const resolvedParams = await params;
+    const productId = parseInt(resolvedParams.id);
     if (isNaN(productId)) {
       return NextResponse.json({error: 'Invalid product ID'}, {status: 400});
     }
@@ -70,15 +106,16 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  {params}: {params: {id: string}},
+  {params}: {params: Promise<{id: string}>},
 ) {
   const authResult = await validateAdminAccess();
-  if (authResult) {
-    return authResult;
+  if (authResult.error) {
+    return authResult.error;
   }
 
   try {
-    const productId = parseInt(params.id);
+    const resolvedParams = await params;
+    const productId = parseInt(resolvedParams.id);
     if (isNaN(productId)) {
       return NextResponse.json({error: 'Invalid product ID'}, {status: 400});
     }

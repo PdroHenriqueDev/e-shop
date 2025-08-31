@@ -8,20 +8,29 @@ import CustomButton from '@/components/customButtton/customButton';
 import Image from 'next/image';
 
 interface OrderDetailsProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 const OrderDetailsPage = ({params}: OrderDetailsProps) => {
   const {currentOrder, orderIsLoading, fetchOrderById} = useOrder();
   const router = useRouter();
-  const orderId = parseInt(params.id);
+  const [orderId, setOrderId] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    const getParams = async () => {
+      const resolvedParams = await params;
+      const id = parseInt(resolvedParams.id);
+      setOrderId(id);
+    };
+    getParams();
+  }, [params]);
 
   useEffect(() => {
-    if (!isNaN(orderId)) {
+    if (orderId !== null && !isNaN(orderId)) {
       fetchOrderById(orderId);
-    } else {
+    } else if (orderId !== null) {
       router.push('/orders');
     }
   }, [orderId, fetchOrderById, router]);

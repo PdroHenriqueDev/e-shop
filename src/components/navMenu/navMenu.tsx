@@ -82,7 +82,7 @@ export default function NavMenu() {
     };
 
     getItems();
-  }, [dataSession?.user?.email, handleSetCartItems]);
+  }, [dataSession?.user, handleSetCartItems]);
 
   const handleAuthAction: MenuProps['onClick'] = async e => {
     e.key === '1' ? await signOut() : signIn();
