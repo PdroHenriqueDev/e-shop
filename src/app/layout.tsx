@@ -19,15 +19,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <NextAuthProvider>
-        <body className={`${inter.className} bg-priamry`}>
+      <body className={`${inter.className} bg-priamry`}>
+        <NextAuthProvider>
           <AntdRegistry>
             <App>
               <NotificationProvider>{children}</NotificationProvider>
             </App>
           </AntdRegistry>
-        </body>
-      </NextAuthProvider>
+        </NextAuthProvider>
+      </body>
     </html>
   );
 }

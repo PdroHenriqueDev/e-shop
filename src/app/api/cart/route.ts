@@ -1,8 +1,7 @@
 import {NextResponse} from 'next/server';
 import prisma from '@/lib/prisma';
-import {User} from '@prisma/client';
-import {getServerSession} from 'next-auth';
-import {authOptions} from '../auth/[...nextauth]/authOptions';
+import {auth} from '../../../../auth';
+import {SessionUser} from '@/interfaces/auth';
 
 const CART_INCLUDE = {
   items: {
@@ -13,13 +12,13 @@ const CART_INCLUDE = {
 };
 
 async function authenticate() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   if (!session?.user) {
     return {
       error: NextResponse.json({error: 'Not authenticated'}, {status: 401}),
     };
   }
-  return {userId: Number((session.user as User).id)};
+  return {userId: Number((session.user as SessionUser).id)};
 }
 
 async function findOrCreateCart(userId: number) {

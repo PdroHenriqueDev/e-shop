@@ -1,7 +1,7 @@
-import {NextRequest, NextResponse} from 'next/server';
+import {NextResponse} from 'next/server';
 import {validateAdminAccess} from '@/lib/adminMiddleware';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const result = await validateAdminAccess();
 
   if (result.error) {

@@ -1,11 +1,12 @@
 'use client';
 import CustomButton from '@/components/customButtton/customButton';
 import {Card, Col, Row, Pagination} from 'antd';
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import Image from 'next/image';
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import z from 'zod';
+import axios from 'axios';
 import CustomInput from '@/components/customInput';
 import {useNotification} from '@/contexts/notificationContext';
 import {useCart} from '@/contexts/cartContext';
@@ -20,7 +21,6 @@ type FormData = z.infer<typeof FormSchema>;
 export default function ProductCatalog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const {notify} = useNotification();
   const {addToCart, cartIsLoading} = useCart();
 
@@ -45,52 +45,29 @@ export default function ProductCatalog() {
     });
   };
 
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-  };
-
   const handleAddToCart = (product: ProductProps) => {
     addToCart(product);
   };
 
-  const products: ProductProps[] = [
-    {
-      id: 1,
-      name: 'Product 1',
-      price: 199.9,
-      image: '',
-      imageUrl:
-        'https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      name: 'Product 2',
-      price: 299.9,
-      image: '',
-      imageUrl:
-        'https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 3,
-      name: 'Product 3',
-      price: 399.9,
-      image: '',
-      imageUrl:
-        'https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 4,
-      name: 'Product 4',
-      price: 499.9,
-      image: '',
-      imageUrl:
-        'https://plus.unsplash.com/premium_photo-1681488262364-8aeb1b6aac56?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      createdAt: new Date().toISOString(),
-    },
-  ];
+  const [products, setProducts] = useState<ProductProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('/api/products');
+        const {data} = response;
+        setProducts(data);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+        notify({type: 'error', msg: 'Failed to load products'});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [notify]);
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -101,6 +78,21 @@ export default function ProductCatalog() {
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
+
+  if (isLoading) {
+    return (
+      <div>
+        <Row className="mb-8 py-12 text-center bg-secondary">
+          <Col span={24}>
+            <h1 className="text-4xl font-bold">Product Catalog</h1>
+            <div className="flex justify-center items-center h-64">
+              <div className="text-lg">Loading products...</div>
+            </div>
+          </Col>
+        </Row>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -128,21 +120,16 @@ export default function ProductCatalog() {
           <div className="flex justify-center mt-4">
             {['All', 'Clothing', 'Electronics', 'Accessories'].map(category => (
               <div key={category} className="mx-2">
-                <CustomButton
-                  buttonText={category}
-                  onClick={() => handleCategoryChange(category)}
-                />
+                <CustomButton buttonText={category} onClick={() => {}} />
               </div>
             ))}
           </div>
         </Col>
       </Row>
 
-      <Row
-        gutter={[16, 16]}
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
+      <Row gutter={[16, 16]}>
         {paginatedProducts.map(product => (
-          <Col key={product.id}>
+          <Col key={product.id} xs={24} sm={12} md={8} lg={6} className="mb-4">
             <Card
               hoverable
               cover={
@@ -156,16 +143,20 @@ export default function ProductCatalog() {
                   />
                 </div>
               }
-              className="p-4 shadow">
-              <h3 className="mt-4 text-xl">{product.name}</h3>
-              <p className="mt-2 text-accent">${product.price}</p>
-              <div className="mt-4">
-                <CustomButton
-                  buttonText={'Add to Cart'}
-                  onClick={() => handleAddToCart(product)}
-                  disabled={cartIsLoading}
-                  backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
-                />
+              className="shadow h-80 w-full flex flex-col">
+              <div className="p-4 flex flex-col h-full">
+                <h3 className="text-base h-12 leading-4 line-clamp-2">
+                  {product.name}
+                </h3>
+                <p className="mt-2 text-accent">${product.price}</p>
+                <div className="mt-auto">
+                  <CustomButton
+                    buttonText={'Add to Cart'}
+                    onClick={() => handleAddToCart(product)}
+                    disabled={cartIsLoading}
+                    backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
+                  />
+                </div>
               </div>
             </Card>
           </Col>

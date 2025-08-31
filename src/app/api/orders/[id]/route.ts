@@ -1,21 +1,20 @@
 import {NextResponse} from 'next/server';
 import prisma from '@/lib/prisma';
-import {User} from '@prisma/client';
-import {getServerSession} from 'next-auth';
-import {authOptions} from '../../auth/[...nextauth]/authOptions';
+import {auth} from '../../../../../auth';
+import {SessionUser} from '@/interfaces/auth';
 
 export async function GET(
-  request: Request,
+  _request: Request,
   {params}: {params: Promise<{id: string}>},
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session || !session.user) {
       return NextResponse.json({error: 'Not authenticated'}, {status: 401});
     }
 
-    const {id} = session.user as User;
+    const {id} = session.user as SessionUser;
     const userId = Number(id);
     const resolvedParams = await params;
     const orderId = parseInt(resolvedParams.id);

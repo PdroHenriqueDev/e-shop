@@ -1,9 +1,8 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {useOrder} from '@/contexts/orderContext';
 import {useRouter} from 'next/navigation';
-import {OrderProps} from '@/interfaces/order';
 import Loading from '@/components/loading/loading';
 import CustomButton from '@/components/customButtton/customButton';
 

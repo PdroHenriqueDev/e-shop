@@ -51,11 +51,15 @@ export default function CategoryPage() {
           <Loading />
         </div>
       ) : (
-        <Row
-          gutter={[16, 16]}
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <Row gutter={[16, 16]}>
           {products.map(product => (
-            <Col key={product.id}>
+            <Col
+              key={product.id}
+              xs={24}
+              sm={12}
+              md={8}
+              lg={6}
+              className="mb-4">
               <Card
                 hoverable
                 cover={
@@ -71,16 +75,20 @@ export default function CategoryPage() {
                     />
                   </div>
                 }
-                className="bg-primary p-4 shadow">
-                <h3 className="mt-4 text-xl">{product.name}</h3>
-                <p className="mt-2 text-gray-700">
-                  ${product.price.toFixed(2)}
-                </p>
-                <div className="mt-4">
-                  <CustomButton
-                    buttonText={'Add to Cart'}
-                    onClick={() => handleAddToCart(product)}
-                  />
+                className="bg-primary shadow h-80 w-full flex flex-col">
+                <div className="p-4 flex flex-col h-full">
+                  <h3 className="text-base h-12 leading-4 line-clamp-2">
+                    {product.name}
+                  </h3>
+                  <p className="mt-2 text-gray-700">
+                    ${product.price.toFixed(2)}
+                  </p>
+                  <div className="mt-auto">
+                    <CustomButton
+                      buttonText={'Add to Cart'}
+                      onClick={() => handleAddToCart(product)}
+                    />
+                  </div>
                 </div>
               </Card>
             </Col>
