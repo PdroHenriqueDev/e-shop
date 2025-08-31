@@ -15,14 +15,12 @@ export async function POST(request: Request) {
     const {id} = session.user as User;
     const userId = Number(id);
 
-    // Get request body
     const {shippingAddress, paymentMethod, total} = await request.json();
 
     if (!shippingAddress || !paymentMethod || !total) {
       return NextResponse.json({error: 'Invalid input'}, {status: 400});
     }
 
-    // Get user's cart
     const cart = await prisma.cart.findUnique({
       where: {userId},
       include: {
@@ -41,9 +39,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create order and order items in a transaction
     const order = await prisma.$transaction(async tx => {
-      // Create the order
       const newOrder = await tx.order.create({
         data: {
           userId,

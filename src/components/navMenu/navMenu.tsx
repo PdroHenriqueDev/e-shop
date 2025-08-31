@@ -7,6 +7,7 @@ import {
   AppstoreOutlined,
   UserOutlined,
   ShoppingCartOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import {signOut, signIn, useSession} from 'next-auth/react';
 import {useRouter} from 'next/navigation';
@@ -99,6 +100,18 @@ export default function NavMenu() {
       key: 'orders',
       onClick: () => router.push('/orders'),
       style: {display: dataSession ? 'block' : 'none'},
+    },
+    {
+      label: 'Admin Panel',
+      key: 'admin',
+      icon: <SettingOutlined />,
+      onClick: () => router.push('/admin'),
+      style: {
+        display:
+          dataSession && (dataSession.user as any)?.role === 'admin'
+            ? 'block'
+            : 'none',
+      },
     },
     {
       label: 'Log Out',
