@@ -1,4 +1,4 @@
-// NextAuth session user type with custom properties
+// Shared authentication types
 export interface SessionUser {
   id: string;
   name?: string | null;
@@ -15,6 +15,9 @@ declare module 'next-auth' {
 
   interface User {
     id: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
     role?: string;
   }
 }
