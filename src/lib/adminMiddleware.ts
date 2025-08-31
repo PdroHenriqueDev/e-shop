@@ -1,12 +1,11 @@
-import {NextResponse} from 'next/server';
-import {getServerSession} from 'next-auth';
-import {authOptions} from '@/app/api/auth/[...nextauth]/authOptions';
+import {NextRequest, NextResponse} from 'next/server';
+import {auth} from '../../auth';
 import prisma from '@/lib/prisma';
 import {User} from '@prisma/client';
 
 export async function validateAdminAccess() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return {
@@ -17,7 +16,7 @@ export async function validateAdminAccess() {
       };
     }
 
-    const userId = Number((session.user as User).id);
+    const userId = Number((session.user as any).id);
 
     const user = await prisma.user.findUnique({
       where: {id: userId},
@@ -49,7 +48,7 @@ export async function validateAdminAccess() {
 
 export async function validateUserAccess() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user) {
       return {
@@ -60,7 +59,7 @@ export async function validateUserAccess() {
       };
     }
 
-    const userId = Number((session.user as User).id);
+    const userId = Number((session.user as any).id);
 
     const user = await prisma.user.findUnique({
       where: {id: userId},

@@ -2,7 +2,6 @@ import {NextRequest, NextResponse} from 'next/server';
 import {validateAdminAccess} from '@/lib/adminMiddleware';
 import prisma from '@/lib/prisma';
 
-// GET: Retrieve a specific user
 export async function GET(
   request: NextRequest,
   {params}: {params: Promise<{id: string}>},
@@ -46,7 +45,6 @@ export async function GET(
   }
 }
 
-// PUT: Update a specific user
 export async function PUT(
   request: NextRequest,
   {params}: {params: Promise<{id: string}>},
@@ -125,7 +123,6 @@ export async function PUT(
   }
 }
 
-// DELETE: Delete a specific user
 export async function DELETE(
   request: NextRequest,
   {params}: {params: Promise<{id: string}>},
