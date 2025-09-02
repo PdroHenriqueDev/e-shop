@@ -46,7 +46,7 @@ export async function POST(request: Request) {
           shippingAddress,
           paymentMethod,
           status: 'pending',
-          paymentStatus: 'pending',
+          paymentStatus: 'PENDING',
           items: {
             create: cart.items.map(item => ({
               productId: item.productId,

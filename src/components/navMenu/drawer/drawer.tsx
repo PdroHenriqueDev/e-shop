@@ -143,7 +143,7 @@ const CartDrawer = () => {
               buttonText="Browse Products"
               onClick={() => {
                 closeDrawer();
-                router.push('/products/catalog');
+                router.push('/');
               }}
             />
           </div>

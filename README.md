@@ -16,9 +16,27 @@ E-Shop is an e-commerce portfolio developed with Next.js.
 - [x] Product details page
 - [x] Checkout
 - [x] Admin dashboard
-- [ ] Payment system integration
+- [x] Payment system integration (Stripe)
 - [ ] Unit tests
 - [ ] Automated tests
+
+## Payment Flow
+
+The application integrates with Stripe for secure payment processing:
+
+1. **Checkout Process**: Users add items to cart and proceed to checkout
+2. **Order Creation**: Order is created in the database with pending status
+3. **Stripe Session**: Checkout session is created via `/api/stripe/create-checkout-session`
+4. **Payment Processing**: User is redirected to Stripe's secure payment page
+5. **Webhook Handling**: Stripe webhooks update order status via `/api/stripe/webhooks`
+6. **Payment Verification**: Session verification through `/api/stripe/verify-session`
+7. **Order Completion**: Successful payments update order status to 'paid' and 'confirmed'
+
+### Supported Payment Events
+- `checkout.session.completed` - Order marked as paid
+- `payment_intent.succeeded` - Payment confirmation
+- `payment_intent.payment_failed` - Payment failure handling
+- `checkout.session.expired` - Session timeout handling
 
 ## How to Start the Project
 

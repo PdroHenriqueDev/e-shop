@@ -200,7 +200,7 @@ const OrderDetailsPage = ({params}: OrderDetailsProps) => {
             <div className="mt-6">
               <CustomButton
                 buttonText="Continue Shopping"
-                onClick={() => router.push('/products/catalog')}
+                onClick={() => router.push('/')}
                 backgroundColor="accent"
               />
             </div>

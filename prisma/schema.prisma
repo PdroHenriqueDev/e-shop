@@ -73,18 +73,27 @@ model CartItem {
   @@map("cart_items")
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
 model Order {
-  id            Int         @id @default(autoincrement())
-  userId        Int         @map(name: "user_id")
-  user          User        @relation(fields: [userId], references: [id])
-  items         OrderItem[]
-  status        String      @default("pending") @db.VarChar(50)
-  total         Float
-  shippingAddress String?    @map(name: "shipping_address") @db.Text
-  paymentMethod String?     @map(name: "payment_method") @db.VarChar(50)
-  paymentStatus String      @default("pending") @map(name: "payment_status") @db.VarChar(50)
-  createdAt     DateTime    @default(now()) @map(name: "created_at")
-  updatedAt     DateTime?   @updatedAt @map(name: "updated_at")
+  id              Int           @id @default(autoincrement())
+  userId          Int           @map(name: "user_id")
+  user            User          @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+  status          String        @default("pending") @db.VarChar(50)
+  total           Float
+  shippingAddress String?       @map(name: "shipping_address") @db.Text
+  paymentMethod   String?       @map(name: "payment_method") @db.VarChar(50)
+  paymentStatus   PaymentStatus @default(PENDING) @map(name: "payment_status")
+  stripeSessionId String?       @unique @map(name: "stripe_session_id") @db.VarChar(255)
+  paymentIntentId String?       @unique @map(name: "payment_intent_id") @db.VarChar(255)
+  createdAt       DateTime      @default(now()) @map(name: "created_at")
+  updatedAt       DateTime?     @updatedAt @map(name: "updated_at")
 
   @@map("orders")
 }

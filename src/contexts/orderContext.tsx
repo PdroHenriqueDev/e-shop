@@ -16,6 +16,13 @@ interface OrderContextType {
   ) => Promise<OrderProps | null>;
   fetchOrders: () => Promise<void>;
   fetchOrderById: (id: number) => Promise<void>;
+  updateOrderPaymentStatus: (
+    orderId: number,
+    paymentStatus: string,
+    stripeSessionId?: string,
+    paymentIntentId?: string,
+  ) => Promise<void>;
+  verifyStripePayment: (sessionId: string) => Promise<OrderProps | null>;
 }
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
@@ -87,6 +94,77 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
     [notify],
   );
 
+  const updateOrderPaymentStatus = useCallback(
+    async (
+      orderId: number,
+      paymentStatus: string,
+      stripeSessionId?: string,
+      paymentIntentId?: string,
+    ): Promise<void> => {
+      try {
+        const response = await axios.patch(`/api/orders/${orderId}`, {
+          paymentStatus,
+          stripeSessionId,
+          paymentIntentId,
+        });
+
+        if (currentOrder && currentOrder.id === orderId) {
+          setCurrentOrder(response.data);
+        }
+
+        setOrders(prevOrders =>
+          prevOrders.map(order =>
+            order.id === orderId ? response.data : order,
+          ),
+        );
+
+        notify({
+          type: 'success',
+          msg: 'Order payment status updated successfully!',
+        });
+      } catch (error) {
+        console.error('Error updating order payment status:', error);
+        notify({
+          type: 'error',
+          msg: 'Failed to update payment status',
+        });
+      }
+    },
+    [currentOrder, notify],
+  );
+
+  const verifyStripePayment = useCallback(
+    async (sessionId: string): Promise<OrderProps | null> => {
+      setOrderIsLoading(true);
+      try {
+        const response = await axios.post('/api/stripe/verify-session', {
+          sessionId,
+        });
+
+        const order = response.data.order;
+        setCurrentOrder(order);
+
+        setOrders(prevOrders =>
+          prevOrders.map(existingOrder =>
+            existingOrder.id === order.id ? order : existingOrder,
+          ),
+        );
+
+        return order;
+      } catch (error) {
+        console.error('Error verifying Stripe payment:', error);
+        notify({
+          type: 'error',
+          msg: 'Failed to verify payment status',
+        });
+        return null;
+      } finally {
+        setOrderIsLoading(false);
+      }
+    },
+    [notify],
+  );
+
   return (
     <OrderContext.Provider
       value={{
@@ -96,6 +174,8 @@ export const OrderProvider: React.FC<{children: React.ReactNode}> = ({
         placeOrder,
         fetchOrders,
         fetchOrderById,
+        updateOrderPaymentStatus,
+        verifyStripePayment,
       }}>
       {children}
     </OrderContext.Provider>

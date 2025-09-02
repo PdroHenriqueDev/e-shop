@@ -19,6 +19,8 @@ export interface OrderProps {
   shippingAddress: string;
   paymentMethod: string;
   paymentStatus: string;
+  stripeSessionId?: string;
+  paymentIntentId?: string;
   items: OrderItemProps[];
   createdAt: Date;
   updatedAt: Date;
