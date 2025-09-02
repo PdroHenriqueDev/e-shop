@@ -60,24 +60,41 @@ export default function Checkout() {
 
       const order = await placeOrder(
         formattedAddress,
-        paymentMethod,
-        orderTotal,
+        'stripe',
+        orderTotal + orderTotal * 0.1,
       );
 
       if (order) {
-        notify({
-          type: 'success',
-          msg: 'Order placed successfully!',
+        const response = await fetch('/api/stripe/create-checkout-session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderId: order.id,
+            successUrl: `${window.location.origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${window.location.origin}/checkout/cancel`,
+          }),
         });
 
-        handleSetCartItems([]);
+        const data = await response.json();
 
-        router.push(`/orders/${order.id}`);
+        if (response.ok && data.url) {
+          handleSetCartItems([]);
+
+          window.location.href = data.url;
+        } else {
+          throw new Error(data.error || 'Failed to create checkout session');
+        }
       }
     } catch (error) {
+      console.error('Checkout error:', error);
       notify({
         type: 'error',
-        msg: 'Failed to place order. Please try again.',
+        msg:
+          error instanceof Error
+            ? error.message
+            : 'Failed to process payment. Please try again.',
       });
     } finally {
       setIsSubmitting(false);
@@ -108,7 +125,7 @@ export default function Checkout() {
           <p className="text-xl mb-4">Your cart is empty</p>
           <CustomButton
             buttonText="Continue Shopping"
-            onClick={() => router.push('/products/catalog')}
+            onClick={() => router.push('/')}
           />
         </div>
       </div>
@@ -268,47 +285,32 @@ export default function Checkout() {
                 </div>
 
                 {paymentMethod === 'credit_card' && (
-                  <div className="mt-4 p-4 border rounded bg-gray-50">
-                    <p className="text-sm text-gray-500 mb-2">
-                      This is a demo application. No actual payment will be
-                      processed.
+                  <div className="mt-4 p-4 border rounded bg-blue-50">
+                    <div className="flex items-center mb-3">
+                      <svg
+                        className="w-6 h-6 text-blue-600 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <span className="font-medium text-blue-800">
+                        Secure Payment with Stripe
+                      </span>
+                    </div>
+                    <p className="text-sm text-blue-700 mb-2">
+                      You will be redirected to Stripe's secure checkout page to
+                      complete your payment.
                     </p>
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium mb-1">
-                        Card Number
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="4242 4242 4242 4242"
-                        className="w-full p-2 border rounded"
-                        disabled
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          Expiration Date
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="MM/YY"
-                          className="w-full p-2 border rounded"
-                          disabled
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-1">
-                          CVC
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="123"
-                          className="w-full p-2 border rounded"
-                          disabled
-                        />
-                      </div>
-                    </div>
+                    <p className="text-xs text-blue-600">
+                      Stripe supports all major credit cards and ensures your
+                      payment information is secure.
+                    </p>
                   </div>
                 )}
 
@@ -350,7 +352,7 @@ export default function Checkout() {
 
               <div className="mb-6">
                 <h3 className="font-bold mb-2">Payment Method</h3>
-                <p>Credit Card</p>
+                <p>Stripe Checkout (Credit Card)</p>
               </div>
 
               <div className="mb-6">
