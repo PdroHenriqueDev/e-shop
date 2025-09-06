@@ -2,9 +2,6 @@
 
 import React, {useEffect, useState} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
-import {CheckCircleOutlined} from '@ant-design/icons';
-import axios from '@/lib/axios';
-import {useCart} from '@/contexts/cartContext';
 import {useNotification} from '@/contexts/notificationContext';
 import PageContainer, {
   ErrorState,
