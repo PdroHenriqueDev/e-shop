@@ -44,18 +44,17 @@ const OrderDetailsPage = ({params}: OrderDetailsProps) => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case ORDER_STATUS.PROCESSING:
-        return 'bg-blue-100 text-blue-800';
-      case ORDER_STATUS.PENDING:
-        return 'bg-yellow-100 text-yellow-800';
-      case ORDER_STATUS.CANCELLED:
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+    const statusColors = {
+      completed: 'bg-green-100 text-green-800',
+      [ORDER_STATUS.PROCESSING]: 'bg-blue-100 text-blue-800',
+      [ORDER_STATUS.PENDING]: 'bg-yellow-100 text-yellow-800',
+      [ORDER_STATUS.CANCELLED]: 'bg-red-100 text-red-800',
+    };
+
+    return (
+      statusColors[status.toLowerCase() as keyof typeof statusColors] ||
+      'bg-gray-100 text-gray-800'
+    );
   };
 
   if (orderIsLoading || !currentOrder) {

@@ -44,29 +44,30 @@ export async function POST(request: NextRequest) {
 
     console.log('Received webhook event:', event.type);
 
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
+    const webhookHandlers = {
+      'checkout.session.completed': async (eventData: any) => {
+        const session = eventData.object as Stripe.Checkout.Session;
         await handleCheckoutSessionCompleted(session);
-        break;
-      }
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      },
+      'payment_intent.succeeded': async (eventData: any) => {
+        const paymentIntent = eventData.object as Stripe.PaymentIntent;
         await handlePaymentIntentSucceeded(paymentIntent);
-        break;
-      }
-      case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      },
+      'payment_intent.payment_failed': async (eventData: any) => {
+        const paymentIntent = eventData.object as Stripe.PaymentIntent;
         await handlePaymentIntentFailed(paymentIntent);
-        break;
-      }
-      case 'checkout.session.expired': {
-        const session = event.data.object as Stripe.Checkout.Session;
+      },
+      'checkout.session.expired': async (eventData: any) => {
+        const session = eventData.object as Stripe.Checkout.Session;
         await handleCheckoutSessionExpired(session);
-        break;
-      }
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
+      },
+    };
+
+    const handler = webhookHandlers[event.type as keyof typeof webhookHandlers];
+    if (handler) {
+      await handler(event.data);
+    } else {
+      console.log(`Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({received: true});
