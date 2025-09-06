@@ -182,7 +182,7 @@ export default function NavMenu() {
       </div>
 
       <div className="flex-1 flex items-start justify-end">
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center mr-4">
           <Dropdown
             menu={{items: itemsDropDown}}
             trigger={['click']}
