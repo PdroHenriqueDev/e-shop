@@ -29,26 +29,22 @@ const items = [
     label: 'Categories',
     key: 'categories',
     icon: <AppstoreOutlined />,
+    path: '/categories',
     children: [
       {
-        type: 'group',
-        label: 'Category 1',
-        children: [
-          {
-            label: 'Subcategory 1',
-            key: 'subcategory:1',
-            path: '/categories',
-          },
-          {label: 'Subcategory 2', key: 'subcategory:2'},
-        ],
+        label: 'Clothing',
+        key: 'clothing',
+        path: '/categories/1',
       },
       {
-        type: 'group',
-        label: 'Category 2',
-        children: [
-          {label: 'Subcategory 3', key: 'subcategory:3'},
-          {label: 'Subcategory 4', key: 'subcategory:4'},
-        ],
+        label: 'Electronics',
+        key: 'electronics',
+        path: '/categories/2',
+      },
+      {
+        label: 'Accessories',
+        key: 'accessories',
+        path: '/categories/3',
       },
     ],
   },
@@ -135,11 +131,10 @@ export default function NavMenu() {
       for (const item of menuItems) {
         if (!item) return;
         if (item.key === key) return item.path;
-        const childPath = findPath(
-          item.children?.flatMap(group => group.children ?? []) ?? [],
-          key,
-        );
-        if (childPath) return childPath;
+        if (item.children) {
+          const childPath = findPath(item.children, key);
+          if (childPath) return childPath;
+        }
       }
     };
 

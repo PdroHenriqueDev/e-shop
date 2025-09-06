@@ -1,100 +1,117 @@
 'use client';
-import {useEffect, useState} from 'react';
-import {ProductProps} from '@/interfaces/product';
-import axios from 'axios';
-import {Row, Col, Card} from 'antd';
+import React, {Suspense, useEffect, useState} from 'react';
+import {useSearchParams, useRouter} from 'next/navigation';
+import {Card, Col, Row} from 'antd';
 import Image from 'next/image';
-import Loading from '@/components/loading/loading';
-import CustomButton from '@/components/customButtton/customButton';
+import axios from '@/lib/axios';
+import {ProductProps} from '@/interfaces/product';
 import {useCart} from '@/contexts/cartContext';
-import {useSearchParams} from 'next/navigation';
+import CustomButton from '@/components/customButtton/customButton';
+import Loading from '@/components/loading/loading';
+import {useNotification} from '@/contexts/notificationContext';
 
-export default function CategoryPage() {
-  const [products, setProducts] = useState<ProductProps[]>([]);
+interface Category {
+  id: number;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function CategoryPageContent() {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [category, setCategory] = useState<string | null>(null);
-
-  const searchParams = useSearchParams();
-  const {addToCart} = useCart();
+  const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+  const {notify} = useNotification();
 
   useEffect(() => {
-    const category = searchParams?.get('category');
-    if (!category) return;
-    setCategory(category);
+    setMounted(true);
+  }, []);
 
-    const fetchProducts = async () => {
+  useEffect(() => {
+    if (!mounted) return;
+
+    const fetchCategories = async () => {
       try {
-        const response = await axios.get(`/api/products`, {params: {category}});
+        const response = await axios.get('/api/categories');
         const {data} = response;
-        setProducts(data);
+        setCategories(data);
       } catch (err) {
+        console.error('Failed to fetch categories:', err);
+        notify({
+          type: 'error',
+          msg: 'Failed to load categories',
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProducts();
-  }, [searchParams]);
+    fetchCategories();
+  }, [mounted, notify]);
 
-  const categoryName =
-    category && category.charAt(0).toUpperCase() + category.slice(1);
+  if (!mounted) {
+    return (
+      <div className="container mx-auto py-12 px-5">
+        <div className="flex items-center justify-center w-full">
+          <Loading />
+        </div>
+      </div>
+    );
+  }
 
-  const handleAddToCart = (product: ProductProps) => {
-    addToCart(product);
+  const handleCategoryClick = (categoryId: number) => {
+    router.push(`/categories/${categoryId}`);
   };
 
   return (
     <div className="container mx-auto py-12 px-5">
-      <h2 className="text-3xl font-bold text-center mb-8">{categoryName}</h2>
+      <h1 className="text-4xl font-bold text-center mb-8">Browse Categories</h1>
       {isLoading ? (
         <div className="flex items-center justify-center w-full">
           <Loading />
         </div>
+      ) : categories.length === 0 ? (
+        <div className="text-center text-gray-500">
+          <p>No categories found.</p>
+        </div>
       ) : (
-        <Row gutter={[16, 16]}>
-          {products.map(product => (
-            <Col
-              key={product.id}
-              xs={24}
-              sm={12}
-              md={8}
-              lg={6}
-              className="mb-4">
-              <Card
-                hoverable
-                cover={
-                  <div className="w-full h-48 relative">
-                    <Image
-                      alt={product.name}
-                      src={
-                        product.imageUrl || 'https://via.placeholder.com/300'
-                      }
-                      layout="fill"
-                      objectFit="cover"
-                      className="rounded-lg"
-                    />
-                  </div>
-                }
-                className="bg-primary shadow h-80 w-full flex flex-col">
-                <div className="p-4 flex flex-col h-full">
-                  <h3 className="text-base h-12 leading-4 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="mt-2 text-gray-700">
-                    ${product.price.toFixed(2)}
-                  </p>
-                  <div className="mt-auto">
+        <div>
+          <Row gutter={[16, 16]} justify="center">
+            {categories.map(category => (
+              <Col key={category.id} xs={24} sm={12} md={8} lg={6}>
+                <Card
+                  hoverable
+                  className="h-full flex flex-col text-center cursor-pointer"
+                  onClick={() => handleCategoryClick(category.id)}>
+                  <div className="flex flex-col h-full justify-center items-center py-8">
+                    <div className="text-6xl mb-4">
+                      {category.name === 'Clothing' && '👕'}
+                      {category.name === 'Electronics' && '📱'}
+                      {category.name === 'Accessories' && '👜'}
+                    </div>
+                    <h3 className="text-2xl font-semibold mb-4">
+                      {category.name}
+                    </h3>
                     <CustomButton
-                      buttonText={'Add to Cart'}
-                      onClick={() => handleAddToCart(product)}
+                      buttonText={`Browse ${category.name}`}
+                      onClick={() => handleCategoryClick(category.id)}
                     />
                   </div>
-                </div>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </div>
       )}
     </div>
+  );
+}
+
+export default function CategoryPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <CategoryPageContent />
+    </Suspense>
   );
 }

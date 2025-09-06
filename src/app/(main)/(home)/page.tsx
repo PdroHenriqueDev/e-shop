@@ -112,26 +112,17 @@ export default function Home() {
           <h2 className="text-3xl font-bold mb-8">Categories</h2>
           <div className="flex justify-around">
             <div>
-              <Link
-                href={{pathname: '/categories', query: {category: 'clothing'}}}>
+              <Link href="/categories/clothing">
                 <CustomButton buttonText="Clothing" />
               </Link>
             </div>
             <div>
-              <Link
-                href={{
-                  pathname: '/categories',
-                  query: {category: 'electronics'},
-                }}>
+              <Link href="/categories/electronics">
                 <CustomButton buttonText="Electronics" />
               </Link>
             </div>
             <div>
-              <Link
-                href={{
-                  pathname: '/categories',
-                  query: {category: 'accessories'},
-                }}>
+              <Link href="/categories/accessories">
                 <CustomButton buttonText="Accessories" />
               </Link>
             </div>

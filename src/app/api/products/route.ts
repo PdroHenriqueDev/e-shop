@@ -6,19 +6,26 @@ export async function GET(request: Request) {
   try {
     const {searchParams} = new URL(request.url);
     const categoryName = searchParams.get('category');
+    const categoryId = searchParams.get('categoryId');
 
-    const whereClause = categoryName
-      ? {
-          category: {
-            is: {
-              name: {
-                equals: categoryName as string,
-                mode: Prisma.QueryMode.insensitive,
-              },
+    let whereClause = undefined;
+
+    if (categoryId) {
+      whereClause = {
+        categoryId: parseInt(categoryId),
+      };
+    } else if (categoryName) {
+      whereClause = {
+        category: {
+          is: {
+            name: {
+              equals: categoryName as string,
+              mode: Prisma.QueryMode.insensitive,
             },
           },
-        }
-      : undefined;
+        },
+      };
+    }
 
     const products = await prisma.product.findMany({
       where: whereClause,
