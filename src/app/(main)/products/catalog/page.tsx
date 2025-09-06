@@ -111,7 +111,7 @@ export default function ProductCatalog() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen">
       <Row className="mb-8 py-12 text-center bg-secondary">
         <Col span={24}>
           <h1 className="text-4xl font-bold">Product Catalog</h1>
@@ -130,10 +130,10 @@ export default function ProductCatalog() {
         </Col>
       </Row>
 
-      <Row className="mb-8 text-center bg-primary">
+      <Row className="mb-12 py-8 text-center bg-primary">
         <Col span={24}>
-          <h2 className="text-3xl font-bold">Categories</h2>
-          <div className="flex justify-center mt-4">
+          <h2 className="text-3xl font-bold mb-6">Categories</h2>
+          <div className="flex justify-center flex-wrap gap-2">
             <div key="all" className="mx-2">
               <CustomButton
                 buttonText="All"
@@ -158,52 +158,60 @@ export default function ProductCatalog() {
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]}>
-        {paginatedProducts.map(product => (
-          <Col key={product.id} xs={24} sm={12} md={8} lg={6} className="mb-4">
-            <Card
-              hoverable
-              cover={
-                <div className="w-full h-48 relative">
-                  <Image
-                    alt={product.name}
-                    src={product.imageUrl || product.image}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                    className="rounded-lg object-cover"
-                  />
+      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <Row gutter={[16, 16]} className="mb-8">
+          {paginatedProducts.map(product => (
+            <Col
+              key={product.id}
+              xs={24}
+              sm={12}
+              md={8}
+              lg={6}
+              className="mb-4">
+              <Card
+                hoverable
+                cover={
+                  <div className="w-full h-48 relative">
+                    <Image
+                      alt={product.name}
+                      src={product.imageUrl || product.image}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="rounded-lg object-cover"
+                    />
+                  </div>
+                }
+                className="shadow h-80 w-full flex flex-col">
+                <div className="p-4 flex flex-col h-full">
+                  <h3 className="text-base h-12 leading-4 line-clamp-2">
+                    {product.name}
+                  </h3>
+                  <p className="mt-2 text-accent">${product.price}</p>
+                  <div className="mt-auto">
+                    <CustomButton
+                      buttonText={'Add to Cart'}
+                      onClick={() => handleAddToCart(product)}
+                      disabled={cartIsLoading}
+                      backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
+                    />
+                  </div>
                 </div>
-              }
-              className="shadow h-80 w-full flex flex-col">
-              <div className="p-4 flex flex-col h-full">
-                <h3 className="text-base h-12 leading-4 line-clamp-2">
-                  {product.name}
-                </h3>
-                <p className="mt-2 text-accent">${product.price}</p>
-                <div className="mt-auto">
-                  <CustomButton
-                    buttonText={'Add to Cart'}
-                    onClick={() => handleAddToCart(product)}
-                    disabled={cartIsLoading}
-                    backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
-                  />
-                </div>
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+              </Card>
+            </Col>
+          ))}
+        </Row>
 
-      <Row className="mt-12">
-        <Col span={24} className="flex justify-end py-5">
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={filteredProducts.length}
-            onChange={page => setCurrentPage(page)}
-          />
-        </Col>
-      </Row>
+        <Row className="mt-12">
+          <Col span={24} className="flex justify-center py-8">
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={filteredProducts.length}
+              onChange={page => setCurrentPage(page)}
+            />
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 }
