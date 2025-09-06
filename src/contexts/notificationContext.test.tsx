@@ -91,5 +91,33 @@ describe('NotificationContext', () => {
         'useNotification must be used within a NotificationProvider',
       );
     });
+
+    it('should handle auth-error events', () => {
+      const TestComponent = () => {
+        const {notify} = useNotification();
+        return <div data-testid="test-component">Test</div>;
+      };
+
+      render(
+        <NotificationProvider>
+          <TestComponent />
+        </NotificationProvider>,
+      );
+
+      // Dispatch a custom auth-error event
+      const authErrorEvent = new CustomEvent('auth-error', {
+        detail: {
+          message: 'Authentication failed',
+          type: 'error',
+        },
+      });
+
+      window.dispatchEvent(authErrorEvent);
+
+      expect(mockMessage.error).toHaveBeenCalledWith(
+        'Authentication failed',
+        3,
+      );
+    });
   });
 });
