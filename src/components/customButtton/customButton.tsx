@@ -34,7 +34,10 @@ export default function CustomButton({
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={e => {
+        e.stopPropagation();
+        onClick?.();
+      }}
       disabled={disabled || isLoading}
       className={buttonClasses}>
       {isLoading ? (
