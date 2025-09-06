@@ -1,7 +1,6 @@
 'use client';
 import CustomButton from '@/components/customButtton/customButton';
 import {Col, Row} from 'antd';
-import Image from 'next/image';
 import Link from 'next/link';
 import {Footer} from 'antd/es/layout/layout';
 import {useEffect, useState} from 'react';
@@ -87,29 +86,6 @@ export default function Home() {
           </Row>
         )}
       </div>
-
-      <Row className="py-12">
-        <Col span={24} className="text-center">
-          <h2 className="text-3xl font-bold mb-8">Categories</h2>
-          <div className="flex justify-around">
-            <div>
-              <Link href="/categories/clothing">
-                <CustomButton buttonText="Clothing" />
-              </Link>
-            </div>
-            <div>
-              <Link href="/categories/electronics">
-                <CustomButton buttonText="Electronics" />
-              </Link>
-            </div>
-            <div>
-              <Link href="/categories/accessories">
-                <CustomButton buttonText="Accessories" />
-              </Link>
-            </div>
-          </div>
-        </Col>
-      </Row>
 
       <Footer className="bg-dark text-white py-6">
         <div className="text-center">
