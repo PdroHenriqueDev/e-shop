@@ -1,11 +1,3 @@
-/**
- * Admin-specific interfaces for the e-commerce application
- */
-
-/**
- * Admin user interface
- * Represents user data in the admin user management system
- */
 export interface AdminUser {
   id: string;
   name: string;
@@ -15,18 +7,12 @@ export interface AdminUser {
   updatedAt: string;
 }
 
-/**
- * Admin user form data interface
- */
 export interface AdminUserFormData {
   name: string;
   email: string;
   role: string;
 }
 
-/**
- * Admin order item interface
- */
 export interface AdminOrderItem {
   id: string;
   productId: string;
@@ -38,10 +24,6 @@ export interface AdminOrderItem {
   };
 }
 
-/**
- * Admin order interface
- * Represents order data in the admin order management system
- */
 export interface AdminOrder {
   id: string;
   userId: string;
@@ -63,10 +45,6 @@ export interface AdminOrder {
   };
 }
 
-/**
- * Admin product interface
- * Represents product data in the admin product management system
- */
 export interface AdminProduct {
   id: string;
   name: string;
@@ -83,9 +61,6 @@ export interface AdminProduct {
   };
 }
 
-/**
- * Admin category interface
- */
 export interface AdminCategory {
   id: string;
   name: string;
@@ -94,10 +69,6 @@ export interface AdminCategory {
   updatedAt: string;
 }
 
-/**
- * Admin dashboard statistics interface
- * Contains key metrics displayed on the admin dashboard overview
- */
 export interface AdminDashboardStats {
   totalUsers: number;
   totalOrders: number;
@@ -105,10 +76,6 @@ export interface AdminDashboardStats {
   totalProducts: number;
 }
 
-/**
- * Recent order interface for admin dashboard
- * Represents order data shown in the recent orders table
- */
 export interface AdminRecentOrder {
   id: string;
   user: {
@@ -119,9 +86,6 @@ export interface AdminRecentOrder {
   createdAt: string;
 }
 
-/**
- * Admin layout props interface
- */
 export interface AdminLayoutProps {
   children: React.ReactNode;
 }

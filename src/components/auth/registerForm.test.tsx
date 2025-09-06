@@ -1,5 +1,5 @@
 import {render, screen, fireEvent, waitFor} from '@testing-library/react';
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {describe, it, expect, vi, beforeEach, Mock} from 'vitest';
 import axios from 'axios';
 import RegisterForm from './registerForm';
 import {useNotification} from '@/contexts/notificationContext';
@@ -14,7 +14,7 @@ const mockHandleIsRegister = vi.fn();
 
 describe('RegisterForm', () => {
   beforeEach(() => {
-    (useNotification as vi.Mock).mockReturnValue({notify: vi.fn()});
+    (useNotification as Mock).mockReturnValue({notify: vi.fn()});
   });
 
   it('should display validation errors for empty fields', async () => {
@@ -58,8 +58,8 @@ describe('RegisterForm', () => {
 
   it('should call handleIsRegister on successful registration', async () => {
     const mockNotify = vi.fn();
-    (useNotification as vi.Mock).mockReturnValue({notify: mockNotify});
-    (axios.post as vi.Mock).mockResolvedValue({});
+    (useNotification as Mock).mockReturnValue({notify: mockNotify});
+    (axios.post as Mock).mockResolvedValue({});
 
     render(<RegisterForm handleIsRegister={mockHandleIsRegister} />);
 
@@ -91,8 +91,8 @@ describe('RegisterForm', () => {
 
   it('should show notification on registration failure', async () => {
     const mockNotify = vi.fn();
-    (useNotification as vi.Mock).mockReturnValue({notify: mockNotify});
-    (axios.post as vi.Mock).mockRejectedValue({
+    (useNotification as Mock).mockReturnValue({notify: mockNotify});
+    (axios.post as Mock).mockRejectedValue({
       response: {
         status: 400,
         data: {error: 'User already exists'},
@@ -123,7 +123,7 @@ describe('RegisterForm', () => {
       }),
     );
 
-    (axios.post as vi.Mock).mockRejectedValue({});
+    (axios.post as Mock).mockRejectedValue({});
 
     fireEvent.click(screen.getByText('Register'));
 

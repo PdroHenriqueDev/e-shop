@@ -1,23 +1,11 @@
 'use client';
-import React, {
-  createContext,
-  useContext,
-  ReactNode,
-  useCallback,
-  useEffect,
-} from 'react';
+import React, {createContext, useContext, useCallback, useEffect} from 'react';
 import {App} from 'antd';
-import {NoticeType} from 'antd/es/message/interface';
-
-type NotifyFunction = (options: {
-  type: NoticeType;
-  msg: string;
-  duration?: number;
-}) => void;
-
-interface NotificationContextType {
-  notify: NotifyFunction;
-}
+import {
+  NotificationContextType,
+  NotificationProviderProps,
+  NotifyFunction,
+} from '@/interfaces/context';
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
@@ -29,10 +17,6 @@ export const useNotification = (): NotificationContextType => {
     );
   return context;
 };
-
-interface NotificationProviderProps {
-  children: ReactNode;
-}
 
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,

@@ -1,13 +1,13 @@
 'use client';
 import CustomButton from '@/components/customButtton/customButton';
-import {Card, Col, Row} from 'antd';
-import Image from 'next/image';
+import {Col, Row} from 'antd';
 import Link from 'next/link';
 import {Footer} from 'antd/es/layout/layout';
 import {useEffect, useState} from 'react';
 import axios from 'axios';
 import {ProductProps} from '@/interfaces/product';
 import Loading from '@/components/loading/loading';
+import Card from '@/components/card/card';
 
 export default function Home() {
   const [products, setProducts] = useState<ProductProps[]>([]);
@@ -68,76 +68,24 @@ export default function Home() {
                 md={8}
                 lg={6}
                 className="mb-4">
-                <Link
-                  href={`/products/${product.id}`}
-                  className="flex-1 w-full">
-                  <Card
-                    hoverable
-                    cover={
-                      <div className="w-full h-48 relative">
-                        <Image
-                          alt={product.name}
-                          src={
-                            product.imageUrl ||
-                            'https://via.placeholder.com/300'
-                          }
-                          layout="fill"
-                          objectFit="cover"
-                          className="rounded-lg"
-                        />
-                      </div>
-                    }
-                    className="bg-primary shadow h-80 w-full flex flex-col">
-                    <div className="p-4 flex flex-col h-full">
-                      <h3 className="text-base h-12 leading-4 line-clamp-2">
-                        {product.name}
-                      </h3>
-                      <p className="mt-2 text-gray-700">
-                        ${product.price.toFixed(2)}
-                      </p>
-                      <div className="mt-auto">
-                        <CustomButton buttonText={'Buy'} />
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
+                <Card
+                  variant="product"
+                  title={product.name}
+                  price={product.price}
+                  imageUrl={
+                    product.imageUrl || 'https://via.placeholder.com/300'
+                  }
+                  imageAlt={product.name}
+                  onClick={() =>
+                    (window.location.href = `/products/${product.id}`)
+                  }
+                  className="h-80"
+                />
               </Col>
             ))}
           </Row>
         )}
       </div>
-
-      <Row className="py-12">
-        <Col span={24} className="text-center">
-          <h2 className="text-3xl font-bold mb-8">Categories</h2>
-          <div className="flex justify-around">
-            <div>
-              <Link
-                href={{pathname: '/categories', query: {category: 'clothing'}}}>
-                <CustomButton buttonText="Clothing" />
-              </Link>
-            </div>
-            <div>
-              <Link
-                href={{
-                  pathname: '/categories',
-                  query: {category: 'electronics'},
-                }}>
-                <CustomButton buttonText="Electronics" />
-              </Link>
-            </div>
-            <div>
-              <Link
-                href={{
-                  pathname: '/categories',
-                  query: {category: 'accessories'},
-                }}>
-                <CustomButton buttonText="Accessories" />
-              </Link>
-            </div>
-          </div>
-        </Col>
-      </Row>
 
       <Footer className="bg-dark text-white py-6">
         <div className="text-center">

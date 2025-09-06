@@ -1,7 +1,5 @@
 import {CustomButtonProps} from '@/interfaces/customButton';
 import React from 'react';
-import {Spin} from 'antd';
-import {LoadingOutlined} from '@ant-design/icons';
 import classNames from 'classnames';
 
 export default function CustomButton({
@@ -28,19 +26,30 @@ export default function CustomButton({
     },
   );
 
-  const spinClasses = classNames({
-    'text-dark': spinColor === 'dark',
-    'text-primary': spinColor === 'primary',
-  });
+  const spinnerColorMap = {
+    dark: 'dark' as const,
+    primary: 'primary' as const,
+  };
 
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={e => {
+        e.stopPropagation();
+        onClick?.();
+      }}
       disabled={disabled || isLoading}
       className={buttonClasses}>
       {isLoading ? (
-        <Spin indicator={<LoadingOutlined spin />} className={spinClasses} />
+        <div className="flex items-center justify-center">
+          <div className="relative">
+            <div
+              className={`w-5 h-5 border-2 border-t-transparent rounded-full animate-spin ${
+                spinColor === 'dark' ? 'border-dark' : 'border-primary'
+              }`}
+            />
+          </div>
+        </div>
       ) : (
         <div className="relative flex items-center justify-center w-full">
           {icon && <span className="absolute left-4">{icon}</span>}

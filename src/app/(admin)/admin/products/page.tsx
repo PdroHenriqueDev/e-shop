@@ -1,9 +1,7 @@
 'use client';
 import {useEffect, useState} from 'react';
 import {
-  Table,
   Button,
-  Space,
   Modal,
   Form,
   Input,
@@ -11,17 +9,12 @@ import {
   Select,
   Upload,
   message,
-  Popconfirm,
+  Space,
 } from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  UploadOutlined,
-} from '@ant-design/icons';
-import type {ColumnsType} from 'antd/es/table';
+import {PlusOutlined, UploadOutlined} from '@ant-design/icons';
 import type {UploadFile} from 'antd/es/upload/interface';
 import Image from 'next/image';
+import DataTable, {commonActions} from '@/components/dataTable/dataTable';
 
 import {AdminProduct, AdminCategory} from '@/interfaces/admin';
 
@@ -155,7 +148,7 @@ export default function ProductsPage() {
     }
   };
 
-  const columns: ColumnsType<AdminProduct> = [
+  const columns = [
     {
       title: 'Image',
       dataIndex: 'imageUrl',
@@ -167,6 +160,7 @@ export default function ProductsPage() {
             src={imageUrl || '/placeholder.jpg'}
             alt="Product"
             fill
+            sizes="48px"
             className="object-cover rounded"
           />
         </div>
@@ -194,61 +188,29 @@ export default function ProductsPage() {
       dataIndex: ['category', 'name'],
       key: 'category',
     },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            type="primary"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}>
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure you want to delete this product?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Yes"
-            cancelText="No">
-            <Button
-              type="primary"
-              danger
-              size="small"
-              icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
+  ];
+
+  const actions = [
+    commonActions.edit(handleEdit),
+    commonActions.delete(handleDelete),
   ];
 
   return (
-    <div className="p-6 bg-primary min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-dark">Products Management</h1>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={handleCreate}
-          className="bg-secondary border-secondary hover:bg-yellow-400 text-dark">
-          Add Product
-        </Button>
-      </div>
-
-      <div className="bg-primary border border-border rounded-lg shadow-sm">
-        <Table
+    <>
+      <div className="p-6 bg-primary min-h-screen">
+        <DataTable
           columns={columns}
-          dataSource={products}
-          rowKey="id"
+          data={products}
           loading={loading}
-          className="text-dark"
+          actions={actions}
+          onAdd={handleCreate}
+          addButtonText="Add Product"
+          title="Products Management"
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total, range) =>
+            showTotal: (total: any, range: any) =>
               `${range[0]}-${range[1]} of ${total} products`,
           }}
         />
@@ -342,6 +304,6 @@ export default function ProductsPage() {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </>
   );
 }

@@ -21,6 +21,10 @@ type FormData = z.infer<typeof FormSchema>;
 export default function ProductCatalog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [categories, setCategories] = useState<{id: number; name: string}[]>(
+    [],
+  );
   const {notify} = useNotification();
   const {addToCart, cartIsLoading} = useCart();
 
@@ -49,25 +53,37 @@ export default function ProductCatalog() {
     addToCart(product);
   };
 
+  const handleCategorySelect = (categoryId: number | null) => {
+    setSelectedCategory(categoryId);
+    setCurrentPage(1);
+  };
+
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('/api/products');
-        const {data} = response;
-        setProducts(data);
+        const categoriesResponse = await axios.get('/api/categories');
+        setCategories(categoriesResponse.data);
+
+        const productsParams = selectedCategory
+          ? {categoryId: selectedCategory}
+          : {};
+        const productsResponse = await axios.get('/api/products', {
+          params: productsParams,
+        });
+        setProducts(productsResponse.data);
       } catch (error) {
-        console.error('Failed to fetch products:', error);
-        notify({type: 'error', msg: 'Failed to load products'});
+        console.error('Failed to fetch data:', error);
+        notify({type: 'error', msg: 'Failed to load data'});
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProducts();
-  }, [notify]);
+    fetchData();
+  }, [notify, selectedCategory]);
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -95,7 +111,7 @@ export default function ProductCatalog() {
   }
 
   return (
-    <div>
+    <div className="min-h-screen">
       <Row className="mb-8 py-12 text-center bg-secondary">
         <Col span={24}>
           <h1 className="text-4xl font-bold">Product Catalog</h1>
@@ -114,65 +130,88 @@ export default function ProductCatalog() {
         </Col>
       </Row>
 
-      <Row className="mb-8 text-center bg-primary">
+      <Row className="mb-12 py-8 text-center bg-primary">
         <Col span={24}>
-          <h2 className="text-3xl font-bold">Categories</h2>
-          <div className="flex justify-center mt-4">
-            {['All', 'Clothing', 'Electronics', 'Accessories'].map(category => (
-              <div key={category} className="mx-2">
-                <CustomButton buttonText={category} onClick={() => {}} />
+          <h2 className="text-3xl font-bold mb-6">Categories</h2>
+          <div className="flex justify-center flex-wrap gap-2">
+            <div key="all" className="mx-2">
+              <CustomButton
+                buttonText="All"
+                onClick={() => handleCategorySelect(null)}
+                backgroundColor={
+                  selectedCategory === null ? 'accent' : 'secondary'
+                }
+              />
+            </div>
+            {categories.map(category => (
+              <div key={category.id} className="mx-2">
+                <CustomButton
+                  buttonText={category.name}
+                  onClick={() => handleCategorySelect(category.id)}
+                  backgroundColor={
+                    selectedCategory === category.id ? 'accent' : 'secondary'
+                  }
+                />
               </div>
             ))}
           </div>
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]}>
-        {paginatedProducts.map(product => (
-          <Col key={product.id} xs={24} sm={12} md={8} lg={6} className="mb-4">
-            <Card
-              hoverable
-              cover={
-                <div className="w-full h-48 relative">
-                  <Image
-                    alt={product.name}
-                    src={product.imageUrl || product.image}
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-lg"
-                  />
+      <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <Row gutter={[16, 16]} className="mb-8">
+          {paginatedProducts.map(product => (
+            <Col
+              key={product.id}
+              xs={24}
+              sm={12}
+              md={8}
+              lg={6}
+              className="mb-4">
+              <Card
+                hoverable
+                cover={
+                  <div className="w-full h-48 relative">
+                    <Image
+                      alt={product.name}
+                      src={product.imageUrl || product.image}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="rounded-lg object-cover"
+                    />
+                  </div>
+                }
+                className="shadow h-80 w-full flex flex-col">
+                <div className="p-4 flex flex-col h-full">
+                  <h3 className="text-base h-12 leading-4 line-clamp-2">
+                    {product.name}
+                  </h3>
+                  <p className="mt-2 text-accent">${product.price}</p>
+                  <div className="mt-auto">
+                    <CustomButton
+                      buttonText={'Add to Cart'}
+                      onClick={() => handleAddToCart(product)}
+                      disabled={cartIsLoading}
+                      backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
+                    />
+                  </div>
                 </div>
-              }
-              className="shadow h-80 w-full flex flex-col">
-              <div className="p-4 flex flex-col h-full">
-                <h3 className="text-base h-12 leading-4 line-clamp-2">
-                  {product.name}
-                </h3>
-                <p className="mt-2 text-accent">${product.price}</p>
-                <div className="mt-auto">
-                  <CustomButton
-                    buttonText={'Add to Cart'}
-                    onClick={() => handleAddToCart(product)}
-                    disabled={cartIsLoading}
-                    backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
-                  />
-                </div>
-              </div>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+              </Card>
+            </Col>
+          ))}
+        </Row>
 
-      <Row className="mt-12">
-        <Col span={24} className="flex justify-end py-5">
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={filteredProducts.length}
-            onChange={page => setCurrentPage(page)}
-          />
-        </Col>
-      </Row>
+        <Row className="mt-12">
+          <Col span={24} className="flex justify-center py-8">
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={filteredProducts.length}
+              onChange={page => setCurrentPage(page)}
+            />
+          </Col>
+        </Row>
+      </div>
     </div>
   );
 }

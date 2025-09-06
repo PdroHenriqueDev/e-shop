@@ -10,7 +10,7 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import {signOut, signIn, useSession} from 'next-auth/react';
-import {useRouter} from 'next/navigation';
+import {useRouter, usePathname} from 'next/navigation';
 import {MenuInfo} from 'rc-menu/lib/interface';
 import {MenuItemWithPathProps} from '@/interfaces/navBar';
 import {useCart} from '@/contexts/cartContext';
@@ -29,26 +29,22 @@ const items = [
     label: 'Categories',
     key: 'categories',
     icon: <AppstoreOutlined />,
+    path: '/categories',
     children: [
       {
-        type: 'group',
-        label: 'Category 1',
-        children: [
-          {
-            label: 'Subcategory 1',
-            key: 'subcategory:1',
-            path: '/categories',
-          },
-          {label: 'Subcategory 2', key: 'subcategory:2'},
-        ],
+        label: 'Clothing',
+        key: 'clothing',
+        path: '/categories/1',
       },
       {
-        type: 'group',
-        label: 'Category 2',
-        children: [
-          {label: 'Subcategory 3', key: 'subcategory:3'},
-          {label: 'Subcategory 4', key: 'subcategory:4'},
-        ],
+        label: 'Electronics',
+        key: 'electronics',
+        path: '/categories/2',
+      },
+      {
+        label: 'Accessories',
+        key: 'accessories',
+        path: '/categories/3',
       },
     ],
   },
@@ -63,9 +59,26 @@ const items = [
 export default function NavMenu() {
   const [current, setCurrent] = useState('home');
   const router = useRouter();
+  const pathname = usePathname();
   const {handleSetCartItems} = useCart();
 
   const {data: dataSession} = useSession();
+
+  useEffect(() => {
+    const getActiveKey = (path: string): string => {
+      if (path === '/') return 'home';
+      if (path.startsWith('/categories')) {
+        if (path === '/categories/1') return 'clothing';
+        if (path === '/categories/2') return 'electronics';
+        if (path === '/categories/3') return 'accessories';
+        return 'categories';
+      }
+      if (path.startsWith('/products')) return 'products';
+      return 'home';
+    };
+
+    setCurrent(getActiveKey(pathname));
+  }, [pathname]);
 
   useEffect(() => {
     const getItems = async () => {
@@ -135,11 +148,10 @@ export default function NavMenu() {
       for (const item of menuItems) {
         if (!item) return;
         if (item.key === key) return item.path;
-        const childPath = findPath(
-          item.children?.flatMap(group => group.children ?? []) ?? [],
-          key,
-        );
-        if (childPath) return childPath;
+        if (item.children) {
+          const childPath = findPath(item.children, key);
+          if (childPath) return childPath;
+        }
       }
     };
 
@@ -182,7 +194,7 @@ export default function NavMenu() {
       </div>
 
       <div className="flex-1 flex items-start justify-end">
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center mr-4">
           <Dropdown
             menu={{items: itemsDropDown}}
             trigger={['click']}

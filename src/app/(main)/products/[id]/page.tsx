@@ -55,9 +55,9 @@ export default function ProductDetails() {
           <Image
             src={product.imageUrl ?? ''}
             alt={product.name}
-            layout="fill"
-            objectFit="cover"
-            className="rounded-lg"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="rounded-lg object-cover"
           />
         </div>
         <div>

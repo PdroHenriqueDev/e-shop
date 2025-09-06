@@ -1,5 +1,5 @@
 import {render, screen, fireEvent, waitFor} from '@testing-library/react';
-import {describe, it, expect, vi} from 'vitest';
+import {describe, it, expect, vi, Mock} from 'vitest';
 import {useRouter} from 'next/navigation';
 import {signIn} from 'next-auth/react';
 import LoginForm from './loginForm';
@@ -19,8 +19,8 @@ vi.mock('@/contexts/notificationContext', () => ({
 
 describe('LoginForm', () => {
   it('should display validation errors for empty fields', async () => {
-    (useRouter as vi.Mock).mockReturnValue({push: vi.fn()});
-    (useNotification as vi.Mock).mockReturnValue({notify: vi.fn()});
+    (useRouter as Mock).mockReturnValue({push: vi.fn()});
+    (useNotification as Mock).mockReturnValue({notify: vi.fn()});
 
     render(<LoginForm />);
 
@@ -38,9 +38,9 @@ describe('LoginForm', () => {
     const mockPush = vi.fn();
     const mockNotify = vi.fn();
 
-    (useRouter as vi.Mock).mockReturnValue({push: mockPush});
-    (useNotification as vi.Mock).mockReturnValue({notify: mockNotify});
-    (signIn as vi.Mock).mockResolvedValue({error: null});
+    (useRouter as Mock).mockReturnValue({push: mockPush});
+    (useNotification as Mock).mockReturnValue({notify: mockNotify});
+    (signIn as Mock).mockResolvedValue({error: null});
 
     render(<LoginForm />);
 
@@ -68,9 +68,9 @@ describe('LoginForm', () => {
     const mockPush = vi.fn();
     const mockNotify = vi.fn();
 
-    (useRouter as vi.Mock).mockReturnValue({push: mockPush});
-    (useNotification as vi.Mock).mockReturnValue({notify: mockNotify});
-    (signIn as vi.Mock).mockResolvedValue({error: 'Invalid credentials'});
+    (useRouter as Mock).mockReturnValue({push: mockPush});
+    (useNotification as Mock).mockReturnValue({notify: mockNotify});
+    (signIn as Mock).mockResolvedValue({error: 'Invalid credentials'});
 
     render(<LoginForm />);
 
