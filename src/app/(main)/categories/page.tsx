@@ -5,17 +5,11 @@ import {Card, Col, Row} from 'antd';
 import Image from 'next/image';
 import axios from '@/lib/axios';
 import {ProductProps} from '@/interfaces/product';
+import {Category} from '@/interfaces/category';
 import {useCart} from '@/contexts/cartContext';
 import CustomButton from '@/components/customButtton/customButton';
 import Loading from '@/components/loading/loading';
 import {useNotification} from '@/contexts/notificationContext';
-
-interface Category {
-  id: number;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 function CategoryPageContent() {
   const [categories, setCategories] = useState<Category[]>([]);

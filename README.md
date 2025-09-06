@@ -33,6 +33,7 @@ The application integrates with Stripe for secure payment processing:
 7. **Order Completion**: Successful payments update order status to 'paid' and 'confirmed'
 
 ### Supported Payment Events
+
 - `checkout.session.completed` - Order marked as paid
 - `payment_intent.succeeded` - Payment confirmation
 - `payment_intent.payment_failed` - Payment failure handling

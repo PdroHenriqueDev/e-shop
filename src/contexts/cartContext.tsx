@@ -7,17 +7,9 @@ import {
   useCallback,
 } from 'react';
 import {CartItemProps, ProductProps} from '@/interfaces/product';
+import {CartContextType} from '@/interfaces/context';
 import {useNotification} from './notificationContext';
 import axios from '@/lib/axios';
-
-interface CartContextType {
-  cartItems: CartItemProps[];
-  addToCart: (product: ProductProps) => void;
-  handleSetCartItems: (cartItem: CartItemProps[]) => void;
-  updateCartQuantity: (productId: number, quantity: number) => Promise<void>;
-  removeFromCart: (cartItem: CartItemProps) => void;
-  cartIsLoading: boolean;
-}
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 

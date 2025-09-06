@@ -3,27 +3,8 @@
 import React, {createContext, useContext, useState, useCallback} from 'react';
 import axios from '@/lib/axios';
 import {OrderProps} from '@/interfaces/order';
+import {OrderContextType} from '@/interfaces/context';
 import {useNotification} from './notificationContext';
-
-interface OrderContextType {
-  orders: OrderProps[];
-  currentOrder: OrderProps | null;
-  orderIsLoading: boolean;
-  placeOrder: (
-    shippingAddress: string,
-    paymentMethod: string,
-    total: number,
-  ) => Promise<OrderProps | null>;
-  fetchOrders: () => Promise<void>;
-  fetchOrderById: (id: number) => Promise<void>;
-  updateOrderPaymentStatus: (
-    orderId: number,
-    paymentStatus: string,
-    stripeSessionId?: string,
-    paymentIntentId?: string,
-  ) => Promise<void>;
-  verifyStripePayment: (sessionId: string) => Promise<OrderProps | null>;
-}
 
 const OrderContext = createContext<OrderContextType | undefined>(undefined);
 

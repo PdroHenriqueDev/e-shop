@@ -15,12 +15,9 @@ import {
 import {signOut} from 'next-auth/react';
 import Link from 'next/link';
 import type {MenuProps} from 'antd';
+import {AdminLayoutProps} from '@/interfaces/admin';
 
 const {Header, Sider, Content} = Layout;
-
-interface AdminLayoutProps {
-  children: React.ReactNode;
-}
 
 export default function AdminLayout({children}: AdminLayoutProps) {
   const {data: session, status} = useSession();

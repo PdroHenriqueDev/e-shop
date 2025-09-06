@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {Drawer, List, Badge, Divider} from 'antd';
 import {ShoppingCartOutlined} from '@ant-design/icons';
-import {CartItemProps, ProductProps} from '@/interfaces/product';
+
 import CustomButton from '@/components/customButtton/customButton';
 import {useCart} from '@/contexts/cartContext';
 import {DeleteOutlined} from '@ant-design/icons';
