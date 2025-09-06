@@ -1,7 +1,8 @@
 'use client';
 import React, {Suspense, useEffect, useState} from 'react';
 import {useSearchParams, useRouter} from 'next/navigation';
-import {Card, Col, Row} from 'antd';
+import {Col, Row} from 'antd';
+import Card from '@/components/card/card';
 import Image from 'next/image';
 import axios from '@/lib/axios';
 import {ProductProps} from '@/interfaces/product';
@@ -72,29 +73,27 @@ function CategoryPageContent() {
       ) : (
         <div>
           <Row gutter={[16, 16]} justify="center">
-            {categories.map(category => (
-              <Col key={category.id} xs={24} sm={12} md={8} lg={6}>
-                <Card
-                  hoverable
-                  className="h-full flex flex-col text-center cursor-pointer"
-                  onClick={() => handleCategoryClick(category.id)}>
-                  <div className="flex flex-col h-full justify-center items-center py-8">
-                    <div className="text-6xl mb-4">
-                      {category.name === 'Clothing' && '👕'}
-                      {category.name === 'Electronics' && '📱'}
-                      {category.name === 'Accessories' && '👜'}
-                    </div>
-                    <h3 className="text-2xl font-semibold mb-4">
-                      {category.name}
-                    </h3>
-                    <CustomButton
-                      buttonText={`Browse ${category.name}`}
-                      onClick={() => handleCategoryClick(category.id)}
-                    />
-                  </div>
-                </Card>
-              </Col>
-            ))}
+            {categories.map(category => {
+              const getIconForCategory = (name: string) => {
+                if (name === 'Clothing') return '👕';
+                if (name === 'Electronics') return '📱';
+                if (name === 'Accessories') return '👜';
+                return '📦';
+              };
+
+              return (
+                <Col key={category.id} xs={24} sm={12} md={8} lg={6}>
+                  <Card
+                    variant="category"
+                    title={category.name}
+                    imageUrl={`data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="#f0f0f0"/><text x="100" y="120" font-size="80" text-anchor="middle">${getIconForCategory(category.name)}</text></svg>`)}`}
+                    imageAlt={category.name}
+                    onClick={() => handleCategoryClick(category.id)}
+                    className="h-full"
+                  />
+                </Col>
+              );
+            })}
           </Row>
         </div>
       )}
