@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import Stripe from 'stripe';
 import prisma from '@/lib/prisma';
+import {ORDER_STATUS} from '@/constants';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not set');
@@ -43,29 +44,30 @@ export async function POST(request: NextRequest) {
 
     console.log('Received webhook event:', event.type);
 
-    switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
+    const webhookHandlers = {
+      'checkout.session.completed': async (eventData: any) => {
+        const session = eventData.object as Stripe.Checkout.Session;
         await handleCheckoutSessionCompleted(session);
-        break;
-      }
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      },
+      'payment_intent.succeeded': async (eventData: any) => {
+        const paymentIntent = eventData.object as Stripe.PaymentIntent;
         await handlePaymentIntentSucceeded(paymentIntent);
-        break;
-      }
-      case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      },
+      'payment_intent.payment_failed': async (eventData: any) => {
+        const paymentIntent = eventData.object as Stripe.PaymentIntent;
         await handlePaymentIntentFailed(paymentIntent);
-        break;
-      }
-      case 'checkout.session.expired': {
-        const session = event.data.object as Stripe.Checkout.Session;
+      },
+      'checkout.session.expired': async (eventData: any) => {
+        const session = eventData.object as Stripe.Checkout.Session;
         await handleCheckoutSessionExpired(session);
-        break;
-      }
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
+      },
+    };
+
+    const handler = webhookHandlers[event.type as keyof typeof webhookHandlers];
+    if (handler) {
+      await handler(event.data);
+    } else {
+      console.log(`Unhandled event type: ${event.type}`);
     }
 
     return NextResponse.json({received: true});
@@ -91,7 +93,7 @@ async function handleCheckoutSessionCompleted(
       data: {
         paymentStatus: 'PAID',
         paymentIntentId: session.payment_intent as string,
-        status: 'confirmed',
+        status: ORDER_STATUS.CONFIRMED,
       },
     });
 
@@ -120,7 +122,7 @@ async function handlePaymentIntentSucceeded(
       where: {id: order.id},
       data: {
         paymentStatus: 'PAID',
-        status: 'confirmed',
+        status: ORDER_STATUS.CONFIRMED,
       },
     });
 
@@ -147,7 +149,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
       where: {id: order.id},
       data: {
         paymentStatus: 'FAILED',
-        status: 'cancelled',
+        status: ORDER_STATUS.CANCELLED,
       },
     });
 
@@ -170,7 +172,7 @@ async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
       where: {id: parseInt(orderId)},
       data: {
         paymentStatus: 'FAILED',
-        status: 'cancelled',
+        status: ORDER_STATUS.CANCELLED,
       },
     });
 

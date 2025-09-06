@@ -5,6 +5,7 @@ import {useOrder} from '@/contexts/orderContext';
 import {useRouter} from 'next/navigation';
 import Loading from '@/components/loading/loading';
 import CustomButton from '@/components/customButtton/customButton';
+import {ORDER_STATUS} from '@/constants';
 
 const OrdersPage = () => {
   const {orders, orderIsLoading, fetchOrders} = useOrder();
@@ -24,18 +25,17 @@ const OrdersPage = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'processing':
-        return 'bg-blue-100 text-blue-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+    const statusColors = {
+      [ORDER_STATUS.COMPLETED]: 'bg-green-100 text-green-800',
+      [ORDER_STATUS.PROCESSING]: 'bg-blue-100 text-blue-800',
+      [ORDER_STATUS.PENDING]: 'bg-yellow-100 text-yellow-800',
+      [ORDER_STATUS.CANCELLED]: 'bg-red-100 text-red-800',
+    };
+
+    return (
+      statusColors[status.toLowerCase() as keyof typeof statusColors] ||
+      'bg-gray-100 text-gray-800'
+    );
   };
 
   if (orderIsLoading) {

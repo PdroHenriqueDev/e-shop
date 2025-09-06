@@ -2,6 +2,7 @@ import {NextResponse} from 'next/server';
 import prisma from '@/lib/prisma';
 import {auth} from '../../../../auth';
 import {SessionUser} from '@/interfaces/auth';
+import {ORDER_STATUS} from '@/constants';
 
 export async function POST(request: Request) {
   try {
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
           total,
           shippingAddress,
           paymentMethod,
-          status: 'pending',
+          status: ORDER_STATUS.PENDING,
           paymentStatus: 'PENDING',
           items: {
             create: cart.items.map(item => ({

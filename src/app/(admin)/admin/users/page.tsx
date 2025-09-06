@@ -17,30 +17,14 @@ import {
 import {EditOutlined, DeleteOutlined, PlusOutlined} from '@ant-design/icons';
 import type {ColumnsType} from 'antd/es/table';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: 'user' | 'admin';
-  createdAt: string;
-  _count: {
-    orders: number;
-  };
-}
-
-interface UserFormData {
-  name: string;
-  email: string;
-  role: 'user' | 'admin';
-  password?: string;
-}
+import {AdminUser, AdminUserFormData} from '@/interfaces/admin';
 
 const UsersPage: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [form] = Form.useForm<UserFormData>();
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [form] = Form.useForm<AdminUserFormData>();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -69,7 +53,7 @@ const UsersPage: React.FC = () => {
     setModalVisible(true);
   };
 
-  const handleEditUser = (user: User) => {
+  const handleEditUser = (user: AdminUser) => {
     setEditingUser(user);
     form.setFieldsValue({
       name: user.name,
@@ -79,9 +63,9 @@ const UsersPage: React.FC = () => {
     setModalVisible(true);
   };
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/users/${userId}`, {
+      const response = await fetch(`/api/admin/users/${id}`, {
         method: 'DELETE',
       });
 
@@ -97,7 +81,7 @@ const UsersPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (values: UserFormData) => {
+  const handleSubmit = async (values: AdminUserFormData) => {
     try {
       const url = editingUser
         ? `/api/admin/users/${editingUser.id}`
@@ -127,7 +111,7 @@ const UsersPage: React.FC = () => {
     }
   };
 
-  const columns: ColumnsType<User> = [
+  const columns: ColumnsType<AdminUser> = [
     {
       title: 'ID',
       dataIndex: 'id',

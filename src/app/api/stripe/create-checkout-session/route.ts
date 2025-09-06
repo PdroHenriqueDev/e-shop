@@ -2,6 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import {auth} from '../../../../../auth';
 import Stripe from 'stripe';
 import prisma from '@/lib/prisma';
+import {ORDER_STATUS} from '@/constants';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not set');
@@ -51,7 +52,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Allow creating new session if order status is not completed
     if (order.stripeSessionId && order.status === 'completed') {
       return NextResponse.json(
         {error: 'Order already completed'},
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       data: {
         stripeSessionId: checkoutSession.id,
         paymentMethod: 'stripe',
-        status: 'pending',
+        status: ORDER_STATUS.PENDING,
         updatedAt: new Date(),
       },
     });

@@ -4,25 +4,15 @@ import {useEffect, useState} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
 import {useNotification} from '@/contexts/notificationContext';
 
-interface OrderDetails {
-  id: string;
-  total: number;
-  shippingAddress: string;
-  paymentStatus: string;
-  createdAt: string;
-  items: {
-    id: string;
-    productName: string;
-    quantity: number;
-    price: number;
-  }[];
-}
+import {CheckoutOrderDetails} from '@/interfaces/checkout';
 
 export default function CheckoutSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const {notify} = useNotification();
-  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [orderDetails, setOrderDetails] = useState<CheckoutOrderDetails | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
