@@ -21,6 +21,10 @@ type FormData = z.infer<typeof FormSchema>;
 export default function ProductCatalog() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [categories, setCategories] = useState<{id: number; name: string}[]>(
+    [],
+  );
   const {notify} = useNotification();
   const {addToCart, cartIsLoading} = useCart();
 
@@ -49,25 +53,37 @@ export default function ProductCatalog() {
     addToCart(product);
   };
 
+  const handleCategorySelect = (categoryId: number | null) => {
+    setSelectedCategory(categoryId);
+    setCurrentPage(1);
+  };
+
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get('/api/products');
-        const {data} = response;
-        setProducts(data);
+        const categoriesResponse = await axios.get('/api/categories');
+        setCategories(categoriesResponse.data);
+
+        const productsParams = selectedCategory
+          ? {categoryId: selectedCategory}
+          : {};
+        const productsResponse = await axios.get('/api/products', {
+          params: productsParams,
+        });
+        setProducts(productsResponse.data);
       } catch (error) {
-        console.error('Failed to fetch products:', error);
-        notify({type: 'error', msg: 'Failed to load products'});
+        console.error('Failed to fetch data:', error);
+        notify({type: 'error', msg: 'Failed to load data'});
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProducts();
-  }, [notify]);
+    fetchData();
+  }, [notify, selectedCategory]);
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -118,9 +134,24 @@ export default function ProductCatalog() {
         <Col span={24}>
           <h2 className="text-3xl font-bold">Categories</h2>
           <div className="flex justify-center mt-4">
-            {['All', 'Clothing', 'Electronics', 'Accessories'].map(category => (
-              <div key={category} className="mx-2">
-                <CustomButton buttonText={category} onClick={() => {}} />
+            <div key="all" className="mx-2">
+              <CustomButton
+                buttonText="All"
+                onClick={() => handleCategorySelect(null)}
+                backgroundColor={
+                  selectedCategory === null ? 'accent' : 'secondary'
+                }
+              />
+            </div>
+            {categories.map(category => (
+              <div key={category.id} className="mx-2">
+                <CustomButton
+                  buttonText={category.name}
+                  onClick={() => handleCategorySelect(category.id)}
+                  backgroundColor={
+                    selectedCategory === category.id ? 'accent' : 'secondary'
+                  }
+                />
               </div>
             ))}
           </div>
