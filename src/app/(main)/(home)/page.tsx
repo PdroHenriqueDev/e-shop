@@ -1,6 +1,6 @@
 'use client';
 import CustomButton from '@/components/customButtton/customButton';
-import {Card, Col, Row} from 'antd';
+import {Col, Row} from 'antd';
 import Image from 'next/image';
 import Link from 'next/link';
 import {Footer} from 'antd/es/layout/layout';
@@ -8,6 +8,7 @@ import {useEffect, useState} from 'react';
 import axios from 'axios';
 import {ProductProps} from '@/interfaces/product';
 import Loading from '@/components/loading/loading';
+import Card from '@/components/card/card';
 
 export default function Home() {
   const [products, setProducts] = useState<ProductProps[]>([]);
@@ -68,39 +69,19 @@ export default function Home() {
                 md={8}
                 lg={6}
                 className="mb-4">
-                <Link
-                  href={`/products/${product.id}`}
-                  className="flex-1 w-full">
-                  <Card
-                    hoverable
-                    cover={
-                      <div className="w-full h-48 relative">
-                        <Image
-                          alt={product.name}
-                          src={
-                            product.imageUrl ||
-                            'https://via.placeholder.com/300'
-                          }
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                          className="rounded-lg object-cover"
-                        />
-                      </div>
-                    }
-                    className="bg-primary shadow h-80 w-full flex flex-col">
-                    <div className="p-4 flex flex-col h-full">
-                      <h3 className="text-base h-12 leading-4 line-clamp-2">
-                        {product.name}
-                      </h3>
-                      <p className="mt-2 text-gray-700">
-                        ${product.price.toFixed(2)}
-                      </p>
-                      <div className="mt-auto">
-                        <CustomButton buttonText={'Buy'} />
-                      </div>
-                    </div>
-                  </Card>
-                </Link>
+                <Card
+                  variant="product"
+                  title={product.name}
+                  price={product.price}
+                  imageUrl={
+                    product.imageUrl || 'https://via.placeholder.com/300'
+                  }
+                  imageAlt={product.name}
+                  onClick={() =>
+                    (window.location.href = `/products/${product.id}`)
+                  }
+                  className="h-80"
+                />
               </Col>
             ))}
           </Row>
