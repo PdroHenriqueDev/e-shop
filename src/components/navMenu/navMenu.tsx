@@ -10,7 +10,7 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import {signOut, signIn, useSession} from 'next-auth/react';
-import {useRouter} from 'next/navigation';
+import {useRouter, usePathname} from 'next/navigation';
 import {MenuInfo} from 'rc-menu/lib/interface';
 import {MenuItemWithPathProps} from '@/interfaces/navBar';
 import {useCart} from '@/contexts/cartContext';
@@ -59,9 +59,26 @@ const items = [
 export default function NavMenu() {
   const [current, setCurrent] = useState('home');
   const router = useRouter();
+  const pathname = usePathname();
   const {handleSetCartItems} = useCart();
 
   const {data: dataSession} = useSession();
+
+  useEffect(() => {
+    const getActiveKey = (path: string): string => {
+      if (path === '/') return 'home';
+      if (path.startsWith('/categories')) {
+        if (path === '/categories/1') return 'clothing';
+        if (path === '/categories/2') return 'electronics';
+        if (path === '/categories/3') return 'accessories';
+        return 'categories';
+      }
+      if (path.startsWith('/products')) return 'products';
+      return 'home';
+    };
+
+    setCurrent(getActiveKey(pathname));
+  }, [pathname]);
 
   useEffect(() => {
     const getItems = async () => {
