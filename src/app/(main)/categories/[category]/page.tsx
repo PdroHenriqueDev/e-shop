@@ -44,6 +44,7 @@ export default function CategoryProductsPage() {
           const currentCategory = categories.find(
             (cat: any) => cat.id === parseInt(categoryId),
           );
+
           if (currentCategory) {
             setCategoryName(currentCategory.name);
           }
@@ -95,8 +96,9 @@ export default function CategoryProductsPage() {
                       <Image
                         src={product.imageUrl ?? ''}
                         alt={product.name}
-                        layout="fill"
-                        objectFit="cover"
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        className="object-cover"
                       />
                     </div>
                   }

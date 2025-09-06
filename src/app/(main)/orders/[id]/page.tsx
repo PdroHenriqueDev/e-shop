@@ -145,6 +145,7 @@ const OrderDetailsPage = ({params}: OrderDetailsProps) => {
                       src={item.product.image || '/placeholder.svg'}
                       alt={item.product.name}
                       fill
+                      sizes="80px"
                       className="object-cover rounded"
                     />
                   </div>

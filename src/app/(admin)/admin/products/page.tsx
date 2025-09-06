@@ -167,6 +167,7 @@ export default function ProductsPage() {
             src={imageUrl || '/placeholder.jpg'}
             alt="Product"
             fill
+            sizes="48px"
             className="object-cover rounded"
           />
         </div>

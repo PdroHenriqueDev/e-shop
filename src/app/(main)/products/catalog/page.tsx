@@ -137,9 +137,9 @@ export default function ProductCatalog() {
                   <Image
                     alt={product.name}
                     src={product.imageUrl || product.image}
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-lg"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="rounded-lg object-cover"
                   />
                 </div>
               }
