@@ -6,15 +6,16 @@ import {useNotification} from '@/contexts/notificationContext';
 import {useRouter} from 'next/navigation';
 import CustomButton from '@/components/customButtton/customButton';
 import Loading from '@/components/loading/loading';
-
-type CheckoutStep = 'shipping' | 'payment' | 'review';
+import {CHECKOUT_STEP, CheckoutStep} from '@/constants';
 
 export default function Checkout() {
   const {cartItems, cartIsLoading, handleSetCartItems} = useCart();
   const {placeOrder, orderIsLoading} = useOrder();
   const {notify} = useNotification();
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState<CheckoutStep>('shipping');
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>(
+    CHECKOUT_STEP.SHIPPING,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [shippingAddress, setShippingAddress] = useState({
@@ -36,12 +37,12 @@ export default function Checkout() {
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentStep('payment');
+    setCurrentStep(CHECKOUT_STEP.PAYMENT);
   };
 
   const handlePaymentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentStep('review');
+    setCurrentStep(CHECKOUT_STEP.REVIEW);
   };
 
   const handlePlaceOrder = async () => {
@@ -138,22 +139,22 @@ export default function Checkout() {
 
       <div className="flex mb-8 border-b pb-4">
         <div
-          className={`flex-1 text-center pb-2 ${currentStep === 'shipping' ? 'border-b-2 border-secondary font-bold' : ''}`}>
+          className={`flex-1 text-center pb-2 ${currentStep === CHECKOUT_STEP.SHIPPING ? 'border-b-2 border-secondary font-bold' : ''}`}>
           1. Shipping
         </div>
         <div
-          className={`flex-1 text-center pb-2 ${currentStep === 'payment' ? 'border-b-2 border-secondary font-bold' : ''}`}>
+          className={`flex-1 text-center pb-2 ${currentStep === CHECKOUT_STEP.PAYMENT ? 'border-b-2 border-secondary font-bold' : ''}`}>
           2. Payment
         </div>
         <div
-          className={`flex-1 text-center pb-2 ${currentStep === 'review' ? 'border-b-2 border-secondary font-bold' : ''}`}>
+          className={`flex-1 text-center pb-2 ${currentStep === CHECKOUT_STEP.REVIEW ? 'border-b-2 border-secondary font-bold' : ''}`}>
           3. Review & Place Order
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
-          {currentStep === 'shipping' && (
+          {currentStep === CHECKOUT_STEP.SHIPPING && (
             <div className="bg-primary p-6 rounded-lg shadow">
               <h2 className="text-xl font-bold mb-4">Shipping Information</h2>
               <form onSubmit={handleShippingSubmit}>
@@ -266,7 +267,7 @@ export default function Checkout() {
             </div>
           )}
 
-          {currentStep === 'payment' && (
+          {currentStep === CHECKOUT_STEP.PAYMENT && (
             <div className="bg-primary p-6 rounded-lg shadow">
               <h2 className="text-xl font-bold mb-4">Payment Method</h2>
               <form onSubmit={handlePaymentSubmit}>
@@ -317,7 +318,7 @@ export default function Checkout() {
                 <div className="mt-6 flex justify-between gap-4">
                   <CustomButton
                     buttonText="Back to Shipping"
-                    onClick={() => setCurrentStep('shipping')}
+                    onClick={() => setCurrentStep(CHECKOUT_STEP.SHIPPING)}
                     backgroundColor="accent"
                   />
                   <CustomButton buttonText="Continue to Review" type="submit" />
@@ -326,7 +327,7 @@ export default function Checkout() {
             </div>
           )}
 
-          {currentStep === 'review' && (
+          {currentStep === CHECKOUT_STEP.REVIEW && (
             <div className="bg-primary p-6 rounded-lg shadow">
               <h2 className="text-xl font-bold mb-4">Review Your Order</h2>
 
@@ -377,7 +378,7 @@ export default function Checkout() {
               <div className="mt-6 flex justify-between gap-4">
                 <CustomButton
                   buttonText="Back to Payment"
-                  onClick={() => setCurrentStep('payment')}
+                  onClick={() => setCurrentStep(CHECKOUT_STEP.PAYMENT)}
                   backgroundColor="accent"
                 />
                 <CustomButton

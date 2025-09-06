@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import {validateAdminAccess} from '@/lib/adminMiddleware';
 import prisma from '@/lib/prisma';
+import {ORDER_STATUS} from '@/constants';
 
 export async function PUT(
   request: NextRequest,
@@ -24,11 +25,11 @@ export async function PUT(
     }
 
     const validStatuses = [
-      'pending',
-      'processing',
-      'shipped',
-      'delivered',
-      'cancelled',
+      ORDER_STATUS.PENDING,
+      ORDER_STATUS.PROCESSING,
+      ORDER_STATUS.SHIPPED,
+      ORDER_STATUS.DELIVERED,
+      ORDER_STATUS.CANCELLED,
     ];
     if (!validStatuses.includes(status)) {
       return NextResponse.json({error: 'Invalid status'}, {status: 400});

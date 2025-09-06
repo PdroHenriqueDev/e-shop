@@ -4,29 +4,7 @@ import {Table, Button, Modal, Select, Tag, message, Descriptions} from 'antd';
 import {EyeOutlined} from '@ant-design/icons';
 import type {ColumnsType} from 'antd/es/table';
 
-interface OrderItem {
-  id: number;
-  quantity: number;
-  price: number;
-  product: {
-    id: number;
-    name: string;
-    imageUrl?: string;
-  };
-}
-
-interface Order {
-  id: number;
-  status: string;
-  total: number;
-  createdAt: string;
-  user: {
-    id: number;
-    name: string;
-    email: string;
-  };
-  items: OrderItem[];
-}
+import {AdminOrder} from '@/interfaces/admin';
 
 const ORDER_STATUSES = [
   {value: 'pending', label: 'Pending', color: 'orange'},
@@ -37,10 +15,10 @@ const ORDER_STATUSES = [
 ];
 
 export default function OrdersManagement() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -62,7 +40,7 @@ export default function OrdersManagement() {
     }
   };
 
-  const handleStatusUpdate = async (orderId: number, newStatus: string) => {
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     try {
       const response = await fetch(`/api/admin/orders/${orderId}`, {
         method: 'PUT',
@@ -84,7 +62,7 @@ export default function OrdersManagement() {
     }
   };
 
-  const handleViewOrder = (order: Order) => {
+  const handleViewOrder = (order: AdminOrder) => {
     setSelectedOrder(order);
     setModalVisible(true);
   };
@@ -94,7 +72,7 @@ export default function OrdersManagement() {
     return statusConfig?.color || 'default';
   };
 
-  const columns: ColumnsType<Order> = [
+  const columns: ColumnsType<AdminOrder> = [
     {
       title: 'Order ID',
       dataIndex: 'id',

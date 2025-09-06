@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import Stripe from 'stripe';
 import prisma from '@/lib/prisma';
+import {ORDER_STATUS} from '@/constants';
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error('STRIPE_SECRET_KEY is not set');
@@ -91,7 +92,7 @@ async function handleCheckoutSessionCompleted(
       data: {
         paymentStatus: 'PAID',
         paymentIntentId: session.payment_intent as string,
-        status: 'confirmed',
+        status: ORDER_STATUS.CONFIRMED,
       },
     });
 
@@ -120,7 +121,7 @@ async function handlePaymentIntentSucceeded(
       where: {id: order.id},
       data: {
         paymentStatus: 'PAID',
-        status: 'confirmed',
+        status: ORDER_STATUS.CONFIRMED,
       },
     });
 
@@ -147,7 +148,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
       where: {id: order.id},
       data: {
         paymentStatus: 'FAILED',
-        status: 'cancelled',
+        status: ORDER_STATUS.CANCELLED,
       },
     });
 
@@ -170,7 +171,7 @@ async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
       where: {id: parseInt(orderId)},
       data: {
         paymentStatus: 'FAILED',
-        status: 'cancelled',
+        status: ORDER_STATUS.CANCELLED,
       },
     });
 

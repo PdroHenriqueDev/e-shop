@@ -7,11 +7,8 @@ import Loading from '@/components/loading/loading';
 import CustomButton from '@/components/customButtton/customButton';
 import Image from 'next/image';
 
-interface OrderDetailsProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
+import {OrderDetailsProps} from '@/interfaces/checkout';
+import {ORDER_STATUS} from '@/constants';
 
 const OrderDetailsPage = ({params}: OrderDetailsProps) => {
   const {currentOrder, orderIsLoading, fetchOrderById} = useOrder();
@@ -50,11 +47,11 @@ const OrderDetailsPage = ({params}: OrderDetailsProps) => {
     switch (status.toLowerCase()) {
       case 'completed':
         return 'bg-green-100 text-green-800';
-      case 'processing':
+      case ORDER_STATUS.PROCESSING:
         return 'bg-blue-100 text-blue-800';
-      case 'pending':
+      case ORDER_STATUS.PENDING:
         return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
+      case ORDER_STATUS.CANCELLED:
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';

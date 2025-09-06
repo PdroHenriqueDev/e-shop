@@ -23,31 +23,16 @@ import type {ColumnsType} from 'antd/es/table';
 import type {UploadFile} from 'antd/es/upload/interface';
 import Image from 'next/image';
 
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  categoryId: number;
-  category: {
-    id: number;
-    name: string;
-  };
-  imageUrl?: string;
-  createdAt: string;
-}
-
-interface Category {
-  id: number;
-  name: string;
-}
+import {AdminProduct, AdminCategory} from '@/interfaces/admin';
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<AdminProduct | null>(
+    null,
+  );
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
@@ -91,7 +76,7 @@ export default function ProductsPage() {
     setModalVisible(true);
   };
 
-  const handleEdit = (product: Product) => {
+  const handleEdit = (product: AdminProduct) => {
     setEditingProduct(product);
     form.setFieldsValue({
       name: product.name,
@@ -100,13 +85,13 @@ export default function ProductsPage() {
       categoryId: product.categoryId,
     });
     setFileList(
-      product.imageUrl
+      product.image
         ? [
             {
               uid: '-1',
-              name: 'image.jpg',
-              status: 'done' as const,
-              url: product.imageUrl,
+              name: 'image.png',
+              status: 'done',
+              url: product.image,
             },
           ]
         : [],
@@ -114,7 +99,7 @@ export default function ProductsPage() {
     setModalVisible(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/admin/products/${id}`, {
         method: 'DELETE',
@@ -170,7 +155,7 @@ export default function ProductsPage() {
     }
   };
 
-  const columns: ColumnsType<Product> = [
+  const columns: ColumnsType<AdminProduct> = [
     {
       title: 'Image',
       dataIndex: 'imageUrl',

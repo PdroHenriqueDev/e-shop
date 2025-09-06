@@ -9,29 +9,17 @@ import {
 } from '@ant-design/icons';
 import type {ColumnsType} from 'antd/es/table';
 
-interface DashboardStats {
-  totalUsers: number;
-  totalProducts: number;
-  totalOrders: number;
-  totalRevenue: number;
-}
-
-interface RecentOrder {
-  id: number;
-  user: string;
-  total: number;
-  status: string;
-  createdAt: string;
-}
+import {AdminDashboardStats, AdminRecentOrder} from '@/interfaces/admin';
+import {ORDER_STATUS} from '@/constants';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({
+  const [stats, setStats] = useState<AdminDashboardStats>({
     totalUsers: 0,
     totalProducts: 0,
     totalOrders: 0,
     totalRevenue: 0,
   });
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [recentOrders, setRecentOrders] = useState<AdminRecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,7 +50,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const orderColumns: ColumnsType<RecentOrder> = [
+  const orderColumns: ColumnsType<AdminRecentOrder> = [
     {
       title: 'Order ID',
       dataIndex: 'id',
@@ -87,7 +75,7 @@ export default function AdminDashboard() {
         const color =
           status === 'completed'
             ? 'green'
-            : status === 'pending'
+            : status === ORDER_STATUS.PENDING
               ? 'orange'
               : 'red';
         return <Tag color={color}>{status.toUpperCase()}</Tag>;
