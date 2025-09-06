@@ -1,11 +1,15 @@
 import {render, screen, waitFor} from '@testing-library/react';
 import {userEvent} from '@testing-library/user-event';
 import {describe, it, expect, vi, beforeEach, afterEach, Mock} from 'vitest';
-import axios from 'axios';
 import RegisterForm from './registerForm';
 import {useNotification} from '@/contexts/notificationContext';
+import axios from '@/lib/axios';
 
-vi.mock('axios');
+vi.mock('@/lib/axios', () => ({
+  default: {
+    post: vi.fn(),
+  },
+}));
 
 vi.mock('@/contexts/notificationContext', () => ({
   useNotification: vi.fn(),
@@ -72,7 +76,7 @@ describe('RegisterForm', () => {
   });
 
   it('should call handleIsRegister on successful registration', async () => {
-    (axios.post as Mock).mockResolvedValue({});
+    (axios.post as Mock).mockResolvedValue({data: {message: 'Success'}});
 
     const user = userEvent.setup();
     render(<RegisterForm handleIsRegister={mockHandleIsRegister} />);
@@ -146,7 +150,7 @@ describe('RegisterForm', () => {
       }),
     );
 
-    (axios.post as Mock).mockRejectedValue({});
+    (axios.post as Mock).mockRejectedValue(new Error('Network error'));
 
     await user.click(submitButton);
 
