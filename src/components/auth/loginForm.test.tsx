@@ -1,5 +1,6 @@
-import {render, screen, fireEvent, waitFor} from '@testing-library/react';
-import {describe, it, expect, vi, Mock} from 'vitest';
+import {render, screen, waitFor} from '@testing-library/react';
+import {userEvent} from '@testing-library/user-event';
+import {describe, it, expect, vi, beforeEach, afterEach, Mock} from 'vitest';
 import {useRouter} from 'next/navigation';
 import {signIn} from 'next-auth/react';
 import LoginForm from './loginForm';
@@ -17,14 +18,25 @@ vi.mock('@/contexts/notificationContext', () => ({
   useNotification: vi.fn(),
 }));
 
-describe('LoginForm', () => {
-  it('should display validation errors for empty fields', async () => {
-    (useRouter as Mock).mockReturnValue({push: vi.fn()});
-    (useNotification as Mock).mockReturnValue({notify: vi.fn()});
+const mockPush = vi.fn();
+const mockNotify = vi.fn();
 
+describe('LoginForm', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (useRouter as Mock).mockReturnValue({push: mockPush});
+    (useNotification as Mock).mockReturnValue({notify: mockNotify});
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+  it('should display validation errors for empty fields', async () => {
+    const user = userEvent.setup();
     render(<LoginForm />);
 
-    fireEvent.click(screen.getByText('Sign in'));
+    const submitButton = screen.getByRole('button', {name: /^sign in$/i});
+    await user.click(submitButton);
 
     expect(
       await screen.findByText('Invalid email format.'),
@@ -35,23 +47,22 @@ describe('LoginForm', () => {
   });
 
   it('should call signIn and navigate on successful login', async () => {
-    const mockPush = vi.fn();
-    const mockNotify = vi.fn();
+    (signIn as Mock).mockResolvedValue({ok: true, error: null});
 
-    (useRouter as Mock).mockReturnValue({push: mockPush});
-    (useNotification as Mock).mockReturnValue({notify: mockNotify});
-    (signIn as Mock).mockResolvedValue({error: null});
-
+    const user = userEvent.setup();
     render(<LoginForm />);
 
-    fireEvent.input(screen.getByPlaceholderText('Enter your email'), {
-      target: {value: 'test@example.com'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Enter your password'), {
-      target: {value: 'password123'},
-    });
+    await user.type(
+      screen.getByPlaceholderText('Enter your email'),
+      'test@example.com',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your password'),
+      'password123',
+    );
 
-    fireEvent.click(screen.getByText('Sign in'));
+    const submitButton = screen.getByRole('button', {name: /^sign in$/i});
+    await user.click(submitButton);
 
     await waitFor(() =>
       expect(signIn).toHaveBeenCalledWith('credentials', {
@@ -65,23 +76,22 @@ describe('LoginForm', () => {
   });
 
   it('should show notification on login failure', async () => {
-    const mockPush = vi.fn();
-    const mockNotify = vi.fn();
-
-    (useRouter as Mock).mockReturnValue({push: mockPush});
-    (useNotification as Mock).mockReturnValue({notify: mockNotify});
     (signIn as Mock).mockResolvedValue({error: 'Invalid credentials'});
 
+    const user = userEvent.setup();
     render(<LoginForm />);
 
-    fireEvent.input(screen.getByPlaceholderText('Enter your email'), {
-      target: {value: 'test@example.com'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Enter your password'), {
-      target: {value: 'password123'},
-    });
+    await user.type(
+      screen.getByPlaceholderText('Enter your email'),
+      'test@example.com',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your password'),
+      'password123',
+    );
 
-    fireEvent.click(screen.getByText('Sign in'));
+    const submitButton = screen.getByRole('button', {name: /^sign in$/i});
+    await user.click(submitButton);
 
     await waitFor(() =>
       expect(signIn).toHaveBeenCalledWith('credentials', {
