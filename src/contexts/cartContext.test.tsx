@@ -317,9 +317,7 @@ describe('CartContext', () => {
     });
 
     it('should handle update quantity error', async () => {
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error');
       mockAxios.put.mockRejectedValueOnce(new Error('Network error'));
 
       render(
@@ -328,6 +326,7 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
+      await user.click(screen.getByTestId('set-cart-items'));
       await user.click(screen.getByTestId('update-quantity'));
 
       await waitFor(() => {
