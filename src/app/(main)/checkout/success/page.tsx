@@ -1,8 +1,14 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
+import {CheckCircleOutlined} from '@ant-design/icons';
+import axios from '@/lib/axios';
+import {useCart} from '@/contexts/cartContext';
 import {useNotification} from '@/contexts/notificationContext';
+import PageContainer, {
+  ErrorState,
+} from '@/components/pageContainer/pageContainer';
 
 import {CheckoutOrderDetails} from '@/interfaces/checkout';
 
@@ -65,51 +71,23 @@ export default function CheckoutSuccessPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Verifying your payment...</p>
-        </div>
-      </div>
+      <PageContainer
+        isLoading={true}
+        loadingMessage="Verifying your payment...">
+        <div />
+      </PageContainer>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="max-w-md mx-auto text-center p-6">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              className="w-8 h-8 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Payment Verification Failed
-          </h1>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <div className="space-y-3">
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">
-              Try Again
-            </button>
-            <button
-              onClick={() => router.push('/orders')}
-              className="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 transition-colors">
-              View Orders
-            </button>
-          </div>
-        </div>
-      </div>
+      <PageContainer>
+        <ErrorState
+          title="Payment Verification Failed"
+          message={error}
+          onRetry={() => router.push('/checkout')}
+        />
+      </PageContainer>
     );
   }
 

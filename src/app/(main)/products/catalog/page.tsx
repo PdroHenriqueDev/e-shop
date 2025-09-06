@@ -11,6 +11,7 @@ import CustomInput from '@/components/customInput';
 import {useNotification} from '@/contexts/notificationContext';
 import {useCart} from '@/contexts/cartContext';
 import {ProductProps} from '@/interfaces/product';
+import {useRouter} from 'next/navigation';
 
 const FormSchema = z.object({
   searchQuery: z.string().optional(),
@@ -27,6 +28,7 @@ export default function ProductCatalog() {
   );
   const {notify} = useNotification();
   const {addToCart, cartIsLoading} = useCart();
+  const router = useRouter();
 
   const form = useForm<FormData>({
     resolver: zodResolver(FormSchema),
@@ -168,35 +170,43 @@ export default function ProductCatalog() {
               md={8}
               lg={6}
               className="mb-4">
-              <Card
-                hoverable
-                cover={
-                  <div className="w-full h-48 relative">
-                    <Image
-                      alt={product.name}
-                      src={product.imageUrl || product.image}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className="rounded-lg object-cover"
-                    />
+              <div
+                onClick={() => router.push(`/products/${product.id}`)}
+                className="cursor-pointer">
+                <Card
+                  hoverable
+                  cover={
+                    <div className="w-full h-48 relative">
+                      <Image
+                        alt={product.name}
+                        src={product.imageUrl || product.image}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 25vw"
+                        className="rounded-lg object-cover"
+                      />
+                    </div>
+                  }
+                  className="shadow h-80 w-full flex flex-col">
+                  <div className="p-4 flex flex-col h-full">
+                    <h3 className="text-base h-12 leading-4 line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <p className="mt-2 text-accent">${product.price}</p>
+                    <div className="mt-auto">
+                      <div onClick={e => e.stopPropagation()}>
+                        <CustomButton
+                          buttonText={'Add to Cart'}
+                          onClick={() => handleAddToCart(product)}
+                          disabled={cartIsLoading}
+                          backgroundColor={
+                            cartIsLoading ? 'accent' : 'secondary'
+                          }
+                        />
+                      </div>
+                    </div>
                   </div>
-                }
-                className="shadow h-80 w-full flex flex-col">
-                <div className="p-4 flex flex-col h-full">
-                  <h3 className="text-base h-12 leading-4 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="mt-2 text-accent">${product.price}</p>
-                  <div className="mt-auto">
-                    <CustomButton
-                      buttonText={'Add to Cart'}
-                      onClick={() => handleAddToCart(product)}
-                      disabled={cartIsLoading}
-                      backgroundColor={cartIsLoading ? 'accent' : 'secondary'}
-                    />
-                  </div>
-                </div>
-              </Card>
+                </Card>
+              </div>
             </Col>
           ))}
         </Row>
