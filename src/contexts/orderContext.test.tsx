@@ -761,5 +761,68 @@ describe('OrderContext', () => {
 
       consoleSpy.mockRestore();
     });
+
+    it('should reset loading state in finally block on success', async () => {
+      const mockOrderResponse = {
+        id: 1,
+        userId: 1,
+        total: 99.99,
+        status: 'completed',
+        shippingAddress: '123 Test St',
+        paymentMethod: 'credit_card',
+        paymentStatus: 'completed',
+        items: [],
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      mockAxios.post.mockResolvedValueOnce({data: mockOrderResponse});
+
+      render(
+        <OrderProvider>
+          <TestComponent />
+        </OrderProvider>,
+      );
+
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
+
+      await user.click(screen.getByTestId('place-order'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
+      });
+    });
+
+    it('should reset loading state in finally block on verify payment success', async () => {
+      const mockVerifyResponse = {
+        id: 1,
+        userId: 1,
+        total: 99.99,
+        status: 'completed',
+        shippingAddress: '123 Test St',
+        paymentMethod: 'credit_card',
+        paymentStatus: 'completed',
+        stripeSessionId: 'sess_123',
+        items: [],
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      mockAxios.post.mockResolvedValueOnce({data: mockVerifyResponse});
+
+      render(
+        <OrderProvider>
+          <TestComponent />
+        </OrderProvider>,
+      );
+
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
+
+      await user.click(screen.getByTestId('verify-stripe-payment'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
+      });
+    });
   });
 });
