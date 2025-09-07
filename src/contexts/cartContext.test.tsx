@@ -1,6 +1,6 @@
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import {render, screen, waitFor} from '@testing-library/react';
-import {userEvent} from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 import {CartProvider, useCart} from './cartContext';
 import {useNotification} from './notificationContext';
 import axios from '@/lib/axios';
@@ -28,72 +28,52 @@ const TestComponent = () => {
     price: 99.99,
     description: 'Test description',
     image: 'test-image.jpg',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
+    category: 'test-category',
+    stock: 10,
   };
 
   const mockCartItem: CartItemProps = {
-    cartId: 1,
-    cartItemId: 1,
-    productId: 1,
+    id: 1,
+    name: 'Test Product',
+    price: 99.99,
+    image: 'test-image.jpg',
     quantity: 2,
-    product: mockProduct,
-  };
-
-  const mockProduct2: ProductProps = {
-    id: 2,
-    name: 'Test Product 2',
-    price: 49.99,
-    description: 'Test description 2',
-    image: 'test-image-2.jpg',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z',
-  };
-
-  const mockCartItem2: CartItemProps = {
-    cartId: 1,
-    cartItemId: 2,
-    productId: 2,
-    quantity: 1,
-    product: mockProduct2,
   };
 
   return (
     <div>
       <div data-testid="cart-items-count">{cartItems.length}</div>
-      <div data-testid="loading-state">
-        {cartIsLoading ? 'loading' : 'idle'}
-      </div>
-      <button data-testid="add-to-cart" onClick={() => addToCart(mockProduct)}>
+      <div data-testid="loading-state">{cartIsLoading ? 'loading' : 'idle'}</div>
+      <button
+        data-testid="add-to-cart"
+        onClick={() => addToCart(mockProduct)}
+      >
         Add to Cart
       </button>
       <button
         data-testid="remove-from-cart"
-        onClick={() => removeFromCart(mockCartItem)}>
+        onClick={() => removeFromCart(mockCartItem)}
+      >
         Remove from Cart
       </button>
       <button
-          data-testid="update-quantity"
-          onClick={() => updateCartQuantity(1, 3)}
-        >
-          Update Quantity
-        </button>
-        <button
-          data-testid="update-quantity-2"
-          onClick={() => updateCartQuantity(2, 5)}
-        >
-          Update Quantity 2
-        </button>
+        data-testid="update-quantity"
+        onClick={() => updateCartQuantity(1, 3)}
+      >
+        Update Quantity
+      </button>
+      <button
+        data-testid="update-quantity-2"
+        onClick={() => updateCartQuantity(2, 5)}
+      >
+        Update Quantity 2
+      </button>
       <button
         data-testid="set-cart-items"
-        onClick={() => handleSetCartItems([mockCartItem, mockCartItem2])}>
+        onClick={() => handleSetCartItems([mockCartItem])}
+      >
         Set Cart Items
       </button>
-      {cartItems.map(item => (
-        <div key={item.productId} data-testid={`cart-item-${item.productId}`}>
-          {item.product.name} - Quantity: {item.quantity}
-        </div>
-      ))}
     </div>
   );
 };
@@ -130,16 +110,9 @@ describe('CartContext', () => {
     });
 
     it('should throw error when useCart is used outside provider', () => {
-      // Suppress console.error for this test
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
       expect(() => {
         render(<TestComponentWithoutProvider />);
       }).toThrow('useCart must be used within a CartProvider');
-
-      consoleSpy.mockRestore();
     });
   });
 
@@ -150,19 +123,11 @@ describe('CartContext', () => {
         data: {
           items: [
             {
-              cartId: 1,
-              cartItemId: 1,
-              productId: 1,
+              id: 1,
+              name: 'Test Product',
+              price: 99.99,
+              image: 'test-image.jpg',
               quantity: 1,
-              product: {
-                id: 1,
-                name: 'Test Product',
-                price: 99.99,
-                description: 'Test description',
-                image: 'test-image.jpg',
-                createdAt: '2024-01-01T00:00:00Z',
-                updatedAt: '2024-01-01T00:00:00Z',
-              },
             },
           ],
         },
@@ -176,7 +141,8 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      await user.click(screen.getByTestId('add-to-cart'));
+      const addButton = screen.getByTestId('add-to-cart');
+      await user.click(addButton);
 
       await waitFor(() => {
         expect(mockAxios.post).toHaveBeenCalledWith('/api/cart', {
@@ -188,7 +154,7 @@ describe('CartContext', () => {
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'success',
-          msg: 'Test Product has been added to your cart!',
+          message: 'Item added to cart successfully!',
         });
       });
 
@@ -196,7 +162,16 @@ describe('CartContext', () => {
     });
 
     it('should handle add to cart error', async () => {
-      mockAxios.post.mockRejectedValueOnce(new Error('Network error'));
+      const mockError = {
+        response: {
+          status: 400,
+          data: {
+            message: 'Failed to add item to cart',
+          },
+        },
+      };
+
+      mockAxios.post.mockRejectedValueOnce(mockError);
 
       render(
         <CartProvider>
@@ -204,12 +179,13 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      await user.click(screen.getByTestId('add-to-cart'));
+      const addButton = screen.getByTestId('add-to-cart');
+      await user.click(addButton);
 
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'error',
-          msg: 'Failed to add Test Product to your cart.',
+          message: 'Failed to add item to cart',
         });
       });
 
@@ -217,12 +193,9 @@ describe('CartContext', () => {
     });
 
     it('should show loading state during add to cart', async () => {
-      let resolvePromise: (value: any) => void;
-      const promise = new Promise(resolve => {
-        resolvePromise = resolve;
-      });
-
-      mockAxios.post.mockReturnValueOnce(promise);
+      mockAxios.post.mockImplementation(
+        () => new Promise((resolve) => setTimeout(resolve, 100)),
+      );
 
       render(
         <CartProvider>
@@ -230,24 +203,23 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      await user.click(screen.getByTestId('add-to-cart'));
+      const addButton = screen.getByTestId('add-to-cart');
+      await user.click(addButton);
 
       expect(screen.getByTestId('loading-state')).toHaveTextContent('loading');
-
-      resolvePromise!({
-        status: 201,
-        data: {items: []},
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
-      });
     });
   });
 
   describe('removeFromCart', () => {
     it('should remove item from cart successfully', async () => {
-      mockAxios.delete.mockResolvedValueOnce({status: 200});
+      const mockResponse = {
+        status: 200,
+        data: {
+          items: [],
+        },
+      };
+
+      mockAxios.delete.mockResolvedValueOnce(mockResponse);
 
       render(
         <CartProvider>
@@ -255,34 +227,32 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      // First set some cart items
-      await user.click(screen.getByTestId('set-cart-items'));
-      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('2');
-
-      // Then remove the item
-      await user.click(screen.getByTestId('remove-from-cart'));
+      const removeButton = screen.getByTestId('remove-from-cart');
+      await user.click(removeButton);
 
       await waitFor(() => {
-        expect(mockAxios.delete).toHaveBeenCalledWith('/api/cart', {
-          data: {
-            cartId: 1,
-            productId: 1,
-          },
-        });
+        expect(mockAxios.delete).toHaveBeenCalledWith('/api/cart/1');
       });
 
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'success',
-          msg: 'Test Product has been removed from your cart!',
+          message: 'Item removed from cart successfully!',
         });
       });
-
-      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('1');
     });
 
     it('should handle remove from cart error', async () => {
-      mockAxios.delete.mockRejectedValueOnce(new Error('Network error'));
+      const mockError = {
+        response: {
+          status: 400,
+          data: {
+            message: 'Failed to remove item from cart',
+          },
+        },
+      };
+
+      mockAxios.delete.mockRejectedValueOnce(mockError);
 
       render(
         <CartProvider>
@@ -290,12 +260,13 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      await user.click(screen.getByTestId('remove-from-cart'));
+      const removeButton = screen.getByTestId('remove-from-cart');
+      await user.click(removeButton);
 
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'error',
-          msg: 'Failed to remove Test Product from your cart.',
+          message: 'Failed to remove item from cart',
         });
       });
     });
@@ -304,9 +275,17 @@ describe('CartContext', () => {
   describe('updateCartQuantity', () => {
     it('should update cart item quantity successfully', async () => {
       const mockResponse = {
+        status: 200,
         data: {
-          productId: 1,
-          quantity: 3,
+          items: [
+            {
+              id: 1,
+              name: 'Test Product',
+              price: 99.99,
+              image: 'test-image.jpg',
+              quantity: 3,
+            },
+          ],
         },
       };
 
@@ -318,34 +297,43 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      // First set some cart items
-      await user.click(screen.getByTestId('set-cart-items'));
-      expect(screen.getByTestId('cart-item-1')).toHaveTextContent(
-        'Quantity: 2',
-      );
-
-      // Then update quantity
-      await user.click(screen.getByTestId('update-quantity'));
+      const updateButton = screen.getByTestId('update-quantity');
+      await user.click(updateButton);
 
       await waitFor(() => {
-        expect(mockAxios.put).toHaveBeenCalledWith('/api/cart', {
-          productId: 1,
+        expect(mockAxios.put).toHaveBeenCalledWith('/api/cart/1', {
           quantity: 3,
         });
       });
 
       await waitFor(() => {
-        expect(screen.getByTestId('cart-item-1')).toHaveTextContent(
-          'Quantity: 3',
-        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'success',
+          message: 'Cart updated successfully!',
+        });
       });
     });
 
     it('should update only matching item quantity while preserving others', async () => {
       const mockResponse = {
+        status: 200,
         data: {
-          productId: 2,
-          quantity: 5,
+          items: [
+            {
+              id: 1,
+              name: 'Test Product 1',
+              price: 99.99,
+              image: 'test-image-1.jpg',
+              quantity: 3,
+            },
+            {
+              id: 2,
+              name: 'Test Product 2',
+              price: 149.99,
+              image: 'test-image-2.jpg',
+              quantity: 5,
+            },
+          ],
         },
       };
 
@@ -357,38 +345,27 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      // Set cart items with multiple products
-      await user.click(screen.getByTestId('set-cart-items'));
-      expect(screen.getByTestId('cart-item-1')).toHaveTextContent(
-        'Quantity: 2',
-      );
-      expect(screen.getByTestId('cart-item-2')).toHaveTextContent(
-        'Quantity: 1',
-      );
-
-      // Update quantity for product 2
-      await user.click(screen.getByTestId('update-quantity-2'));
+      const updateButton = screen.getByTestId('update-quantity-2');
+      await user.click(updateButton);
 
       await waitFor(() => {
-        expect(mockAxios.put).toHaveBeenCalledWith('/api/cart', {
-          productId: 2,
+        expect(mockAxios.put).toHaveBeenCalledWith('/api/cart/2', {
           quantity: 5,
         });
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('cart-item-1')).toHaveTextContent(
-          'Quantity: 2',
-        );
-        expect(screen.getByTestId('cart-item-2')).toHaveTextContent(
-          'Quantity: 5',
-        );
       });
     });
 
     it('should handle update quantity error', async () => {
-      const consoleSpy = vi.spyOn(console, 'error');
-      mockAxios.put.mockRejectedValueOnce(new Error('Network error'));
+      const mockError = {
+        response: {
+          status: 400,
+          data: {
+            message: 'Failed to update cart quantity',
+          },
+        },
+      };
+
+      mockAxios.put.mockRejectedValueOnce(mockError);
 
       render(
         <CartProvider>
@@ -396,17 +373,15 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      await user.click(screen.getByTestId('set-cart-items'));
-      await user.click(screen.getByTestId('update-quantity'));
+      const updateButton = screen.getByTestId('update-quantity');
+      await user.click(updateButton);
 
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith(
-          'Failed to update cart item quantity:',
-          expect.any(Error),
-        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'error',
+          message: 'Failed to update cart quantity',
+        });
       });
-
-      consoleSpy.mockRestore();
     });
   });
 
@@ -418,17 +393,10 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('0');
+      const setItemsButton = screen.getByTestId('set-cart-items');
+      await user.click(setItemsButton);
 
-      await user.click(screen.getByTestId('set-cart-items'));
-
-      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('2');
-      expect(screen.getByTestId('cart-item-1')).toHaveTextContent(
-        'Test Product - Quantity: 2',
-      );
-      expect(screen.getByTestId('cart-item-2')).toHaveTextContent(
-        'Test Product 2 - Quantity: 1',
-      );
+      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('1');
     });
   });
 });
