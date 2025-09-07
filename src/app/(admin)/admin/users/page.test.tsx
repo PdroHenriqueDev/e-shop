@@ -25,30 +25,33 @@ vi.mock('antd', () => ({
       {children}
     </button>
   ),
-  Modal: ({title, open, onCancel, children}: any) => (
+  Modal: ({title, open, onCancel, children}: any) =>
     open ? (
       <div data-testid="modal">
         <div data-testid="modal-title">{title}</div>
         <div data-testid="modal-content">{children}</div>
-        <button data-testid="modal-close" onClick={onCancel}>Close</button>
+        <button data-testid="modal-close" onClick={onCancel}>
+          Close
+        </button>
       </div>
-    ) : null
-  ),
+    ) : null,
   Form: Object.assign(
     ({children}: any) => <form data-testid="form">{children}</form>,
     {
-      useForm: () => [{
-        resetFields: vi.fn(),
-        setFieldsValue: vi.fn(),
-        validateFields: vi.fn().mockResolvedValue({}),
-      }],
+      useForm: () => [
+        {
+          resetFields: vi.fn(),
+          setFieldsValue: vi.fn(),
+          validateFields: vi.fn().mockResolvedValue({}),
+        },
+      ],
       Item: ({children, label}: any) => (
         <div data-testid="form-item">
           <label>{label}</label>
           {children}
         </div>
       ),
-    }
+    },
   ),
   Input: ({placeholder, value, onChange}: any) => (
     <input
@@ -67,7 +70,9 @@ vi.mock('antd', () => ({
   Popconfirm: ({title, onConfirm, children}: any) => (
     <div data-testid="popconfirm">
       <div data-testid="popconfirm-title">{title}</div>
-      <button data-testid="popconfirm-ok" onClick={onConfirm}>OK</button>
+      <button data-testid="popconfirm-ok" onClick={onConfirm}>
+        OK
+      </button>
       {children}
     </div>
   ),
@@ -107,7 +112,9 @@ const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock console.error
-const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+const mockConsoleError = vi
+  .spyOn(console, 'error')
+  .mockImplementation(() => {});
 
 describe('UsersPage', () => {
   beforeEach(() => {
