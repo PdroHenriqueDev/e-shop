@@ -24,9 +24,7 @@ vi.mock('../customInput', () => ({
     <div data-testid={`input-${id}`}>
       <label>{label}</label>
       <input placeholder={placeholder} />
-      {errorMessage && (
-        <span data-testid={`error-${id}`}>{errorMessage}</span>
-      )}
+      {errorMessage && <span data-testid={`error-${id}`}>{errorMessage}</span>}
     </div>
   ),
 }));
@@ -105,7 +103,7 @@ describe('Form Component', () => {
 
   it('should call onSubmit when form is submitted', async () => {
     const mockOnSubmit = vi.fn();
-    
+
     // Set up mockHandleSubmit to call the onSubmit function
     mockHandleSubmit = vi.fn(fn => (e: any) => {
       e.preventDefault();
@@ -142,8 +140,7 @@ describe('Form Component', () => {
         defaultValues={mockDefaultValues}
         onSubmit={mockOnSubmit}
         fields={mockFields}
-        submitButtonText="Submit"
-      >
+        submitButtonText="Submit">
         <div data-testid="child">Test Child</div>
       </Form>,
     );
@@ -172,11 +169,11 @@ describe('Form Component', () => {
 
   it('should display error messages when validation fails', () => {
     const mockOnSubmit = vi.fn();
-    
+
     // Set mock errors
     mockErrors = {
-      email: { message: 'Invalid email format' },
-      password: { message: 'Password too short' },
+      email: {message: 'Invalid email format'},
+      password: {message: 'Password too short'},
     };
 
     render(
@@ -189,9 +186,13 @@ describe('Form Component', () => {
       />,
     );
 
-    expect(screen.getByTestId('error-email')).toHaveTextContent('Invalid email format');
-    expect(screen.getByTestId('error-password')).toHaveTextContent('Password too short');
-    
+    expect(screen.getByTestId('error-email')).toHaveTextContent(
+      'Invalid email format',
+    );
+    expect(screen.getByTestId('error-password')).toHaveTextContent(
+      'Password too short',
+    );
+
     // Reset errors for other tests
     mockErrors = {};
   });
