@@ -34,12 +34,14 @@ vi.mock('antd', () => {
     </div>
   );
 
-  ListItem.Meta = ({title, description}: any) => (
+  const ListItemMeta = ({title, description}: any) => (
     <div data-testid="list-meta">
       <div data-testid="meta-title">{title}</div>
       <div data-testid="meta-description">{description}</div>
     </div>
   );
+  ListItemMeta.displayName = 'ListItem.Meta';
+  ListItem.Meta = ListItemMeta;
 
   const List = ({dataSource, renderItem}: any) => (
     <div data-testid="list">
