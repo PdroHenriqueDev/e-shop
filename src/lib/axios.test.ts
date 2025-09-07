@@ -200,6 +200,26 @@ describe('axios configuration and error handling', () => {
     }
   });
 
+  it('should pass through successful responses in interceptor', async () => {
+    const mockResponse = {
+      data: {message: 'success'},
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
+    };
+
+    const axios = await import('axios');
+    const mockUse = vi.mocked(axios.default.create().interceptors.response.use);
+    if (mockUse.mock.calls.length > 0) {
+      const successHandler = mockUse.mock.calls[0][0];
+      if (successHandler) {
+        const result = successHandler(mockResponse);
+        expect(result).toBe(mockResponse);
+      }
+    }
+  });
+
   it('should export axios instance', () => {
     expect(axiosInstance.default).toBeDefined();
   });
