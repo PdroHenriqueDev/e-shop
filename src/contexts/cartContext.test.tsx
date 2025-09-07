@@ -28,26 +28,42 @@ const TestComponent = () => {
     price: 99.99,
     description: 'Test description',
     image: 'test-image.jpg',
-    category: 'test-category',
-    stock: 10,
+    createdAt: '2024-01-01T00:00:00Z',
   };
 
   const mockCartItem: CartItemProps = {
-    id: 1,
-    name: 'Test Product',
-    price: 99.99,
-    image: 'test-image.jpg',
+    cartId: 1,
+    cartItemId: 1,
+    productId: 1,
     quantity: 2,
+    product: mockProduct,
   };
+
+  const mockCartItems = [
+    mockCartItem,
+    {
+      cartId: 2,
+      cartItemId: 2,
+      productId: 2,
+      quantity: 1,
+      product: {
+        id: 2,
+        name: 'Test Product 2',
+        price: 149.99,
+        description: 'Test description 2',
+        image: 'test-image-2.jpg',
+        createdAt: '2024-01-01T00:00:00Z',
+      },
+    },
+  ];
 
   return (
     <div>
       <div data-testid="cart-items-count">{cartItems.length}</div>
-      <div data-testid="loading-state">{cartIsLoading ? 'loading' : 'idle'}</div>
-      <button
-        data-testid="add-to-cart"
-        onClick={() => addToCart(mockProduct)}
-      >
+      <div data-testid="loading-state">
+        {cartIsLoading ? 'loading' : 'idle'}
+      </div>
+      <button data-testid="add-to-cart" onClick={() => addToCart(mockProduct)}>
         Add to Cart
       </button>
       <button
@@ -63,16 +79,16 @@ const TestComponent = () => {
         Update Quantity
       </button>
       <button
+        data-testid="set-cart-items"
+        onClick={() => handleSetCartItems(mockCartItems)}
+      >
+        Set Cart Items
+      </button>
+      <button
         data-testid="update-quantity-2"
         onClick={() => updateCartQuantity(2, 5)}
       >
         Update Quantity 2
-      </button>
-      <button
-        data-testid="set-cart-items"
-        onClick={() => handleSetCartItems([mockCartItem])}
-      >
-        Set Cart Items
       </button>
     </div>
   );
@@ -91,6 +107,7 @@ describe('CartContext', () => {
     vi.mocked(useNotification).mockReturnValue({
       notify: mockNotify,
     });
+
   });
 
   afterEach(() => {
@@ -154,7 +171,7 @@ describe('CartContext', () => {
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'success',
-          message: 'Item added to cart successfully!',
+          msg: 'Test Product has been added to your cart!',
         });
       });
 
@@ -185,7 +202,7 @@ describe('CartContext', () => {
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'error',
-          message: 'Failed to add item to cart',
+          msg: 'Failed to add Test Product to your cart.',
         });
       });
 
@@ -194,7 +211,7 @@ describe('CartContext', () => {
 
     it('should show loading state during add to cart', async () => {
       mockAxios.post.mockImplementation(
-        () => new Promise((resolve) => setTimeout(resolve, 100)),
+        () => new Promise(resolve => setTimeout(resolve, 100)),
       );
 
       render(
@@ -231,13 +248,18 @@ describe('CartContext', () => {
       await user.click(removeButton);
 
       await waitFor(() => {
-        expect(mockAxios.delete).toHaveBeenCalledWith('/api/cart/1');
+        expect(mockAxios.delete).toHaveBeenCalledWith('/api/cart', {
+          data: {
+            cartId: 1,
+            productId: 1,
+          },
+        });
       });
 
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'success',
-          message: 'Item removed from cart successfully!',
+          msg: 'Test Product has been removed from your cart!',
         });
       });
     });
@@ -266,7 +288,7 @@ describe('CartContext', () => {
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'error',
-          message: 'Failed to remove item from cart',
+          msg: 'Failed to remove Test Product from your cart.',
         });
       });
     });
@@ -301,7 +323,8 @@ describe('CartContext', () => {
       await user.click(updateButton);
 
       await waitFor(() => {
-        expect(mockAxios.put).toHaveBeenCalledWith('/api/cart/1', {
+        expect(mockAxios.put).toHaveBeenCalledWith('/api/cart', {
+          productId: 1,
           quantity: 3,
         });
       });
@@ -309,31 +332,48 @@ describe('CartContext', () => {
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'success',
-          message: 'Cart updated successfully!',
+          msg: 'Cart updated successfully!',
         });
       });
     });
 
     it('should update only matching item quantity while preserving others', async () => {
+      const mockCartItems = [
+        {
+          cartId: 1,
+          cartItemId: 1,
+          productId: 1,
+          quantity: 2,
+          product: {
+            id: 1,
+            name: 'Test Product 1',
+            price: 99.99,
+            description: 'Test description 1',
+            image: 'test-image-1.jpg',
+        createdAt: '2024-01-01T00:00:00Z',
+      },
+    },
+    {
+      cartId: 2,
+      cartItemId: 2,
+      productId: 2,
+      quantity: 1,
+      product: {
+        id: 2,
+        name: 'Test Product 2',
+        price: 149.99,
+        description: 'Test description 2',
+        image: 'test-image-2.jpg',
+        createdAt: '2024-01-01T00:00:00Z',
+      },
+    },
+      ];
+
       const mockResponse = {
         status: 200,
         data: {
-          items: [
-            {
-              id: 1,
-              name: 'Test Product 1',
-              price: 99.99,
-              image: 'test-image-1.jpg',
-              quantity: 3,
-            },
-            {
-              id: 2,
-              name: 'Test Product 2',
-              price: 149.99,
-              image: 'test-image-2.jpg',
-              quantity: 5,
-            },
-          ],
+          productId: 1,
+          quantity: 5,
         },
       };
 
@@ -345,12 +385,16 @@ describe('CartContext', () => {
         </CartProvider>,
       );
 
-      const updateButton = screen.getByTestId('update-quantity-2');
+      const setItemsButton = screen.getByTestId('set-cart-items');
+      await user.click(setItemsButton);
+
+      const updateButton = screen.getByTestId('update-quantity');
       await user.click(updateButton);
 
       await waitFor(() => {
-        expect(mockAxios.put).toHaveBeenCalledWith('/api/cart/2', {
-          quantity: 5,
+        expect(mockAxios.put).toHaveBeenCalledWith('/api/cart', {
+          productId: 1,
+          quantity: 3,
         });
       });
     });
@@ -379,7 +423,7 @@ describe('CartContext', () => {
       await waitFor(() => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'error',
-          message: 'Failed to update cart quantity',
+          msg: 'Failed to update cart quantity',
         });
       });
     });
@@ -396,7 +440,7 @@ describe('CartContext', () => {
       const setItemsButton = screen.getByTestId('set-cart-items');
       await user.click(setItemsButton);
 
-      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('1');
+      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('2');
     });
   });
 });
