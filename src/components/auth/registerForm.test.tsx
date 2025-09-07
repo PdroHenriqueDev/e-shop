@@ -1,26 +1,39 @@
-import {render, screen, fireEvent, waitFor} from '@testing-library/react';
-import {describe, it, expect, vi, beforeEach, Mock} from 'vitest';
-import axios from 'axios';
+import {render, screen, waitFor} from '@testing-library/react';
+import {userEvent} from '@testing-library/user-event';
+import {describe, it, expect, vi, beforeEach, afterEach, Mock} from 'vitest';
 import RegisterForm from './registerForm';
 import {useNotification} from '@/contexts/notificationContext';
+import axios from '@/lib/axios';
 
-vi.mock('axios');
+vi.mock('@/lib/axios', () => ({
+  default: {
+    post: vi.fn(),
+  },
+}));
 
 vi.mock('@/contexts/notificationContext', () => ({
   useNotification: vi.fn(),
 }));
 
 const mockHandleIsRegister = vi.fn();
+const mockNotify = vi.fn();
 
 describe('RegisterForm', () => {
   beforeEach(() => {
-    (useNotification as Mock).mockReturnValue({notify: vi.fn()});
+    vi.clearAllMocks();
+    (useNotification as Mock).mockReturnValue({notify: mockNotify});
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
   it('should display validation errors for empty fields', async () => {
+    const user = userEvent.setup();
     render(<RegisterForm handleIsRegister={mockHandleIsRegister} />);
 
-    fireEvent.click(screen.getByText('Register'));
+    const submitButton = screen.getByRole('button', {name: /register/i});
+    await user.click(submitButton);
 
     expect(
       await screen.findByText('Username must be at least 2 characters.'),
@@ -34,22 +47,28 @@ describe('RegisterForm', () => {
   });
 
   it('should display error if passwords do not match', async () => {
+    const user = userEvent.setup();
     render(<RegisterForm handleIsRegister={mockHandleIsRegister} />);
 
-    fireEvent.input(screen.getByPlaceholderText('Enter your full name'), {
-      target: {value: 'testuser'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Enter your email'), {
-      target: {value: 'test@example.com'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Enter your password'), {
-      target: {value: 'password123'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Confirm your password'), {
-      target: {value: 'password456'},
-    });
+    await user.type(
+      screen.getByPlaceholderText('Enter your full name'),
+      'testuser',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your email'),
+      'test@example.com',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your password'),
+      'password123',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Confirm your password'),
+      'password456',
+    );
 
-    fireEvent.click(screen.getByText('Register'));
+    const submitButton = screen.getByRole('button', {name: /register/i});
+    await user.click(submitButton);
 
     expect(
       await screen.findByText("Passwords don't match."),
@@ -57,26 +76,30 @@ describe('RegisterForm', () => {
   });
 
   it('should call handleIsRegister on successful registration', async () => {
-    const mockNotify = vi.fn();
-    (useNotification as Mock).mockReturnValue({notify: mockNotify});
-    (axios.post as Mock).mockResolvedValue({});
+    (axios.post as Mock).mockResolvedValue({data: {message: 'Success'}});
 
+    const user = userEvent.setup();
     render(<RegisterForm handleIsRegister={mockHandleIsRegister} />);
 
-    fireEvent.input(screen.getByPlaceholderText('Enter your full name'), {
-      target: {value: 'testuser'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Enter your email'), {
-      target: {value: 'test@example.com'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Enter your password'), {
-      target: {value: 'password123'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Confirm your password'), {
-      target: {value: 'password123'},
-    });
+    await user.type(
+      screen.getByPlaceholderText('Enter your full name'),
+      'testuser',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your email'),
+      'test@example.com',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your password'),
+      'password123',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Confirm your password'),
+      'password123',
+    );
 
-    fireEvent.click(screen.getByText('Register'));
+    const submitButton = screen.getByRole('button', {name: /register/i});
+    await user.click(submitButton);
 
     await waitFor(() =>
       expect(axios.post).toHaveBeenCalledWith('/api/auth/register', {
@@ -90,8 +113,6 @@ describe('RegisterForm', () => {
   });
 
   it('should show notification on registration failure', async () => {
-    const mockNotify = vi.fn();
-    (useNotification as Mock).mockReturnValue({notify: mockNotify});
     (axios.post as Mock).mockRejectedValue({
       response: {
         status: 400,
@@ -99,22 +120,28 @@ describe('RegisterForm', () => {
       },
     });
 
+    const user = userEvent.setup();
     render(<RegisterForm handleIsRegister={mockHandleIsRegister} />);
 
-    fireEvent.input(screen.getByPlaceholderText('Enter your full name'), {
-      target: {value: 'testuser'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Enter your email'), {
-      target: {value: 'test@example.com'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Enter your password'), {
-      target: {value: 'password123'},
-    });
-    fireEvent.input(screen.getByPlaceholderText('Confirm your password'), {
-      target: {value: 'password123'},
-    });
+    await user.type(
+      screen.getByPlaceholderText('Enter your full name'),
+      'testuser',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your email'),
+      'test@example.com',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your password'),
+      'password123',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Confirm your password'),
+      'password123',
+    );
 
-    fireEvent.click(screen.getByText('Register'));
+    const submitButton = screen.getByRole('button', {name: /register/i});
+    await user.click(submitButton);
 
     await waitFor(() =>
       expect(mockNotify).toHaveBeenCalledWith({
@@ -123,9 +150,9 @@ describe('RegisterForm', () => {
       }),
     );
 
-    (axios.post as Mock).mockRejectedValue({});
+    (axios.post as Mock).mockRejectedValue(new Error('Network error'));
 
-    fireEvent.click(screen.getByText('Register'));
+    await user.click(submitButton);
 
     await waitFor(() =>
       expect(mockNotify).toHaveBeenCalledWith({

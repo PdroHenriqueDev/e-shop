@@ -1,6 +1,6 @@
 'use client';
 import React, {useEffect, useState} from 'react';
-import {useParams} from 'next/navigation';
+import {useParams, useRouter} from 'next/navigation';
 import {Card, Col, Row} from 'antd';
 import Image from 'next/image';
 import axios from '@/lib/axios';
@@ -14,6 +14,7 @@ export default function CategoryProductsPage() {
   const [products, setProducts] = useState<ProductProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
+  const router = useRouter();
   const {addToCart} = useCart();
   const {notify} = useNotification();
 
@@ -89,38 +90,48 @@ export default function CategoryProductsPage() {
           <Row gutter={[16, 16]}>
             {products.map(product => (
               <Col key={product.id} xs={24} sm={12} md={8} lg={6}>
-                <Card
-                  hoverable
-                  cover={
-                    <div className="relative w-full h-48">
-                      <Image
-                        src={product.imageUrl ?? ''}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-cover"
-                      />
+                <div
+                  onClick={() => router.push(`/products/${product.id}`)}
+                  className="cursor-pointer">
+                  <Card
+                    hoverable
+                    cover={
+                      <div className="relative w-full h-48">
+                        <Image
+                          src={product.imageUrl ?? ''}
+                          alt={product.name}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          className="object-cover"
+                        />
+                      </div>
+                    }
+                    bodyStyle={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}>
+                    <div className="flex flex-col h-full">
+                      <h3 className="text-lg font-semibold mb-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-gray-600 mb-2 flex-grow">
+                        {product.description}
+                      </p>
+                      <p className="text-xl font-bold text-primary mb-4">
+                        ${product.price}
+                      </p>
+                      <div className="mt-auto">
+                        <div onClick={e => e.stopPropagation()}>
+                          <CustomButton
+                            buttonText="Add to Cart"
+                            onClick={() => handleAddToCart(product)}
+                          />
+                        </div>
+                      </div>
                     </div>
-                  }
-                  className="h-full flex flex-col">
-                  <div className="flex flex-col h-full">
-                    <h3 className="text-lg font-semibold mb-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-gray-600 mb-2 flex-grow">
-                      {product.description}
-                    </p>
-                    <p className="text-xl font-bold text-primary mb-4">
-                      ${product.price}
-                    </p>
-                    <div className="mt-auto">
-                      <CustomButton
-                        buttonText="Add to Cart"
-                        onClick={() => handleAddToCart(product)}
-                      />
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </div>
               </Col>
             ))}
           </Row>

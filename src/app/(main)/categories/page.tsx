@@ -9,6 +9,9 @@ import {ProductProps} from '@/interfaces/product';
 import {Category} from '@/interfaces/category';
 import {useCart} from '@/contexts/cartContext';
 import CustomButton from '@/components/customButtton/customButton';
+import PageContainer, {
+  EmptyState,
+} from '@/components/pageContainer/pageContainer';
 import Loading from '@/components/loading/loading';
 import {useNotification} from '@/contexts/notificationContext';
 
@@ -47,11 +50,9 @@ function CategoryPageContent() {
 
   if (!mounted) {
     return (
-      <div className="container mx-auto py-12 px-5">
-        <div className="flex items-center justify-center w-full">
-          <Loading />
-        </div>
-      </div>
+      <PageContainer isLoading={true} loadingMessage="Initializing...">
+        <div />
+      </PageContainer>
     );
   }
 
@@ -60,16 +61,15 @@ function CategoryPageContent() {
   };
 
   return (
-    <div className="container mx-auto py-12 px-5">
-      <h1 className="text-4xl font-bold text-center mb-8">Browse Categories</h1>
-      {isLoading ? (
-        <div className="flex items-center justify-center w-full">
-          <Loading />
-        </div>
-      ) : categories.length === 0 ? (
-        <div className="text-center text-gray-500">
-          <p>No categories found.</p>
-        </div>
+    <PageContainer
+      title="Browse Categories"
+      isLoading={isLoading}
+      loadingMessage="Loading categories...">
+      {categories.length === 0 ? (
+        <EmptyState
+          title="No Categories Found"
+          message="There are no categories available at the moment."
+        />
       ) : (
         <div>
           <Row gutter={[16, 16]} justify="center">
@@ -97,7 +97,7 @@ function CategoryPageContent() {
           </Row>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }
 
