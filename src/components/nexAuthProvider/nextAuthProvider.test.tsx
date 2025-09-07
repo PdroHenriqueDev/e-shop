@@ -14,8 +14,7 @@ vi.mock('next-auth/react', () => ({
       data-testid="session-provider"
       data-refetch-interval={refetchInterval}
       data-refetch-on-window-focus={String(refetchOnWindowFocus)}
-      data-refetch-when-offline={String(refetchWhenOffline)}
-    >
+      data-refetch-when-offline={String(refetchWhenOffline)}>
       {children}
     </div>
   ),
