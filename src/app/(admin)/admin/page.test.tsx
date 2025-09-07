@@ -129,7 +129,7 @@ describe('AdminDashboard', () => {
       {
         id: '2',
         user: 'Jane Smith',
-        total: 149.50,
+        total: 149.5,
         status: 'pending',
         createdAt: '2024-01-02T00:00:00Z',
       },
@@ -185,12 +185,13 @@ describe('AdminDashboard', () => {
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          totalUsers: 10,
-          totalProducts: 5,
-          totalOrders: 2,
-          totalRevenue: 100,
-        }),
+        json: () =>
+          Promise.resolve({
+            totalUsers: 10,
+            totalProducts: 5,
+            totalOrders: 2,
+            totalRevenue: 100,
+          }),
       } as Response)
       .mockResolvedValueOnce({
         ok: false,
@@ -216,7 +217,7 @@ describe('AdminDashboard', () => {
     await waitFor(() => {
       expect(mockConsoleError).toHaveBeenCalledWith(
         'Failed to fetch dashboard data:',
-        expect.any(Error)
+        expect.any(Error),
       );
     });
 
@@ -230,12 +231,13 @@ describe('AdminDashboard', () => {
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          totalUsers: 1,
-          totalProducts: 2,
-          totalOrders: 3,
-          totalRevenue: 4.56,
-        }),
+        json: () =>
+          Promise.resolve({
+            totalUsers: 1,
+            totalProducts: 2,
+            totalOrders: 3,
+            totalRevenue: 4.56,
+          }),
       } as Response)
       .mockResolvedValueOnce({
         ok: true,
@@ -272,12 +274,13 @@ describe('AdminDashboard', () => {
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          totalUsers: 0,
-          totalProducts: 0,
-          totalOrders: 0,
-          totalRevenue: 0,
-        }),
+        json: () =>
+          Promise.resolve({
+            totalUsers: 0,
+            totalProducts: 0,
+            totalOrders: 0,
+            totalRevenue: 0,
+          }),
       } as Response)
       .mockResolvedValueOnce({
         ok: true,
