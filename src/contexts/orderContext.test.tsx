@@ -188,6 +188,10 @@ describe('OrderContext', () => {
       });
 
       expect(screen.getByTestId('current-order-id')).toHaveTextContent('none');
+
+      await waitFor(() => {
+        expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
+      });
     });
 
     it('should show loading state during place order', async () => {
@@ -455,6 +459,48 @@ describe('OrderContext', () => {
 
       consoleSpy.mockRestore();
     });
+
+    it('should update payment status when currentOrder is null', async () => {
+      const mockOrder = {
+        id: 2,
+        userId: 1,
+        total: 149.99,
+        status: 'pending',
+        shippingAddress: '456 Test Ave',
+        paymentMethod: 'credit_card',
+        paymentStatus: 'completed',
+        stripeSessionId: 'sess_456',
+        paymentIntentId: 'pi_456',
+        items: [],
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      mockAxios.patch.mockResolvedValueOnce({data: mockOrder});
+
+      render(
+        <OrderProvider>
+          <TestComponent />
+        </OrderProvider>,
+      );
+
+      await user.click(screen.getByTestId('update-payment-status'));
+
+      await waitFor(() => {
+        expect(mockAxios.patch).toHaveBeenCalledWith('/api/orders/1', {
+          paymentStatus: 'completed',
+          stripeSessionId: 'sess_123',
+          paymentIntentId: 'pi_123',
+        });
+      });
+
+      await waitFor(() => {
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'success',
+          msg: 'Order payment status updated successfully!',
+        });
+      });
+    });
   });
 
   describe('verifyStripePayment', () => {
@@ -535,6 +581,10 @@ describe('OrderContext', () => {
           type: 'error',
           msg: 'Failed to verify payment status',
         });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
       });
 
       consoleSpy.mockRestore();

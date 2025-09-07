@@ -1,5 +1,6 @@
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import {AxiosError} from 'axios';
+import axios from 'axios';
 
 // Mock axios before importing our module
 vi.mock('axios', () => {
@@ -9,6 +10,10 @@ vi.mock('axios', () => {
         use: vi.fn(),
       },
     },
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   };
 
   return {
@@ -17,6 +22,8 @@ vi.mock('axios', () => {
     },
   };
 });
+
+const mockAxios = vi.mocked(axios);
 
 describe('axios configuration and error handling', () => {
   let mockDispatchEvent: any;
@@ -191,5 +198,9 @@ describe('axios configuration and error handling', () => {
     if (errorHandler) {
       await expect(errorHandler(mockError)).rejects.toBe(mockError);
     }
+  });
+
+  it('should export axios instance', () => {
+    expect(axiosInstance.default).toBeDefined();
   });
 });
