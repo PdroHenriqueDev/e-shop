@@ -108,4 +108,122 @@ describe('LoginForm', () => {
       }),
     );
   });
+
+  it('should handle GitHub sign-in successfully', async () => {
+    (signIn as Mock).mockResolvedValue({ok: true, error: null});
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    const githubButton = screen.getByRole('button', {
+      name: /sign in with github/i,
+    });
+    await user.click(githubButton);
+
+    await waitFor(() =>
+      expect(signIn).toHaveBeenCalledWith('github', {
+        redirect: false,
+      }),
+    );
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/'));
+  });
+
+  it('should show notification on GitHub sign-in failure', async () => {
+    (signIn as Mock).mockResolvedValue({error: 'GitHub auth failed'});
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    const githubButton = screen.getByRole('button', {
+      name: /sign in with github/i,
+    });
+    await user.click(githubButton);
+
+    await waitFor(() =>
+      expect(signIn).toHaveBeenCalledWith('github', {
+        redirect: false,
+      }),
+    );
+
+    await waitFor(() =>
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'error',
+        msg: 'GitHub login failed. Please try again.',
+      }),
+    );
+  });
+
+  it('should display loading state during form submission', async () => {
+    (signIn as Mock).mockImplementation(
+      () => new Promise(resolve => setTimeout(() => resolve({ok: true}), 100)),
+    );
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.type(
+      screen.getByPlaceholderText('Enter your email'),
+      'test@example.com',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your password'),
+      'password123',
+    );
+
+    const submitButton = screen.getByRole('button', {name: /^sign in$/i});
+    await user.click(submitButton);
+
+    // Check that button shows loading state
+    expect(submitButton).toBeDisabled();
+  });
+
+  it('should render forgot password link', () => {
+    render(<LoginForm />);
+
+    const forgotPasswordLink = screen.getByRole('link', {
+      name: /forgot your password/i,
+    });
+    expect(forgotPasswordLink).toBeInTheDocument();
+    expect(forgotPasswordLink).toHaveAttribute('href', 'password-reset');
+  });
+
+  it('should validate email format', async () => {
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.type(
+      screen.getByPlaceholderText('Enter your email'),
+      'invalid-email',
+    );
+    await user.type(
+      screen.getByPlaceholderText('Enter your password'),
+      'password123',
+    );
+
+    const submitButton = screen.getByRole('button', {name: /^sign in$/i});
+    await user.click(submitButton);
+
+    expect(
+      await screen.findByText('Invalid email format.'),
+    ).toBeInTheDocument();
+  });
+
+  it('should validate password length', async () => {
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.type(
+      screen.getByPlaceholderText('Enter your email'),
+      'test@example.com',
+    );
+    await user.type(screen.getByPlaceholderText('Enter your password'), '123');
+
+    const submitButton = screen.getByRole('button', {name: /^sign in$/i});
+    await user.click(submitButton);
+
+    expect(
+      await screen.findByText('Password must be at least 6 characters.'),
+    ).toBeInTheDocument();
+  });
 });
