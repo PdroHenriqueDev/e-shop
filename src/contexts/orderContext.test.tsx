@@ -169,6 +169,96 @@ describe('OrderContext', () => {
       expect(screen.getByTestId('current-order-id')).toHaveTextContent('1');
     });
 
+    it('should verify Stripe payment and update order in list', async () => {
+      const mockOrder1 = {
+        id: 1,
+        userId: 1,
+        total: 99.99,
+        status: 'pending',
+        shippingAddress: '123 Test St',
+        paymentMethod: 'credit_card',
+        paymentStatus: 'pending',
+        stripeSessionId: 'sess_123',
+        items: [],
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      const mockOrder2 = {
+        id: 2,
+        userId: 1,
+        total: 149.99,
+        status: 'completed',
+        shippingAddress: '456 Test Ave',
+        paymentMethod: 'credit_card',
+        paymentStatus: 'completed',
+        stripeSessionId: 'sess_456',
+        items: [],
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      const mockVerifyResponse = {
+        order: {
+          ...mockOrder1,
+          status: 'completed',
+          paymentStatus: 'completed',
+        },
+      };
+
+      mockAxios.get.mockResolvedValueOnce({data: [mockOrder1, mockOrder2]});
+      mockAxios.post.mockResolvedValueOnce({data: mockVerifyResponse});
+
+      render(
+        <OrderProvider>
+          <TestComponent />
+        </OrderProvider>,
+      );
+
+      await user.click(screen.getByTestId('fetch-orders'));
+      await waitFor(() => {
+        expect(screen.getByTestId('orders-count')).toHaveTextContent('2');
+      });
+
+      await user.click(screen.getByTestId('verify-stripe-payment'));
+
+      await waitFor(() => {
+        expect(mockAxios.post).toHaveBeenCalledWith(
+          '/api/stripe/verify-session',
+          {
+            sessionId: 'sess_123',
+          },
+        );
+      });
+
+      expect(screen.getByTestId('current-order-id')).toHaveTextContent('1');
+    });
+
+    it('should handle verify Stripe payment error', async () => {
+      mockAxios.post.mockRejectedValueOnce(new Error('Network error'));
+
+      render(
+        <OrderProvider>
+          <TestComponent />
+        </OrderProvider>,
+      );
+
+      await user.click(screen.getByTestId('verify-stripe-payment'));
+
+      await waitFor(() => {
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'error',
+          msg: 'Failed to verify payment status',
+        });
+      });
+
+      expect(screen.getByTestId('current-order-id')).toHaveTextContent('none');
+
+      await waitFor(() => {
+        expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
+      });
+    });
+
     it('should handle place order error', async () => {
       mockAxios.post.mockRejectedValueOnce(new Error('Network error'));
 
@@ -188,6 +278,24 @@ describe('OrderContext', () => {
       });
 
       expect(screen.getByTestId('current-order-id')).toHaveTextContent('none');
+
+      await waitFor(() => {
+        expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
+      });
+    });
+
+    it('should reset loading state after place order error', async () => {
+      mockAxios.post.mockRejectedValueOnce(new Error('Network error'));
+
+      render(
+        <OrderProvider>
+          <TestComponent />
+        </OrderProvider>,
+      );
+
+      expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
+
+      await user.click(screen.getByTestId('place-order'));
 
       await waitFor(() => {
         expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
@@ -217,6 +325,70 @@ describe('OrderContext', () => {
       await waitFor(() => {
         expect(screen.getByTestId('loading-state')).toHaveTextContent('idle');
       });
+    });
+
+    it('should update payment status when currentOrder has different ID', async () => {
+      const mockCurrentOrder = {
+        id: 2,
+        userId: 1,
+        total: 199.99,
+        status: 'pending',
+        shippingAddress: '789 Test Blvd',
+        paymentMethod: 'credit_card',
+        paymentStatus: 'pending',
+        stripeSessionId: 'sess_789',
+        paymentIntentId: 'pi_789',
+        items: [],
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      const mockUpdatedOrder = {
+        id: 1,
+        userId: 1,
+        total: 99.99,
+        status: 'completed',
+        shippingAddress: '123 Test St',
+        paymentMethod: 'credit_card',
+        paymentStatus: 'completed',
+        stripeSessionId: 'sess_123',
+        paymentIntentId: 'pi_123',
+        items: [],
+        createdAt: '2024-01-01T00:00:00Z',
+        updatedAt: '2024-01-01T00:00:00Z',
+      };
+
+      mockAxios.get.mockResolvedValueOnce({data: [mockCurrentOrder]});
+      mockAxios.get.mockResolvedValueOnce({data: mockCurrentOrder});
+      mockAxios.patch.mockResolvedValueOnce({data: mockUpdatedOrder});
+
+      render(
+        <OrderProvider>
+          <TestComponent />
+        </OrderProvider>,
+      );
+
+      await user.click(screen.getByTestId('fetch-orders'));
+      await waitFor(() => {
+        expect(screen.getByTestId('orders-count')).toHaveTextContent('1');
+      });
+
+      await user.click(screen.getByTestId('fetch-order-by-id'));
+      await waitFor(() => {
+        expect(screen.getByTestId('current-order-id')).toHaveTextContent('2');
+      });
+
+      await user.click(screen.getByTestId('update-payment-status'));
+
+      await waitFor(() => {
+        expect(mockAxios.patch).toHaveBeenCalledWith('/api/orders/1', {
+          paymentStatus: 'completed',
+          stripeSessionId: 'sess_123',
+          paymentIntentId: 'pi_123',
+        });
+      });
+
+      expect(screen.getByTestId('current-order-id')).toHaveTextContent('2');
     });
   });
 
