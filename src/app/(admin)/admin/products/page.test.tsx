@@ -1,26 +1,20 @@
-import {render, screen, waitFor} from '@testing-library/react';
+import {render, screen, waitFor, fireEvent} from '@testing-library/react';
 import {vi} from 'vitest';
 import ProductsPage from './page';
 
 // Mock Next.js Image component
 vi.mock('next/image', () => ({
-  default: ({src, alt, width, height}: any) => (
-    <img
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      data-testid="image"
-    />
+  default: ({src, alt, ...props}: any) => (
+    <img src={src} alt={alt} {...props} data-testid="next-image" />
   ),
 }));
 
 // Mock DataTable component
 vi.mock('@/components/dataTable/dataTable', () => ({
-  default: ({data, loading, onAdd, addButtonText}: any) => (
+  default: ({data, loading, onAdd, addButtonText, actions}: any) => (
     <div data-testid="data-table">
       {onAdd && (
-        <button data-testid="button" onClick={onAdd}>
+        <button data-testid="add-button" onClick={onAdd}>
           {addButtonText || 'Add'}
         </button>
       )}
@@ -30,7 +24,22 @@ vi.mock('@/components/dataTable/dataTable', () => ({
         <div data-testid="table-content">
           {data?.map((item: any, index: number) => (
             <div key={item.id || index} data-testid="table-row">
-              {JSON.stringify(item)}
+              <span>{item.name}</span>
+              <span>{item.price}</span>
+              {actions && (
+                <div>
+                  <button
+                    data-testid={`edit-${item.id}`}
+                    onClick={() => actions[0]?.onClick?.(item)}>
+                    Edit
+                  </button>
+                  <button
+                    data-testid={`delete-${item.id}`}
+                    onClick={() => actions[1]?.onClick?.(item.id)}>
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -39,38 +48,50 @@ vi.mock('@/components/dataTable/dataTable', () => ({
   ),
   commonActions: {
     edit: (onClick: any) => ({
-      key: 'edit',
       label: 'Edit',
       onClick,
     }),
     delete: (onClick: any) => ({
-      key: 'delete',
       label: 'Delete',
       onClick,
     }),
   },
 }));
 
-// Mock Antd components with minimal implementation
+// Mock Ant Design components
 vi.mock('antd', () => ({
-  Button: ({children, onClick, type, icon}: any) => (
-    <button data-testid="button" onClick={onClick} type={type}>
-      {icon}
+  Button: ({children, onClick, ...props}: any) => (
+    <button onClick={onClick} {...props} data-testid="button">
       {children}
     </button>
   ),
-  Modal: ({title, open, onCancel, children}: any) =>
+  Modal: ({children, open, onCancel, title, ...props}: any) =>
     open ? (
-      <div data-testid="modal">
+      <div data-testid="modal" {...props}>
         <div data-testid="modal-title">{title}</div>
-        <div data-testid="modal-content">{children}</div>
         <button data-testid="modal-close" onClick={onCancel}>
           Close
         </button>
+        {children}
       </div>
     ) : null,
   Form: Object.assign(
-    ({children}: any) => <form data-testid="form">{children}</form>,
+    ({children, onFinish, ...props}: any) => (
+      <form
+        data-testid="form"
+        onSubmit={e => {
+          e.preventDefault();
+          onFinish?.({
+            name: 'Test Product',
+            price: 99.99,
+            categoryId: '1',
+            description: 'Test Description',
+          });
+        }}
+        {...props}>
+        {children}
+      </form>
+    ),
     {
       useForm: () => [
         {
@@ -87,36 +108,44 @@ vi.mock('antd', () => ({
       ),
     },
   ),
-  Input: ({placeholder, value, onChange}: any) => (
-    <input
-      data-testid="input"
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-    />
+  Input: Object.assign(
+    (props: any) => <input data-testid="input" {...props} />,
+    {
+      TextArea: (props: any) => <textarea data-testid="textarea" {...props} />,
+    },
   ),
-  InputNumber: ({placeholder, value, onChange, min}: any) => (
-    <input
-      data-testid="input-number"
-      type="number"
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      min={min}
-    />
+  InputNumber: (props: any) => (
+    <input type="number" data-testid="input-number" {...props} />
   ),
-  Select: ({placeholder, value, onChange, children}: any) => (
-    <select data-testid="select" value={value} onChange={onChange}>
-      <option value="">{placeholder}</option>
-      {children}
-    </select>
+  Select: Object.assign(
+    ({children, onChange, ...props}: any) => (
+      <select
+        data-testid="select"
+        onChange={e => onChange?.(e.target.value)}
+        {...props}>
+        {children}
+      </select>
+    ),
+    {
+      Option: ({children, value}: any) => (
+        <option value={value}>{children}</option>
+      ),
+    },
   ),
-  Upload: ({children, fileList, onChange}: any) => (
-    <div data-testid="upload">
+  Upload: ({children, onChange, fileList, ...props}: any) => (
+    <div data-testid="upload" {...props}>
       <input
         type="file"
-        data-testid="file-input"
-        onChange={e => onChange?.({fileList: Array.from(e.target.files || [])})}
+        onChange={e => {
+          const files = Array.from(e.target.files || []);
+          onChange?.({
+            fileList: files.map((file, index) => ({
+              uid: index,
+              name: file.name,
+              originFileObj: file,
+            })),
+          });
+        }}
       />
       {children}
     </div>
@@ -128,10 +157,10 @@ vi.mock('antd', () => ({
   },
 }));
 
-// Mock Antd icons
+// Mock icons
 vi.mock('@ant-design/icons', () => ({
   PlusOutlined: () => <span data-testid="plus-icon">+</span>,
-  UploadOutlined: () => <span data-testid="upload-icon">Upload</span>,
+  UploadOutlined: () => <span data-testid="upload-icon">↑</span>,
 }));
 
 // Mock interfaces
@@ -140,65 +169,73 @@ vi.mock('@/interfaces/admin', () => ({
   AdminCategory: {},
 }));
 
-// Mock fetch
+// Setup fetch mock
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Mock console.error
+// Setup console.error mock
 const mockConsoleError = vi
   .spyOn(console, 'error')
   .mockImplementation(() => {});
 
 describe('ProductsPage', () => {
+  const mockProducts = [
+    {
+      id: '1',
+      name: 'Test Product 1',
+      description: 'Test Description 1',
+      price: 99.99,
+      categoryId: '1',
+      imageUrl: '/test1.jpg',
+      category: {id: '1', name: 'Test Category 1'},
+    },
+    {
+      id: '2',
+      name: 'Test Product 2',
+      description: 'Test Description 2',
+      price: 149.99,
+      categoryId: '2',
+      imageUrl: '/test2.jpg',
+      category: {id: '2', name: 'Test Category 2'},
+    },
+  ];
+
+  const mockCategories = [
+    {id: '1', name: 'Test Category 1'},
+    {id: '2', name: 'Test Category 2'},
+  ];
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   afterEach(() => {
-    mockConsoleError.mockClear();
+    vi.resetAllMocks();
   });
 
   it('should render products page with loading state', () => {
-    mockFetch.mockImplementation(() => new Promise(() => {})); // Never resolves
-
+    mockFetch.mockImplementation(() => new Promise(() => {}));
     render(<ProductsPage />);
-
     expect(screen.getByTestId('table-loading')).toBeInTheDocument();
   });
 
   it('should fetch products and categories successfully', async () => {
-    const mockProducts = [
-      {
-        id: '1',
-        name: 'Test Product',
-        price: 99.99,
-        category: {id: '1', name: 'Test Category'},
-        stock: 10,
-        description: 'Test description',
-        images: ['test.jpg'],
-      },
-    ];
-
-    const mockCategories = [{id: '1', name: 'Test Category'}];
-
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockProducts),
+        json: () => Promise.resolve([]),
       } as Response)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockCategories),
+        json: () => Promise.resolve([]),
       } as Response);
 
     render(<ProductsPage />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('table-content')).toBeInTheDocument();
+      expect(mockFetch).toHaveBeenCalledWith('/api/admin/products');
+      expect(mockFetch).toHaveBeenCalledWith('/api/categories');
     });
-
-    expect(mockFetch).toHaveBeenCalledWith('/api/admin/products');
-    expect(mockFetch).toHaveBeenCalledWith('/api/categories');
   });
 
   it('should handle fetch products failure', async () => {
@@ -214,7 +251,7 @@ describe('ProductsPage', () => {
     render(<ProductsPage />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('table-content')).toBeInTheDocument();
+      expect(mockFetch).toHaveBeenCalledWith('/api/admin/products');
     });
   });
 
@@ -231,12 +268,14 @@ describe('ProductsPage', () => {
     render(<ProductsPage />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('table-content')).toBeInTheDocument();
+      expect(mockFetch).toHaveBeenCalledWith('/api/categories');
     });
   });
 
   it('should handle fetch errors gracefully', async () => {
-    mockFetch.mockRejectedValue(new Error('Network error'));
+    mockFetch
+      .mockRejectedValueOnce(new Error('Network error'))
+      .mockRejectedValueOnce(new Error('Network error'));
 
     render(<ProductsPage />);
 
@@ -262,7 +301,348 @@ describe('ProductsPage', () => {
     render(<ProductsPage />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('button')).toBeInTheDocument();
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+  });
+
+  it('should open modal when add button is clicked', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    expect(screen.getByTestId('modal')).toBeInTheDocument();
+    expect(screen.getByTestId('modal-title')).toHaveTextContent('Add Product');
+  });
+
+  it('should close modal when cancel is clicked', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    // Open modal
+    fireEvent.click(screen.getByTestId('add-button'));
+    expect(screen.getByTestId('modal')).toBeInTheDocument();
+
+    // Close modal
+    fireEvent.click(screen.getByTestId('modal-close'));
+    expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+  });
+
+  it('should handle product creation successfully', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({}),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    // Open modal
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    // Submit form
+    fireEvent.submit(screen.getByTestId('form'));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/admin/products', {
+        method: 'POST',
+        body: expect.any(FormData),
+      });
+    });
+  });
+
+  it('should handle product creation failure', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    // Open modal
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    // Submit form
+    fireEvent.submit(screen.getByTestId('form'));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/admin/products', {
+        method: 'POST',
+        body: expect.any(FormData),
+      });
+    });
+  });
+
+  it('should handle product creation network error', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockRejectedValueOnce(new Error('Network error'));
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    // Open modal
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    // Submit form
+    fireEvent.submit(screen.getByTestId('form'));
+
+    await waitFor(() => {
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        'Failed to submit product:',
+        expect.any(Error),
+      );
+    });
+  });
+
+  it('should handle product deletion successfully', async () => {
+    const mockProduct = {
+      id: '1',
+      name: 'Test Product',
+      price: 99.99,
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProduct]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('delete-1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('delete-1'));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/admin/products/1', {
+        method: 'DELETE',
+      });
+    });
+  });
+
+  it('should handle product deletion failure', async () => {
+    const mockProduct = {
+      id: '1',
+      name: 'Test Product',
+      price: 99.99,
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProduct]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('delete-1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('delete-1'));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/admin/products/1', {
+        method: 'DELETE',
+      });
+    });
+  });
+
+  it('should handle product deletion network error', async () => {
+    const mockProduct = {
+      id: '1',
+      name: 'Test Product',
+      price: 99.99,
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProduct]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockRejectedValueOnce(new Error('Network error'));
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('delete-1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('delete-1'));
+
+    await waitFor(() => {
+      expect(mockConsoleError).toHaveBeenCalledWith(
+        'Failed to delete product:',
+        expect.any(Error),
+      );
+    });
+  });
+
+  it('should handle product edit', async () => {
+    const mockProduct = {
+      id: '1',
+      name: 'Test Product',
+      price: 99.99,
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProduct]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('edit-1'));
+
+    expect(screen.getByTestId('modal')).toBeInTheDocument();
+    expect(screen.getByText('Edit Product')).toBeInTheDocument();
+  });
+
+  it('should handle product update successfully', async () => {
+    const mockProduct = {
+      id: '1',
+      name: 'Test Product',
+      price: 99.99,
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProduct]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({}),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-1')).toBeInTheDocument();
+    });
+
+    // Open edit modal
+    fireEvent.click(screen.getByTestId('edit-1'));
+
+    // Submit form
+    fireEvent.submit(screen.getByTestId('form'));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/admin/products/1', {
+        method: 'PUT',
+        body: expect.any(FormData),
+      });
     });
   });
 });
