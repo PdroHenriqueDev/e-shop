@@ -40,6 +40,24 @@ const TestComponent = () => {
     product: mockProduct,
   };
 
+  const mockProduct2: ProductProps = {
+    id: 2,
+    name: 'Test Product 2',
+    price: 49.99,
+    description: 'Test description 2',
+    image: 'test-image-2.jpg',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+  };
+
+  const mockCartItem2: CartItemProps = {
+    cartId: 1,
+    cartItemId: 2,
+    productId: 2,
+    quantity: 1,
+    product: mockProduct2,
+  };
+
   return (
     <div>
       <div data-testid="cart-items-count">{cartItems.length}</div>
@@ -55,13 +73,20 @@ const TestComponent = () => {
         Remove from Cart
       </button>
       <button
-        data-testid="update-quantity"
-        onClick={() => updateCartQuantity(1, 3)}>
-        Update Quantity
-      </button>
+          data-testid="update-quantity"
+          onClick={() => updateCartQuantity(1, 3)}
+        >
+          Update Quantity
+        </button>
+        <button
+          data-testid="update-quantity-2"
+          onClick={() => updateCartQuantity(2, 5)}
+        >
+          Update Quantity 2
+        </button>
       <button
         data-testid="set-cart-items"
-        onClick={() => handleSetCartItems([mockCartItem])}>
+        onClick={() => handleSetCartItems([mockCartItem, mockCartItem2])}>
         Set Cart Items
       </button>
       {cartItems.map(item => (
@@ -232,7 +257,7 @@ describe('CartContext', () => {
 
       // First set some cart items
       await user.click(screen.getByTestId('set-cart-items'));
-      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('1');
+      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('2');
 
       // Then remove the item
       await user.click(screen.getByTestId('remove-from-cart'));
@@ -253,7 +278,7 @@ describe('CartContext', () => {
         });
       });
 
-      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('0');
+      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('1');
     });
 
     it('should handle remove from cart error', async () => {
@@ -316,6 +341,51 @@ describe('CartContext', () => {
       });
     });
 
+    it('should update only matching item quantity while preserving others', async () => {
+      const mockResponse = {
+        data: {
+          productId: 2,
+          quantity: 5,
+        },
+      };
+
+      mockAxios.put.mockResolvedValueOnce(mockResponse);
+
+      render(
+        <CartProvider>
+          <TestComponent />
+        </CartProvider>,
+      );
+
+      // Set cart items with multiple products
+      await user.click(screen.getByTestId('set-cart-items'));
+      expect(screen.getByTestId('cart-item-1')).toHaveTextContent(
+        'Quantity: 2',
+      );
+      expect(screen.getByTestId('cart-item-2')).toHaveTextContent(
+        'Quantity: 1',
+      );
+
+      // Update quantity for product 2
+      await user.click(screen.getByTestId('update-quantity-2'));
+
+      await waitFor(() => {
+        expect(mockAxios.put).toHaveBeenCalledWith('/api/cart', {
+          productId: 2,
+          quantity: 5,
+        });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('cart-item-1')).toHaveTextContent(
+          'Quantity: 2',
+        );
+        expect(screen.getByTestId('cart-item-2')).toHaveTextContent(
+          'Quantity: 5',
+        );
+      });
+    });
+
     it('should handle update quantity error', async () => {
       const consoleSpy = vi.spyOn(console, 'error');
       mockAxios.put.mockRejectedValueOnce(new Error('Network error'));
@@ -352,9 +422,12 @@ describe('CartContext', () => {
 
       await user.click(screen.getByTestId('set-cart-items'));
 
-      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('1');
+      expect(screen.getByTestId('cart-items-count')).toHaveTextContent('2');
       expect(screen.getByTestId('cart-item-1')).toHaveTextContent(
         'Test Product - Quantity: 2',
+      );
+      expect(screen.getByTestId('cart-item-2')).toHaveTextContent(
+        'Test Product 2 - Quantity: 1',
       );
     });
   });
