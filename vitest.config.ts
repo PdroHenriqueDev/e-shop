@@ -24,6 +24,7 @@ export default defineConfig({
         '**/public/**',
         '**/auth.ts',
         '**/middleware.ts',
+        '**/src/interfaces/**',
       ],
       thresholds: {
         global: {
