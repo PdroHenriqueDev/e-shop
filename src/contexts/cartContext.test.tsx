@@ -68,26 +68,22 @@ const TestComponent = () => {
       </button>
       <button
         data-testid="remove-from-cart"
-        onClick={() => removeFromCart(mockCartItem)}
-      >
+        onClick={() => removeFromCart(mockCartItem)}>
         Remove from Cart
       </button>
       <button
         data-testid="update-quantity"
-        onClick={() => updateCartQuantity(1, 3)}
-      >
+        onClick={() => updateCartQuantity(1, 3)}>
         Update Quantity
       </button>
       <button
         data-testid="set-cart-items"
-        onClick={() => handleSetCartItems(mockCartItems)}
-      >
+        onClick={() => handleSetCartItems(mockCartItems)}>
         Set Cart Items
       </button>
       <button
         data-testid="update-quantity-2"
-        onClick={() => updateCartQuantity(2, 5)}
-      >
+        onClick={() => updateCartQuantity(2, 5)}>
         Update Quantity 2
       </button>
     </div>
@@ -107,7 +103,6 @@ describe('CartContext', () => {
     vi.mocked(useNotification).mockReturnValue({
       notify: mockNotify,
     });
-
   });
 
   afterEach(() => {
@@ -350,23 +345,23 @@ describe('CartContext', () => {
             price: 99.99,
             description: 'Test description 1',
             image: 'test-image-1.jpg',
-        createdAt: '2024-01-01T00:00:00Z',
-      },
-    },
-    {
-      cartId: 2,
-      cartItemId: 2,
-      productId: 2,
-      quantity: 1,
-      product: {
-        id: 2,
-        name: 'Test Product 2',
-        price: 149.99,
-        description: 'Test description 2',
-        image: 'test-image-2.jpg',
-        createdAt: '2024-01-01T00:00:00Z',
-      },
-    },
+            createdAt: '2024-01-01T00:00:00Z',
+          },
+        },
+        {
+          cartId: 2,
+          cartItemId: 2,
+          productId: 2,
+          quantity: 1,
+          product: {
+            id: 2,
+            name: 'Test Product 2',
+            price: 149.99,
+            description: 'Test description 2',
+            image: 'test-image-2.jpg',
+            createdAt: '2024-01-01T00:00:00Z',
+          },
+        },
       ];
 
       const mockResponse = {
