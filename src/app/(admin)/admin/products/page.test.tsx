@@ -11,7 +11,7 @@ vi.mock('next/image', () => ({
 
 // Mock DataTable component
 vi.mock('@/components/dataTable/dataTable', () => ({
-  default: ({data, loading, onAdd, addButtonText, actions}: any) => (
+  default: ({data, loading, onAdd, addButtonText, actions, columns}: any) => (
     <div data-testid="data-table">
       {onAdd && (
         <button data-testid="add-button" onClick={onAdd}>
@@ -24,6 +24,13 @@ vi.mock('@/components/dataTable/dataTable', () => ({
         <div data-testid="table-content">
           {data?.map((item: any, index: number) => (
             <div key={item.id || index} data-testid="table-row">
+              {item.imageUrl && (
+                <img
+                  src={item.imageUrl}
+                  alt="Product"
+                  data-testid="next-image"
+                />
+              )}
               <span>{item.name}</span>
               <span>{item.price}</span>
               {actions && (
@@ -600,6 +607,37 @@ describe('ProductsPage', () => {
     expect(screen.getByText('Edit Product')).toBeInTheDocument();
   });
 
+  it('should handle product edit with image', async () => {
+    const mockProduct = {
+      id: '1',
+      name: 'Test Product',
+      price: 99.99,
+      image: 'test-image.jpg',
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProduct]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('edit-1'));
+
+    expect(screen.getByTestId('modal')).toBeInTheDocument();
+    expect(screen.getByText('Edit Product')).toBeInTheDocument();
+  });
+
   it('should handle product update successfully', async () => {
     const mockProduct = {
       id: '1',
@@ -643,6 +681,128 @@ describe('ProductsPage', () => {
         method: 'PUT',
         body: expect.any(FormData),
       });
+    });
+  });
+
+  it('should handle form submission without file upload', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{id: '1', name: 'Test Category'}]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({}),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument();
+    });
+
+    // Submit form without file upload
+    fireEvent.submit(screen.getByTestId('form'));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/admin/products', {
+        method: 'POST',
+        body: expect.any(FormData),
+      });
+    });
+  });
+
+  it('should render image in data table', async () => {
+    const mockProduct = {
+      id: '1',
+      name: 'Test Product',
+      price: 99.99,
+      imageUrl: 'test-image.jpg',
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProduct]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByAltText('Product')).toBeInTheDocument();
+    });
+  });
+
+  it('should render pagination with showTotal function', async () => {
+    const mockProducts = Array.from({length: 15}, (_, i) => ({
+      id: `${i + 1}`,
+      name: `Test Product ${i + 1}`,
+      price: 99.99,
+      category: {id: '1', name: 'Test Category'},
+    }));
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+    });
+  });
+
+  it('should render category options in select', async () => {
+    const mockCategories = [
+      {id: '1', name: 'Category 1'},
+      {id: '2', name: 'Category 2'},
+    ];
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCategories),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument();
     });
   });
 });
