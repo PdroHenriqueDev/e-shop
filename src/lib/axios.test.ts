@@ -48,7 +48,7 @@ describe('axios configuration and error handling', () => {
     if (mockUse.mock.calls.length > 0) {
       errorHandler = mockUse.mock.calls[0][1]; // Second argument is the error handler
     }
- });
+  });
 
   afterEach(() => {
     global.window = originalWindow;

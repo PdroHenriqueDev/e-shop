@@ -302,7 +302,7 @@ describe('/api/cart', () => {
         where: {id: 1},
         data: {quantity: {increment: 3}},
       });
-     });
+    });
 
     it('should create new cart when none exists', async () => {
       const cartData = {
@@ -358,7 +358,7 @@ describe('/api/cart', () => {
         },
       });
     });
-   });
+  });
 
   describe('PUT /api/cart', () => {
     it('should update cart item quantity successfully', async () => {
