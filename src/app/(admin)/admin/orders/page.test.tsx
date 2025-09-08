@@ -2,22 +2,20 @@ import {render, screen, waitFor, fireEvent} from '@testing-library/react';
 import {vi} from 'vitest';
 import OrdersManagement from './page';
 
-// Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation(query => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   })),
 });
 
-// Mock Antd components
 vi.mock('antd', () => ({
   Table: ({
     columns,
@@ -109,21 +107,17 @@ vi.mock('antd', () => ({
   ),
 }));
 
-// Mock Antd icons
 vi.mock('@ant-design/icons', () => ({
   EyeOutlined: () => <span data-testid="eye-icon">EyeIcon</span>,
 }));
 
-// Mock interfaces
 vi.mock('@/interfaces/admin', () => ({
   AdminOrder: {},
 }));
 
-// Mock fetch
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Mock console.error
 const mockConsoleError = vi
   .spyOn(console, 'error')
   .mockImplementation(() => {});
@@ -138,7 +132,7 @@ describe('OrdersManagement', () => {
   });
 
   it('should render orders management page with loading state', () => {
-    mockFetch.mockImplementation(() => new Promise(() => {})); // Never resolves
+    mockFetch.mockImplementation(() => new Promise(() => {}));
 
     render(<OrdersManagement />);
 
@@ -235,7 +229,6 @@ describe('OrdersManagement', () => {
       expect(screen.getByTestId('table-content')).toBeInTheDocument();
     });
 
-    // Simulate status update
     const select = screen.getByTestId('select');
     fireEvent.change(select, {target: {value: 'processing'}});
 
@@ -277,7 +270,6 @@ describe('OrdersManagement', () => {
       expect(screen.getByTestId('table-content')).toBeInTheDocument();
     });
 
-    // Simulate status update
     const select = screen.getByTestId('select');
     fireEvent.change(select, {target: {value: 'processing'}});
 
@@ -359,19 +351,14 @@ describe('OrdersManagement', () => {
       expect(screen.getByTestId('table-content')).toBeInTheDocument();
     });
 
-    // Click view details button
     const viewButton = screen.getByTestId('button');
     fireEvent.click(viewButton);
 
-    // Modal should be visible
     expect(screen.getByTestId('modal')).toBeInTheDocument();
     expect(screen.getByText('Order Details - #1')).toBeInTheDocument();
 
-    // Close modal
     const closeButton = screen.getByTestId('modal-close');
     fireEvent.click(closeButton);
-
-    // Modal should be closed
     expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
   });
 
