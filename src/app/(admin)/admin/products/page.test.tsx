@@ -11,48 +11,66 @@ vi.mock('next/image', () => ({
 
 // Mock DataTable component
 vi.mock('@/components/dataTable/dataTable', () => ({
-  default: ({data, loading, onAdd, addButtonText, actions, columns}: any) => (
-    <div data-testid="data-table">
-      {onAdd && (
-        <button data-testid="add-button" onClick={onAdd}>
-          {addButtonText || 'Add'}
-        </button>
-      )}
-      {loading ? (
-        <div data-testid="table-loading">Loading...</div>
-      ) : (
-        <div data-testid="table-content">
-          {data?.map((item: any, index: number) => (
-            <div key={item.id || index} data-testid="table-row">
-              {item.imageUrl && (
-                <img
-                  src={item.imageUrl}
-                  alt="Product"
-                  data-testid="next-image"
-                />
-              )}
-              <span>{item.name}</span>
-              <span>{item.price}</span>
-              {actions && (
-                <div>
-                  <button
-                    data-testid={`edit-${item.id}`}
-                    onClick={() => actions[0]?.onClick?.(item)}>
-                    Edit
-                  </button>
-                  <button
-                    data-testid={`delete-${item.id}`}
-                    onClick={() => actions[1]?.onClick?.(item.id)}>
-                    Delete
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  ),
+  default: ({
+    data,
+    loading,
+    onAdd,
+    addButtonText,
+    actions,
+    columns,
+    pagination,
+  }: any) => {
+    // Call showTotal function if provided to trigger line 214
+    const showTotalResult = pagination?.showTotal
+      ? pagination.showTotal(data?.length || 0, [
+          1,
+          Math.min(10, data?.length || 0),
+        ])
+      : null;
+
+    return (
+      <div data-testid="data-table">
+        {onAdd && (
+          <button data-testid="add-button" onClick={onAdd}>
+            {addButtonText || 'Add'}
+          </button>
+        )}
+        {loading ? (
+          <div data-testid="table-loading">Loading...</div>
+        ) : (
+          <div data-testid="table-content">
+            {data?.map((item: any, index: number) => (
+              <div key={item.id || index} data-testid="table-row">
+                {/* Render image column using the actual column render function */}
+                {columns
+                  ?.find((col: any) => col.key === 'imageUrl')
+                  ?.render?.(item.imageUrl)}
+                <span>{item.name}</span>
+                <span>{item.price}</span>
+                {actions && (
+                  <div>
+                    <button
+                      data-testid={`edit-${item.id}`}
+                      onClick={() => actions[0]?.onClick?.(item)}>
+                      Edit
+                    </button>
+                    <button
+                      data-testid={`delete-${item.id}`}
+                      onClick={() => actions[1]?.onClick?.(item.id)}>
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {showTotalResult && (
+          <div data-testid="pagination-info">{showTotalResult}</div>
+        )}
+      </div>
+    );
+  },
   commonActions: {
     edit: (onClick: any) => ({
       label: 'Edit',
@@ -400,6 +418,42 @@ describe('ProductsPage', () => {
     });
   });
 
+  it('should render image with placeholder fallback', async () => {
+    const mockProduct = {
+      id: '1',
+      name: 'Test Product',
+      price: 99.99,
+      imageUrl: null, // No image URL to trigger placeholder
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProduct]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('data-table')).toBeInTheDocument();
+    });
+
+    // Check that the image with placeholder is rendered
+    const images = screen.getAllByTestId('next-image');
+    expect(images.length).toBeGreaterThan(0);
+
+    // Verify the placeholder image source is used when imageUrl is null
+    const placeholderImage = images.find(img =>
+      img.getAttribute('src')?.includes('/placeholder.jpg'),
+    );
+    expect(placeholderImage).toBeInTheDocument();
+  });
+
   it('should handle product creation failure', async () => {
     mockFetch
       .mockResolvedValueOnce({
@@ -607,12 +661,14 @@ describe('ProductsPage', () => {
     expect(screen.getByText('Edit Product')).toBeInTheDocument();
   });
 
-  it('should handle product edit with image', async () => {
+  it('should handle product edit with image and cover fileList logic', async () => {
     const mockProduct = {
       id: '1',
       name: 'Test Product',
       price: 99.99,
       image: 'test-image.jpg',
+      description: 'Test description',
+      categoryId: '1',
       category: {id: '1', name: 'Test Category'},
     };
 
@@ -633,6 +689,39 @@ describe('ProductsPage', () => {
     });
 
     fireEvent.click(screen.getByTestId('edit-1'));
+
+    expect(screen.getByTestId('modal')).toBeInTheDocument();
+    expect(screen.getByText('Edit Product')).toBeInTheDocument();
+  });
+
+  it('should handle product edit without image', async () => {
+    const mockProduct = {
+      id: '2',
+      name: 'Test Product No Image',
+      price: 49.99,
+      image: null,
+      description: 'Test description',
+      categoryId: '1',
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProduct]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('edit-2')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('edit-2'));
 
     expect(screen.getByTestId('modal')).toBeInTheDocument();
     expect(screen.getByText('Edit Product')).toBeInTheDocument();
@@ -803,6 +892,75 @@ describe('ProductsPage', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('modal')).toBeInTheDocument();
+    });
+  });
+
+  it('should handle form submission with file upload', async () => {
+    const mockCategories = [{id: '1', name: 'Test Category'}];
+    const mockFile = new File(['test'], 'test.jpg', {type: 'image/jpeg'});
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCategories),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({id: '1', name: 'Test Product'}),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([{id: '1', name: 'Test Product'}]),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument();
+    });
+
+    // Fill form fields
+    const inputs = screen.getAllByTestId('input');
+    fireEvent.change(inputs[0], {
+      target: {value: 'Test Product'},
+    });
+    fireEvent.change(screen.getByTestId('textarea'), {
+      target: {value: 'Test Description'},
+    });
+    fireEvent.change(screen.getByTestId('input-number'), {
+      target: {value: 99.99},
+    });
+
+    // Simulate file upload
+    const uploadComponent = screen.getByTestId('upload');
+    const fileInput = uploadComponent.querySelector('input[type="file"]');
+    fireEvent.change(fileInput!, {target: {files: [mockFile]}});
+
+    // Submit form
+    const submitButtons = screen.getAllByTestId('button');
+    const submitButton = submitButtons.find(btn =>
+      btn.textContent?.includes('Create'),
+    );
+    fireEvent.click(submitButton!);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/admin/products',
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.any(FormData),
+        }),
+      );
     });
   });
 });
