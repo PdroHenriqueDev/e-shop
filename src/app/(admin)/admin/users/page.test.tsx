@@ -2,7 +2,6 @@ import {render, screen, waitFor} from '@testing-library/react';
 import {vi} from 'vitest';
 import UsersPage from './page';
 
-// Mock Antd components with minimal implementation
 vi.mock('antd', () => ({
   Table: ({columns, dataSource, loading}: any) => (
     <div data-testid="table">
@@ -94,24 +93,20 @@ vi.mock('antd', () => ({
   },
 }));
 
-// Mock Antd icons
 vi.mock('@ant-design/icons', () => ({
   EditOutlined: () => <span data-testid="edit-icon">Edit</span>,
   DeleteOutlined: () => <span data-testid="delete-icon">Delete</span>,
   PlusOutlined: () => <span data-testid="plus-icon">+</span>,
 }));
 
-// Mock interfaces
 vi.mock('@/interfaces/admin', () => ({
   AdminUser: {},
   AdminUserFormData: {},
 }));
 
-// Mock fetch
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Mock console.error
 const mockConsoleError = vi
   .spyOn(console, 'error')
   .mockImplementation(() => {});
@@ -126,7 +121,7 @@ describe('UsersPage', () => {
   });
 
   it('should render users page with loading state', () => {
-    mockFetch.mockImplementation(() => new Promise(() => {})); // Never resolves
+    mockFetch.mockImplementation(() => new Promise(() => {}));
 
     render(<UsersPage />);
 

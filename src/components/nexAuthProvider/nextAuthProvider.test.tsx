@@ -2,7 +2,6 @@ import {describe, it, expect, vi} from 'vitest';
 import {render, screen} from '@testing-library/react';
 import {NextAuthProvider} from './nextAuthProvider';
 
-// Mock next-auth/react
 vi.mock('next-auth/react', () => ({
   SessionProvider: ({
     children,
@@ -26,7 +25,7 @@ describe('NextAuthProvider', () => {
 
     const provider = screen.getByTestId('session-provider');
     expect(provider).toBeInTheDocument();
-    expect(provider).toHaveAttribute('data-refetch-interval', '300'); // 5 * 60
+    expect(provider).toHaveAttribute('data-refetch-interval', '300');
     expect(provider).toHaveAttribute('data-refetch-on-window-focus', 'true');
     expect(provider).toHaveAttribute('data-refetch-when-offline', 'false');
   });
