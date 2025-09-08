@@ -99,8 +99,8 @@ Object.defineProperty(window, 'matchMedia', {
     matches: false,
     media: query,
     onchange: null,
-    addListener: vi.fn(), // deprecated
-    removeListener: vi.fn(), // deprecated
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
@@ -364,12 +364,10 @@ describe('AdminLayout', () => {
       </AdminLayout>,
     );
 
-    // Wait until layout is ready
     await waitFor(() =>
       expect(screen.getByTestId('admin-dropdown')).toBeInTheDocument(),
     );
 
-    // Click the Logout menu item rendered by the Dropdown mock
     const logoutBtn = screen.getByTestId('dropdown-item-logout');
     logoutBtn.click();
 
@@ -390,30 +388,26 @@ describe('AdminLayout', () => {
       </AdminLayout>,
     );
 
-    // Wait until layout is rendered
     await waitFor(() =>
       expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2),
     );
 
-    // Initially collapsed=false -> shows MenuFoldOutlined and sider title "E-Shop Admin"
     expect(screen.getByTestId('menu-fold-icon')).toBeInTheDocument();
-    expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2); // Header + Sider
+    expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2);
 
-    // Click fold icon -> collapsed becomes true -> shows MenuUnfoldOutlined and sider title "Admin"
     screen.getByTestId('menu-fold-icon').click();
 
     await waitFor(() => {
       expect(screen.getByTestId('menu-unfold-icon')).toBeInTheDocument();
       expect(screen.getByText('Admin')).toBeInTheDocument();
-      expect(screen.getAllByText('E-Shop Admin')).toHaveLength(1); // Only header
+      expect(screen.getAllByText('E-Shop Admin')).toHaveLength(1);
     });
 
-    // Click unfold icon -> collapsed=false again -> sider title back to "E-Shop Admin"
     screen.getByTestId('menu-unfold-icon').click();
 
     await waitFor(() => {
       expect(screen.getByTestId('menu-fold-icon')).toBeInTheDocument();
-      expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2); // Header + Sider again
+      expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2);
     });
   });
 });
