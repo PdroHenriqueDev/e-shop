@@ -1,5 +1,6 @@
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import {AxiosError} from 'axios';
+import axios from 'axios';
 
 // Mock axios before importing our module
 vi.mock('axios', () => {
@@ -9,6 +10,10 @@ vi.mock('axios', () => {
         use: vi.fn(),
       },
     },
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
   };
 
   return {
@@ -17,6 +22,8 @@ vi.mock('axios', () => {
     },
   };
 });
+
+const mockAxios = vi.mocked(axios);
 
 describe('axios configuration and error handling', () => {
   let mockDispatchEvent: any;
@@ -191,5 +198,29 @@ describe('axios configuration and error handling', () => {
     if (errorHandler) {
       await expect(errorHandler(mockError)).rejects.toBe(mockError);
     }
+  });
+
+  it('should pass through successful responses in interceptor', async () => {
+    const mockResponse = {
+      data: {message: 'success'},
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
+    };
+
+    const axios = await import('axios');
+    const mockUse = vi.mocked(axios.default.create().interceptors.response.use);
+    if (mockUse.mock.calls.length > 0) {
+      const successHandler = mockUse.mock.calls[0][0];
+      if (successHandler) {
+        const result = successHandler(mockResponse);
+        expect(result).toBe(mockResponse);
+      }
+    }
+  });
+
+  it('should export axios instance', () => {
+    expect(axiosInstance.default).toBeDefined();
   });
 });
