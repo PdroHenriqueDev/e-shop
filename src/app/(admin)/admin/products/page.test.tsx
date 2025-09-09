@@ -2,14 +2,12 @@ import {render, screen, waitFor, fireEvent} from '@testing-library/react';
 import {vi} from 'vitest';
 import ProductsPage from './page';
 
-// Mock Next.js Image component
 vi.mock('next/image', () => ({
   default: ({src, alt, ...props}: any) => (
     <img src={src} alt={alt} {...props} data-testid="next-image" />
   ),
 }));
 
-// Mock DataTable component
 vi.mock('@/components/dataTable/dataTable', () => ({
   default: ({
     data,
@@ -20,7 +18,6 @@ vi.mock('@/components/dataTable/dataTable', () => ({
     columns,
     pagination,
   }: any) => {
-    // Call showTotal function if provided to trigger line 214
     const showTotalResult = pagination?.showTotal
       ? pagination.showTotal(data?.length || 0, [
           1,
@@ -41,7 +38,6 @@ vi.mock('@/components/dataTable/dataTable', () => ({
           <div data-testid="table-content">
             {data?.map((item: any, index: number) => (
               <div key={item.id || index} data-testid="table-row">
-                {/* Render image column using the actual column render function */}
                 {columns
                   ?.find((col: any) => col.key === 'imageUrl')
                   ?.render?.(item.imageUrl)}
@@ -83,7 +79,6 @@ vi.mock('@/components/dataTable/dataTable', () => ({
   },
 }));
 
-// Mock Ant Design components
 vi.mock('antd', () => ({
   Button: ({children, onClick, ...props}: any) => (
     <button onClick={onClick} {...props} data-testid="button">
@@ -182,23 +177,19 @@ vi.mock('antd', () => ({
   },
 }));
 
-// Mock icons
 vi.mock('@ant-design/icons', () => ({
   PlusOutlined: () => <span data-testid="plus-icon">+</span>,
   UploadOutlined: () => <span data-testid="upload-icon">↑</span>,
 }));
 
-// Mock interfaces
 vi.mock('@/interfaces/admin', () => ({
   AdminProduct: {},
   AdminCategory: {},
 }));
 
-// Setup fetch mock
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Setup console.error mock
 const mockConsoleError = vi
   .spyOn(console, 'error')
   .mockImplementation(() => {});
@@ -370,11 +361,9 @@ describe('ProductsPage', () => {
       expect(screen.getByTestId('add-button')).toBeInTheDocument();
     });
 
-    // Open modal
     fireEvent.click(screen.getByTestId('add-button'));
     expect(screen.getByTestId('modal')).toBeInTheDocument();
 
-    // Close modal
     fireEvent.click(screen.getByTestId('modal-close'));
     expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
   });
@@ -404,10 +393,8 @@ describe('ProductsPage', () => {
       expect(screen.getByTestId('add-button')).toBeInTheDocument();
     });
 
-    // Open modal
     fireEvent.click(screen.getByTestId('add-button'));
 
-    // Submit form
     fireEvent.submit(screen.getByTestId('form'));
 
     await waitFor(() => {
@@ -423,7 +410,7 @@ describe('ProductsPage', () => {
       id: '1',
       name: 'Test Product',
       price: 99.99,
-      imageUrl: null, // No image URL to trigger placeholder
+      imageUrl: null,
       category: {id: '1', name: 'Test Category'},
     };
 
@@ -443,11 +430,9 @@ describe('ProductsPage', () => {
       expect(screen.getByTestId('data-table')).toBeInTheDocument();
     });
 
-    // Check that the image with placeholder is rendered
     const images = screen.getAllByTestId('next-image');
     expect(images.length).toBeGreaterThan(0);
 
-    // Verify the placeholder image source is used when imageUrl is null
     const placeholderImage = images.find(img =>
       img.getAttribute('src')?.includes('/placeholder.jpg'),
     );
@@ -474,10 +459,8 @@ describe('ProductsPage', () => {
       expect(screen.getByTestId('add-button')).toBeInTheDocument();
     });
 
-    // Open modal
     fireEvent.click(screen.getByTestId('add-button'));
 
-    // Submit form
     fireEvent.submit(screen.getByTestId('form'));
 
     await waitFor(() => {
@@ -506,10 +489,8 @@ describe('ProductsPage', () => {
       expect(screen.getByTestId('add-button')).toBeInTheDocument();
     });
 
-    // Open modal
     fireEvent.click(screen.getByTestId('add-button'));
 
-    // Submit form
     fireEvent.submit(screen.getByTestId('form'));
 
     await waitFor(() => {
@@ -759,10 +740,8 @@ describe('ProductsPage', () => {
       expect(screen.getByTestId('edit-1')).toBeInTheDocument();
     });
 
-    // Open edit modal
     fireEvent.click(screen.getByTestId('edit-1'));
 
-    // Submit form
     fireEvent.submit(screen.getByTestId('form'));
 
     await waitFor(() => {
@@ -804,7 +783,6 @@ describe('ProductsPage', () => {
       expect(screen.getByTestId('modal')).toBeInTheDocument();
     });
 
-    // Submit form without file upload
     fireEvent.submit(screen.getByTestId('form'));
 
     await waitFor(() => {

@@ -309,7 +309,6 @@ describe('OrdersManagement', () => {
       expect(screen.getByTestId('table-content')).toBeInTheDocument();
     });
 
-    // Simulate status update
     const select = screen.getByTestId('select');
     fireEvent.change(select, {target: {value: 'processing'}});
 

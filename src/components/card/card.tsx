@@ -70,7 +70,6 @@ export default function Card(props: CardProps) {
             key="addToCart"
             buttonText="Add to Cart"
             onClick={() => {
-              // Note: stopPropagation is handled at the button level
               props.onAddToCart?.();
             }}
             isLoading={props.isLoading}

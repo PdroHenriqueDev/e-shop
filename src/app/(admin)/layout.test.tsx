@@ -92,7 +92,6 @@ vi.mock('@ant-design/icons', () => ({
 
 global.fetch = vi.fn();
 
-// Mock window.matchMedia for Antd components
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation(query => ({

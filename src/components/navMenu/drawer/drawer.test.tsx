@@ -3,7 +3,6 @@ import {render, screen, fireEvent, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import CartDrawer from './drawer';
 
-// Mock dependencies
 vi.mock('@/contexts/cartContext', () => ({
   useCart: vi.fn(),
 }));
@@ -93,7 +92,6 @@ vi.mock('@ant-design/icons', () => ({
   ),
 }));
 
-// Import mocked modules
 import {useCart} from '@/contexts/cartContext';
 import {useRouter} from 'next/navigation';
 
@@ -245,7 +243,6 @@ describe('CartDrawer', () => {
     const cartIcon = screen.getByTestId('cart-icon');
     await user.click(cartIcon);
 
-    // Total: (99.99 * 2) + (149.99 * 1) = 349.97
     expect(screen.getByText('$349.97')).toBeInTheDocument();
     expect(screen.getByText('Total:')).toBeInTheDocument();
   });
