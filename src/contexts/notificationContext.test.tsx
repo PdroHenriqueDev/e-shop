@@ -104,7 +104,6 @@ describe('NotificationContext', () => {
         </NotificationProvider>,
       );
 
-      // Dispatch a custom auth-error event
       const authErrorEvent = new CustomEvent('auth-error', {
         detail: {
           message: 'Authentication failed',

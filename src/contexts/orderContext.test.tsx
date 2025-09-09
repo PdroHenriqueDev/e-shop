@@ -113,7 +113,6 @@ describe('OrderContext', () => {
     });
 
     it('should throw error when useOrder is used outside provider', () => {
-      // Suppress console.error for this test
       const consoleSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});

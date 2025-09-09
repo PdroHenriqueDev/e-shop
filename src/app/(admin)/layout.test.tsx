@@ -30,61 +30,81 @@ vi.mock('next/link', () => {
   };
 });
 
-vi.mock('antd', () => {
-  const MockLayout = ({children}: {children: React.ReactNode}) => (
-    <div data-testid="admin-layout">{children}</div>
-  );
-  MockLayout.displayName = 'MockLayout';
-
-  const MockHeader = ({children}: {children: React.ReactNode}) => (
-    <header data-testid="admin-header">{children}</header>
-  );
-  MockHeader.displayName = 'MockHeader';
-  MockLayout.Header = MockHeader;
-
-  const MockSider = ({children}: {children: React.ReactNode}) => (
-    <aside data-testid="admin-sider">{children}</aside>
-  );
-  MockSider.displayName = 'MockSider';
-  MockLayout.Sider = MockSider;
-
-  const MockContent = ({children}: {children: React.ReactNode}) => (
-    <main data-testid="admin-content">{children}</main>
-  );
-  MockContent.displayName = 'MockContent';
-  MockLayout.Content = MockContent;
-
+vi.mock('antd', async () => {
+  const actual = await vi.importActual('antd');
   return {
-    Layout: MockLayout,
-    Menu: ({children}: {children: React.ReactNode}) => (
-      <nav data-testid="admin-menu">{children}</nav>
-    ),
-    Avatar: ({children}: {children: React.ReactNode}) => (
-      <div data-testid="admin-avatar">{children}</div>
-    ),
-    Dropdown: ({children}: {children: React.ReactNode}) => (
-      <div data-testid="admin-dropdown">{children}</div>
-    ),
-    Spin: ({children}: {children: React.ReactNode}) => (
-      <div data-testid="admin-spinner">Loading...</div>
-    ),
-    ConfigProvider: ({children}: {children: React.ReactNode}) => (
-      <div data-testid="config-provider">{children}</div>
+    ...actual,
+    Dropdown: ({children, menu}: any) => (
+      <div data-testid="admin-dropdown">
+        {children}
+        <div data-testid="admin-dropdown-menu">
+          {menu?.items?.map((it: any) => (
+            <button
+              key={it.key}
+              data-testid={`dropdown-item-${it.key}`}
+              onClick={it.onClick}>
+              {typeof it.label === 'string' ? it.label : it.key}
+            </button>
+          ))}
+        </div>
+      </div>
     ),
   };
 });
 
 vi.mock('@ant-design/icons', () => ({
-  DashboardOutlined: () => <span data-testid="dashboard-icon">Dashboard</span>,
-  ShoppingOutlined: () => <span data-testid="shopping-icon">Shopping</span>,
-  UserOutlined: () => <span data-testid="user-icon">User</span>,
-  OrderedListOutlined: () => <span data-testid="orders-icon">Orders</span>,
-  LogoutOutlined: () => <span data-testid="logout-icon">Logout</span>,
-  MenuFoldOutlined: () => <span data-testid="menu-fold-icon">Fold</span>,
-  MenuUnfoldOutlined: () => <span data-testid="menu-unfold-icon">Unfold</span>,
+  DashboardOutlined: (p: any) => (
+    <span data-testid="dashboard-icon" {...p}>
+      Dashboard
+    </span>
+  ),
+  ShoppingOutlined: (p: any) => (
+    <span data-testid="shopping-icon" {...p}>
+      Shopping
+    </span>
+  ),
+  UserOutlined: (p: any) => (
+    <span data-testid="user-icon" {...p}>
+      User
+    </span>
+  ),
+  OrderedListOutlined: (p: any) => (
+    <span data-testid="orders-icon" {...p}>
+      Orders
+    </span>
+  ),
+  LogoutOutlined: (p: any) => (
+    <span data-testid="logout-icon" {...p}>
+      Logout
+    </span>
+  ),
+  MenuFoldOutlined: (p: any) => (
+    <button data-testid="menu-fold-icon" {...p}>
+      Fold
+    </button>
+  ),
+  MenuUnfoldOutlined: (p: any) => (
+    <button data-testid="menu-unfold-icon" {...p}>
+      Unfold
+    </button>
+  ),
 }));
 
 global.fetch = vi.fn();
+
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
 
 const mockPush = vi.fn();
 const mockUseRouter = useRouter as ReturnType<typeof vi.fn>;
@@ -117,8 +137,7 @@ describe('AdminLayout', () => {
       </AdminLayout>,
     );
 
-    expect(screen.getByTestId('admin-spinner')).toBeInTheDocument();
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(document.querySelector('.ant-spin-spinning')).toBeInTheDocument();
   });
 
   it('should redirect to login when no session exists', () => {
@@ -152,7 +171,7 @@ describe('AdminLayout', () => {
       </AdminLayout>,
     );
 
-    expect(screen.getByTestId('admin-spinner')).toBeInTheDocument();
+    expect(document.querySelector('.ant-spin-spinning')).toBeInTheDocument();
   });
 
   it('should redirect to home when admin validation fails', async () => {
@@ -219,10 +238,7 @@ describe('AdminLayout', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('config-provider')).toBeInTheDocument();
-      expect(screen.getByTestId('admin-sider')).toBeInTheDocument();
-      expect(screen.getByTestId('admin-header')).toBeInTheDocument();
-      expect(screen.getByTestId('admin-content')).toBeInTheDocument();
+      expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2);
       expect(screen.getByTestId('test-content')).toBeInTheDocument();
     });
   });
@@ -244,7 +260,7 @@ describe('AdminLayout', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('admin-menu')).toBeInTheDocument();
+      expect(screen.getAllByText('Dashboard')).toHaveLength(2); // Icon + Menu link
     });
   });
 
@@ -286,10 +302,8 @@ describe('AdminLayout', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('config-provider')).toBeInTheDocument();
-      expect(screen.getByTestId('admin-sider')).toBeInTheDocument();
-      expect(screen.getByTestId('admin-header')).toBeInTheDocument();
-      expect(screen.getByTestId('admin-content')).toBeInTheDocument();
+      expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2);
+      expect(screen.getByText('Test Content')).toBeInTheDocument();
     });
   });
 
@@ -332,6 +346,67 @@ describe('AdminLayout', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Admin')).toBeInTheDocument();
+    });
+  });
+
+  it('calls signOut when clicking Logout in the user dropdown', async () => {
+    mockUseSession.mockReturnValue({
+      data: {user: {name: 'Admin User'}},
+      status: 'authenticated',
+    } as any);
+
+    mockFetch.mockResolvedValueOnce({ok: true} as Response);
+
+    render(
+      <AdminLayout>
+        <div>Test Content</div>
+      </AdminLayout>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('admin-dropdown')).toBeInTheDocument(),
+    );
+
+    const logoutBtn = screen.getByTestId('dropdown-item-logout');
+    logoutBtn.click();
+
+    expect(mockSignOut).toHaveBeenCalledTimes(1);
+  });
+
+  it('toggles collapsed state via header icons and updates sider title text', async () => {
+    mockUseSession.mockReturnValue({
+      data: {user: {name: 'Admin User'}},
+      status: 'authenticated',
+    } as any);
+
+    mockFetch.mockResolvedValueOnce({ok: true} as Response);
+
+    render(
+      <AdminLayout>
+        <div>Test Content</div>
+      </AdminLayout>,
+    );
+
+    await waitFor(() =>
+      expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2),
+    );
+
+    expect(screen.getByTestId('menu-fold-icon')).toBeInTheDocument();
+    expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2);
+
+    screen.getByTestId('menu-fold-icon').click();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('menu-unfold-icon')).toBeInTheDocument();
+      expect(screen.getByText('Admin')).toBeInTheDocument();
+      expect(screen.getAllByText('E-Shop Admin')).toHaveLength(1);
+    });
+
+    screen.getByTestId('menu-unfold-icon').click();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('menu-fold-icon')).toBeInTheDocument();
+      expect(screen.getAllByText('E-Shop Admin')).toHaveLength(2);
     });
   });
 });

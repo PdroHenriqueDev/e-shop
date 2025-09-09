@@ -17,13 +17,19 @@ export default function ProductDetails() {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      if (!id) return;
+      if (!id) {
+        setIsLoading(false);
+        return;
+      }
 
       try {
         const response = await axios.get(`/api/products/${id}`);
         const {data} = response;
 
         setProduct(data);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+        setProduct(undefined);
       } finally {
         setIsLoading(false);
       }

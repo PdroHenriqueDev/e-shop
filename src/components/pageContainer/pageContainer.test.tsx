@@ -2,7 +2,6 @@ import {render, screen, fireEvent} from '@testing-library/react';
 import {describe, it, expect, vi} from 'vitest';
 import PageContainer, {EmptyState, ErrorState} from './pageContainer';
 
-// Mock the Loading component
 vi.mock('../loading/loading', () => ({
   default: () => <div data-testid="loading-component">Loading...</div>,
 }));
@@ -135,7 +134,6 @@ describe('PageContainer', () => {
       </PageContainer>,
     );
 
-    // The mb-8 class is only applied when header section exists
     const container = screen.getByTestId('content').parentElement;
     expect(container?.querySelector('.mb-8')).not.toBeInTheDocument();
   });

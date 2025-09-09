@@ -2,7 +2,6 @@ import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import {NextResponse} from 'next/server';
 import {validateAdminAccess, validateUserAccess} from './adminMiddleware';
 
-// Mock dependencies
 vi.mock('../../auth', () => ({
   auth: vi.fn(),
 }));

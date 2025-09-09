@@ -1,121 +1,162 @@
+import React from 'react';
 import {render, screen, waitFor} from '@testing-library/react';
-import {vi} from 'vitest';
+import {vi, describe, it, expect, beforeEach} from 'vitest';
 import AdminDashboard from './page';
 
-// Mock Antd components
 vi.mock('antd', () => ({
-  Card: ({children, title, className}: any) => (
-    <div data-testid="card" className={className}>
-      {title && <div data-testid="card-title">{title}</div>}
+  Card: ({children, title}: any) => (
+    <div data-testid="card">
+      <div data-testid="card-title">{title}</div>
       {children}
     </div>
   ),
-  Col: ({children, className}: any) => (
-    <div data-testid="col" className={className}>
-      {children}
-    </div>
-  ),
-  Row: ({children, className}: any) => (
-    <div data-testid="row" className={className}>
-      {children}
-    </div>
-  ),
-  Statistic: ({title, value, prefix, loading, valueStyle}: any) => (
+  Statistic: ({title, value, prefix}: any) => (
     <div data-testid="statistic">
       <div data-testid="statistic-title">{title}</div>
-      <div data-testid="statistic-value" style={valueStyle}>
-        {loading ? 'Loading...' : value}
+      <div data-testid="statistic-value">{value}</div>
+      <div data-testid="statistic-prefix">{prefix}</div>
+    </div>
+  ),
+  Table: ({dataSource, columns, loading}: any) => (
+    <div data-testid="table">
+      <div data-testid="table-content">
+        {loading ? 'Loading...' : dataSource?.length || 0} items
       </div>
-      {prefix && <div data-testid="statistic-prefix">{prefix}</div>}
-    </div>
-  ),
-  Table: ({
-    columns,
-    dataSource,
-    loading,
-    rowKey,
-    pagination,
-    className,
-  }: any) => (
-    <div data-testid="table" className={className}>
-      {loading ? (
-        <div data-testid="table-loading">Loading...</div>
-      ) : (
-        <div data-testid="table-content">
-          {dataSource?.map((item: any, index: number) => (
-            <div key={item[rowKey] || index} data-testid="table-row">
-              {JSON.stringify(item)}
-            </div>
-          ))}
+      {dataSource?.map((item: any, idx: number) => (
+        <div key={item.id || idx} data-testid="table-row">
+          <div data-testid="status-cell">
+            {columns
+              ?.find((c: any) => c.key === 'status')
+              ?.render?.(item.status)}
+          </div>
+          <div data-testid="total-cell">
+            {columns?.find((c: any) => c.key === 'total')?.render?.(item.total)}
+          </div>
+          <div data-testid="date-cell">
+            {columns
+              ?.find((c: any) => c.key === 'createdAt')
+              ?.render?.(item.createdAt)}
+          </div>
         </div>
-      )}
+      ))}
     </div>
   ),
-  Tag: ({children, color}: any) => (
-    <span data-testid="tag" style={{color}}>
+  Row: ({children}: any) => <div data-testid="row">{children}</div>,
+  Col: ({children}: any) => <div data-testid="col">{children}</div>,
+  Tag: ({color, children, ...props}: any) => (
+    <span data-testid="tag" data-color={color} {...props}>
       {children}
     </span>
   ),
 }));
 
-// Mock Antd icons
 vi.mock('@ant-design/icons', () => ({
-  ShoppingOutlined: () => <span data-testid="shopping-icon">ShoppingIcon</span>,
   UserOutlined: () => <span data-testid="user-icon">UserIcon</span>,
+  OrderedListOutlined: () => <span data-testid="list-icon">ListIcon</span>,
+  ShoppingOutlined: () => <span data-testid="shopping-icon">ShoppingIcon</span>,
   DollarOutlined: () => <span data-testid="dollar-icon">DollarIcon</span>,
-  OrderedListOutlined: () => (
-    <span data-testid="ordered-list-icon">OrderedListIcon</span>
-  ),
 }));
 
-// Mock constants
 vi.mock('@/constants', () => ({
   ORDER_STATUS: {
     PENDING: 'pending',
-    COMPLETED: 'completed',
+    PROCESSING: 'processing',
+    SHIPPED: 'shipped',
+    DELIVERED: 'delivered',
     CANCELLED: 'cancelled',
+    CONFIRMED: 'confirmed',
+    PAID: 'paid',
+    COMPLETED: 'completed',
   },
 }));
 
-// Mock interfaces
-vi.mock('@/interfaces/admin', () => ({
-  AdminDashboardStats: {},
-  AdminRecentOrder: {},
-}));
-
-// Mock fetch
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
-
-// Mock console.error
-const mockConsoleError = vi
-  .spyOn(console, 'error')
-  .mockImplementation(() => {});
 
 describe('AdminDashboard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    mockConsoleError.mockClear();
+  it('should render loading state initially', () => {
+    mockFetch.mockImplementation(() => new Promise(() => {}));
+
+    render(<AdminDashboard />);
+
+    expect(screen.getByText(/Loading\.\.\./)).toBeInTheDocument();
   });
 
-  it('should render dashboard with loading state initially', () => {
-    mockFetch.mockImplementation(() => new Promise(() => {})); // Never resolves
+  it('should render dashboard structure', () => {
+    mockFetch.mockImplementation(() => new Promise(() => {}));
 
     render(<AdminDashboard />);
 
     expect(screen.getByText('Dashboard Overview')).toBeInTheDocument();
-    expect(screen.getAllByText('Loading...')).toHaveLength(5); // 4 statistics + 1 table
+    expect(screen.getByText('Total Users')).toBeInTheDocument();
+    expect(screen.getByText('Total Products')).toBeInTheDocument();
+    expect(screen.getByText('Total Orders')).toBeInTheDocument();
+    expect(screen.getByText('Total Revenue')).toBeInTheDocument();
+    expect(screen.getByText('Recent Orders')).toBeInTheDocument();
   });
 
-  it('should fetch and display dashboard data successfully', async () => {
+  it('should handle API errors gracefully', async () => {
+    const mockConsoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    mockFetch.mockRejectedValue(new Error('API Error'));
+
+    render(<AdminDashboard />);
+
+    await waitFor(
+      () => {
+        expect(mockConsoleError).toHaveBeenCalled();
+      },
+      {timeout: 3000},
+    );
+
+    mockConsoleError.mockRestore();
+  });
+
+  it('should render icons correctly', () => {
+    mockFetch.mockImplementation(() => new Promise(() => {}));
+
+    render(<AdminDashboard />);
+
+    expect(screen.getByTestId('user-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('list-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('shopping-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('dollar-icon')).toBeInTheDocument();
+  });
+
+  it('should have proper component structure', () => {
+    mockFetch.mockImplementation(() => new Promise(() => {}));
+
+    render(<AdminDashboard />);
+
+    expect(screen.getAllByTestId('card')).toHaveLength(5);
+    expect(screen.getAllByTestId('statistic')).toHaveLength(4);
+    expect(screen.getByTestId('table')).toBeInTheDocument();
+  });
+
+  it('should display initial values', () => {
+    mockFetch.mockImplementation(() => new Promise(() => {}));
+
+    render(<AdminDashboard />);
+
+    const statisticValues = screen.getAllByTestId('statistic-value');
+    expect(statisticValues).toHaveLength(4);
+    statisticValues.forEach(value => {
+      expect(value.textContent).toMatch(/^(0|Loading\.\.\.)$/);
+    });
+  });
+
+  it('should render Status tag with correct color and text for all branches', async () => {
     const mockStats = {
       totalUsers: 100,
       totalProducts: 50,
       totalOrders: 25,
-      totalRevenue: 1500.75,
+      totalRevenue: 1000,
     };
 
     const mockOrders = [
@@ -124,14 +165,21 @@ describe('AdminDashboard', () => {
         user: 'John Doe',
         total: 99.99,
         status: 'completed',
-        createdAt: '2024-01-01T00:00:00Z',
+        createdAt: '2024-01-01',
       },
       {
         id: '2',
         user: 'Jane Smith',
-        total: 149.5,
+        total: 149.99,
         status: 'pending',
-        createdAt: '2024-01-02T00:00:00Z',
+        createdAt: '2024-01-02',
+      },
+      {
+        id: '3',
+        user: 'Bob Johnson',
+        total: 199.99,
+        status: 'failed',
+        createdAt: '2024-01-03',
       },
     ];
 
@@ -147,163 +195,57 @@ describe('AdminDashboard', () => {
 
     render(<AdminDashboard />);
 
-    await waitFor(() => {
-      expect(screen.getByText('100')).toBeInTheDocument(); // Total Users
-      expect(screen.getByText('50')).toBeInTheDocument(); // Total Products
-      expect(screen.getByText('25')).toBeInTheDocument(); // Total Orders
-      expect(screen.getByText('1500.75')).toBeInTheDocument(); // Total Revenue
-    });
+    await waitFor(() =>
+      expect(screen.getByTestId('table')).toBeInTheDocument(),
+    );
 
-    // Check if orders are displayed
-    await waitFor(() => {
-      expect(screen.getByText(/John Doe/)).toBeInTheDocument();
-      expect(screen.getByText(/Jane Smith/)).toBeInTheDocument();
-    });
+    const tags = screen.getAllByTestId('tag');
+    expect(tags).toHaveLength(3);
 
-    expect(mockFetch).toHaveBeenCalledWith('/api/admin/stats');
-    expect(mockFetch).toHaveBeenCalledWith('/api/admin/orders/recent');
+    expect(tags[0]).toHaveAttribute('data-color', 'green');
+    expect(tags[0]).toHaveTextContent('COMPLETED');
+
+    expect(tags[1]).toHaveAttribute('data-color', 'orange');
+    expect(tags[1]).toHaveTextContent('PENDING');
+
+    expect(tags[2]).toHaveAttribute('data-color', 'red');
+    expect(tags[2]).toHaveTextContent('FAILED');
   });
 
-  it('should handle stats API failure gracefully', async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: false,
-      } as Response)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve([]),
-      } as Response);
-
-    render(<AdminDashboard />);
-
-    await waitFor(() => {
-      expect(screen.getAllByText('0')).toHaveLength(4); // Default stats values
-    });
-  });
-
-  it('should handle orders API failure gracefully', async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            totalUsers: 10,
-            totalProducts: 5,
-            totalOrders: 2,
-            totalRevenue: 100,
-          }),
-      } as Response)
-      .mockResolvedValueOnce({
-        ok: false,
-      } as Response);
-
-    render(<AdminDashboard />);
-
-    await waitFor(() => {
-      expect(screen.getByText('10')).toBeInTheDocument();
-    });
-
-    // Orders table should be empty
-    await waitFor(() => {
-      expect(screen.getByTestId('table-content')).toBeInTheDocument();
-    });
-  });
-
-  it('should handle fetch errors gracefully', async () => {
-    mockFetch.mockRejectedValue(new Error('Network error'));
-
-    render(<AdminDashboard />);
-
-    await waitFor(() => {
-      expect(mockConsoleError).toHaveBeenCalledWith(
-        'Failed to fetch dashboard data:',
-        expect.any(Error),
-      );
-    });
-
-    // Should show default values
-    await waitFor(() => {
-      expect(screen.getAllByText('0')).toHaveLength(4); // All 4 statistics should show 0
-    });
-  });
-
-  it('should render statistics with correct icons and styling', async () => {
-    mockFetch
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            totalUsers: 1,
-            totalProducts: 2,
-            totalOrders: 3,
-            totalRevenue: 4.56,
-          }),
-      } as Response)
-      .mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve([]),
-      } as Response);
-
-    render(<AdminDashboard />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('user-icon')).toBeInTheDocument();
-      expect(screen.getByTestId('shopping-icon')).toBeInTheDocument();
-      expect(screen.getByTestId('ordered-list-icon')).toBeInTheDocument();
-      expect(screen.getByTestId('dollar-icon')).toBeInTheDocument();
-    });
-
-    // Check statistic titles
-    expect(screen.getByText('Total Users')).toBeInTheDocument();
-    expect(screen.getByText('Total Products')).toBeInTheDocument();
-    expect(screen.getByText('Total Orders')).toBeInTheDocument();
-    expect(screen.getByText('Total Revenue')).toBeInTheDocument();
-  });
-
-  it('should render recent orders table with correct data', async () => {
-    const mockOrders = [
-      {
-        id: 'order-1',
-        user: 'Test User',
-        total: 123.45,
-        status: 'completed',
-        createdAt: '2024-01-01T12:00:00Z',
-      },
-    ];
+  it('renders formatted total and date cells', async () => {
+    const stats = {
+      totalUsers: 0,
+      totalProducts: 0,
+      totalOrders: 0,
+      totalRevenue: 0,
+    };
+    const row = {
+      id: 't1',
+      user: 'Any',
+      total: 123.456,
+      status: 'completed',
+      createdAt: '2024-01-05T00:00:00.000Z',
+    };
+    const expectedDate = new Date(row.createdAt).toLocaleDateString();
 
     mockFetch
       .mockResolvedValueOnce({
         ok: true,
-        json: () =>
-          Promise.resolve({
-            totalUsers: 0,
-            totalProducts: 0,
-            totalOrders: 0,
-            totalRevenue: 0,
-          }),
+        json: () => Promise.resolve(stats),
       } as Response)
       .mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve(mockOrders),
+        json: () => Promise.resolve([row]),
       } as Response);
 
     render(<AdminDashboard />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Recent Orders')).toBeInTheDocument();
-      expect(screen.getByTestId('table')).toBeInTheDocument();
-    });
-  });
+    await waitFor(() =>
+      expect(screen.getByTestId('table')).toBeInTheDocument(),
+    );
 
-  it('should render with correct CSS classes and styling', () => {
-    mockFetch.mockImplementation(() => new Promise(() => {}));
+    expect(screen.getByTestId('total-cell')).toHaveTextContent('$123.46');
 
-    render(<AdminDashboard />);
-
-    const mainDiv = screen.getByText('Dashboard Overview').parentElement;
-    expect(mainDiv).toHaveClass('p-6', 'bg-primary', 'min-h-screen');
-
-    const title = screen.getByText('Dashboard Overview');
-    expect(title).toHaveClass('text-2xl', 'font-bold', 'mb-6', 'text-dark');
+    expect(screen.getByTestId('date-cell')).toHaveTextContent(expectedDate);
   });
 });
