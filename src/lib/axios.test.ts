@@ -47,7 +47,8 @@ describe('axios configuration and error handling', () => {
     vi.clearAllMocks();
 
     // Import the axios instance to trigger code execution
-    axiosInstance = await import('./axios');
+    const axiosModule = await import('./axios');
+    axiosInstance = axiosModule.default;
 
     // Get the error handler from the interceptor setup
     const axios = await import('axios');
@@ -63,7 +64,7 @@ describe('axios configuration and error handling', () => {
   });
 
   it('should create axios instance and set up interceptor', () => {
-    expect(axiosInstance.default).toBeDefined();
+    expect(axiosInstance).toBeDefined();
   });
 
   it('should handle 401 errors in interceptor and dispatch auth-error event', async () => {
@@ -221,6 +222,6 @@ describe('axios configuration and error handling', () => {
   });
 
   it('should export axios instance', () => {
-    expect(axiosInstance.default).toBeDefined();
+    expect(axiosInstance).toBeDefined();
   });
 });
