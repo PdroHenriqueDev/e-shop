@@ -1,14 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { NextResponse } from 'next/server';
-import { GET } from './route';
-import { validateAdminAccess } from '@/lib/adminMiddleware';
+import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {NextResponse} from 'next/server';
+import {GET} from './route';
+import {validateAdminAccess} from '@/lib/adminMiddleware';
 
-// Mock the validateAdminAccess function
 vi.mock('@/lib/adminMiddleware', () => ({
   validateAdminAccess: vi.fn(),
 }));
 
-const mockValidateAdminAccess = validateAdminAccess as vi.MockedFunction<typeof validateAdminAccess>;
+const mockValidateAdminAccess = validateAdminAccess as vi.MockedFunction<
+  typeof validateAdminAccess
+>;
 
 describe('Admin Validate API', () => {
   beforeEach(() => {
@@ -69,8 +70,8 @@ describe('Admin Validate API', () => {
     describe('Authentication Failure', () => {
       it('returns error response when admin access is invalid', async () => {
         const mockErrorResponse = NextResponse.json(
-          { error: 'Unauthorized' },
-          { status: 401 }
+          {error: 'Unauthorized'},
+          {status: 401},
         );
 
         mockValidateAdminAccess.mockResolvedValue({
@@ -86,8 +87,8 @@ describe('Admin Validate API', () => {
 
       it('returns 403 error when user is not admin', async () => {
         const mockErrorResponse = NextResponse.json(
-          { error: 'Forbidden: Admin access required' },
-          { status: 403 }
+          {error: 'Forbidden: Admin access required'},
+          {status: 403},
         );
 
         mockValidateAdminAccess.mockResolvedValue({
@@ -103,8 +104,8 @@ describe('Admin Validate API', () => {
 
       it('returns 401 error when no token is provided', async () => {
         const mockErrorResponse = NextResponse.json(
-          { error: 'No token provided' },
-          { status: 401 }
+          {error: 'No token provided'},
+          {status: 401},
         );
 
         mockValidateAdminAccess.mockResolvedValue({
@@ -120,8 +121,8 @@ describe('Admin Validate API', () => {
 
       it('returns 401 error when token is invalid', async () => {
         const mockErrorResponse = NextResponse.json(
-          { error: 'Invalid token' },
-          { status: 401 }
+          {error: 'Invalid token'},
+          {status: 401},
         );
 
         mockValidateAdminAccess.mockResolvedValue({
@@ -138,9 +139,13 @@ describe('Admin Validate API', () => {
 
     describe('Error Handling', () => {
       it('handles validateAdminAccess throwing an error', async () => {
-        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        
-        mockValidateAdminAccess.mockRejectedValue(new Error('Database connection failed'));
+        const consoleErrorSpy = vi
+          .spyOn(console, 'error')
+          .mockImplementation(() => {});
+
+        mockValidateAdminAccess.mockRejectedValue(
+          new Error('Database connection failed'),
+        );
 
         try {
           await GET();
@@ -150,7 +155,7 @@ describe('Admin Validate API', () => {
         }
 
         expect(mockValidateAdminAccess).toHaveBeenCalledTimes(1);
-        
+
         consoleErrorSpy.mockRestore();
       });
 
