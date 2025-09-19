@@ -27,7 +27,7 @@ vi.mock('stripe', () => {
     }
   };
 
-  const StripeConstructor = vi.fn(() => mockStripe);
+  const StripeConstructor = vi.fn(() => mockStripe) as any;
   StripeConstructor.errors = {
     StripeError,
   };
@@ -97,6 +97,19 @@ const mockOrder = {
 };
 
 describe('Stripe Verify Session API', () => {
+  describe('Environment Variable Validation', () => {
+    it('throws error when STRIPE_SECRET_KEY is not set', async () => {
+      const originalKey = process.env.STRIPE_SECRET_KEY;
+      delete process.env.STRIPE_SECRET_KEY;
+      vi.resetModules();
+      await expect(import('./route')).rejects.toThrow(
+        'STRIPE_SECRET_KEY is not set',
+      );
+      process.env.STRIPE_SECRET_KEY = originalKey;
+      vi.resetModules();
+    });
+  });
+
   let GET: any;
   let POST: any;
   let mockStripe: any;
@@ -115,7 +128,7 @@ describe('Stripe Verify Session API', () => {
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('GET /api/stripe/verify-session', () => {
