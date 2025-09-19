@@ -170,7 +170,7 @@ vi.mock('antd', () => ({
               originFileObj: file,
             })),
           ];
-          onChange?.({ fileList: newList });
+          onChange?.({fileList: newList});
         }}
       />
       {children}
@@ -207,7 +207,9 @@ beforeEach(() => {
       formAppendSpy(key, value);
       this._data.push([key, value]);
     });
-    entries() { return this._data[Symbol.iterator](); }
+    entries() {
+      return this._data[Symbol.iterator]();
+    }
   }
   (global as any).FormData = FDMock as any;
 });
@@ -1139,12 +1141,12 @@ describe('ProductsPage', () => {
     fireEvent.click(cancelButton!);
 
     // Assert modal is removed from DOM
-     await waitFor(() => {
-       expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
-     });
-   });
+    await waitFor(() => {
+      expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+    });
+  });
 
-   it('should call beforeUpload and not add file when it returns false', async () => {
+  it('should call beforeUpload and not add file when it returns false', async () => {
     const mockFile = new File(['test'], 'test.jpg', {type: 'image/jpeg'});
 
     mockFetch
@@ -1173,7 +1175,7 @@ describe('ProductsPage', () => {
     // Get the upload component and simulate file selection
     const uploadComponent = screen.getByTestId('upload');
     const fileInput = uploadComponent.querySelector('input[type="file"]');
-    
+
     // The beforeUpload function in the actual component always returns false
     // So we just need to verify that files don't get added to fileList automatically
     fireEvent.change(fileInput!, {target: {files: [mockFile]}});
