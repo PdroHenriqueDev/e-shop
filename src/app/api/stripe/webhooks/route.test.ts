@@ -21,7 +21,7 @@ vi.mock('stripe', () => {
     }
   };
 
-  const StripeConstructor = vi.fn(() => mockStripe);
+  const StripeConstructor = vi.fn(() => mockStripe) as any;
   StripeConstructor.errors = {
     StripeError,
   };
@@ -76,23 +76,45 @@ const mockOrder = {
 };
 
 describe('Stripe Webhooks API', () => {
+  describe('Environment Variable Validation', () => {
+    it('throws error when STRIPE_SECRET_KEY is not set', async () => {
+      const originalKey = process.env.STRIPE_SECRET_KEY;
+      delete process.env.STRIPE_SECRET_KEY;
+      vi.resetModules();
+      await expect(import('./route')).rejects.toThrow(
+        'STRIPE_SECRET_KEY is not set',
+      );
+      process.env.STRIPE_SECRET_KEY = originalKey;
+      vi.resetModules();
+    });
+
+    it('throws error when STRIPE_WEBHOOK_SECRET is not set', async () => {
+      const originalSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      delete process.env.STRIPE_WEBHOOK_SECRET;
+      vi.resetModules();
+      await expect(import('./route')).rejects.toThrow(
+        'STRIPE_WEBHOOK_SECRET is not set',
+      );
+      process.env.STRIPE_WEBHOOK_SECRET = originalSecret;
+      vi.resetModules();
+    });
+  });
+
   let POST: any;
   let mockStripe: any;
 
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    // Import the route function after mocks are set up
     const routeModule = await import('./route');
     POST = routeModule.POST;
 
-    // Get the mocked Stripe instance
     const StripeConstructor = (await import('stripe')).default;
     mockStripe = new StripeConstructor();
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('POST /api/stripe/webhooks', () => {

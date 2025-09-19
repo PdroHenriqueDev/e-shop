@@ -1,7 +1,6 @@
 import {NextRequest} from 'next/server';
 import {vi, describe, it, expect, beforeEach, afterEach} from 'vitest';
 import {auth} from '../../../../../auth';
-import Stripe from 'stripe';
 import prisma from '@/lib/prisma';
 
 process.env.STRIPE_SECRET_KEY = 'sk_test_123';
@@ -117,12 +116,10 @@ describe('Stripe Verify Session API', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    // Import the route functions after mocks are set up
     const routeModule = await import('./route');
     GET = routeModule.GET;
     POST = routeModule.POST;
 
-    // Get the mocked Stripe instance
     const StripeConstructor = (await import('stripe')).default;
     mockStripe = new StripeConstructor();
   });
