@@ -1,7 +1,6 @@
 import {NextRequest} from 'next/server';
 import {vi, describe, it, expect, beforeEach, afterEach} from 'vitest';
 import {auth} from '../../../../../auth';
-import Stripe from 'stripe';
 import prisma from '@/lib/prisma';
 import {ORDER_STATUS} from '@/constants';
 
@@ -29,7 +28,7 @@ vi.mock('stripe', () => {
     }
   };
 
-  const StripeConstructor = vi.fn(() => mockStripe);
+  const StripeConstructor = vi.fn(() => mockStripe) as any;
   StripeConstructor.errors = {
     StripeError,
   };
@@ -95,6 +94,22 @@ const mockCheckoutSession = {
   url: 'https://checkout.stripe.com/pay/cs_test_123',
 };
 
+describe('Environment Variable Validation', () => {
+  it('throws error when STRIPE_SECRET_KEY is not set', async () => {
+    const originalKey = process.env.STRIPE_SECRET_KEY;
+    delete process.env.STRIPE_SECRET_KEY;
+
+    vi.resetModules();
+
+    await expect(async () => {
+      await import('./route');
+    }).rejects.toThrow('STRIPE_SECRET_KEY is not set');
+
+    process.env.STRIPE_SECRET_KEY = originalKey;
+    vi.resetModules();
+  });
+});
+
 describe('POST /api/stripe/create-checkout-session', () => {
   let POST: any;
   let mockStripe: any;
@@ -102,17 +117,15 @@ describe('POST /api/stripe/create-checkout-session', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    // Import the POST function after mocks are set up
     const routeModule = await import('./route');
     POST = routeModule.POST;
 
-    // Get the mocked Stripe instance
     const StripeConstructor = (await import('stripe')).default;
     mockStripe = new StripeConstructor();
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Authentication', () => {

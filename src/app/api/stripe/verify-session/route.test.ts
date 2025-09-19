@@ -1,7 +1,6 @@
 import {NextRequest} from 'next/server';
 import {vi, describe, it, expect, beforeEach, afterEach} from 'vitest';
 import {auth} from '../../../../../auth';
-import Stripe from 'stripe';
 import prisma from '@/lib/prisma';
 
 process.env.STRIPE_SECRET_KEY = 'sk_test_123';
@@ -27,7 +26,7 @@ vi.mock('stripe', () => {
     }
   };
 
-  const StripeConstructor = vi.fn(() => mockStripe);
+  const StripeConstructor = vi.fn(() => mockStripe) as any;
   StripeConstructor.errors = {
     StripeError,
   };
@@ -97,6 +96,19 @@ const mockOrder = {
 };
 
 describe('Stripe Verify Session API', () => {
+  describe('Environment Variable Validation', () => {
+    it('throws error when STRIPE_SECRET_KEY is not set', async () => {
+      const originalKey = process.env.STRIPE_SECRET_KEY;
+      delete process.env.STRIPE_SECRET_KEY;
+      vi.resetModules();
+      await expect(import('./route')).rejects.toThrow(
+        'STRIPE_SECRET_KEY is not set',
+      );
+      process.env.STRIPE_SECRET_KEY = originalKey;
+      vi.resetModules();
+    });
+  });
+
   let GET: any;
   let POST: any;
   let mockStripe: any;
@@ -104,18 +116,16 @@ describe('Stripe Verify Session API', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    // Import the route functions after mocks are set up
     const routeModule = await import('./route');
     GET = routeModule.GET;
     POST = routeModule.POST;
 
-    // Get the mocked Stripe instance
     const StripeConstructor = (await import('stripe')).default;
     mockStripe = new StripeConstructor();
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('GET /api/stripe/verify-session', () => {
