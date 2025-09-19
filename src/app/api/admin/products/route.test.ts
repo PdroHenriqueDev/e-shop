@@ -619,6 +619,57 @@ describe('Admin Products API', () => {
 
         consoleSpy.mockRestore();
       });
+
+      it('POST sets imageUrl to placeholder when image file is provided', async () => {
+        mockValidateAdminAccess.mockResolvedValue({error: null});
+
+        const formData = new FormData();
+        formData.append('name', 'Test Product');
+        formData.append('description', 'Desc');
+        formData.append('price', '19.99');
+        formData.append('categoryId', '7');
+        formData.append('image', 'fake-image-data');
+
+        const created = {
+          id: 123,
+          name: 'Test Product',
+          description: 'Desc',
+          price: 19.99,
+          categoryId: 7,
+          imageUrl: '/placeholder.jpg',
+          category: {id: 7, name: 'Cat'},
+        };
+
+        mockPrisma.product.create.mockResolvedValue(created);
+
+        const request = new NextRequest(
+          'http://localhost:3000/api/admin/products',
+          {
+            method: 'POST',
+            body: formData,
+          },
+        );
+
+        const res = await POST(request);
+        expect(res instanceof NextResponse).toBe(true);
+
+        const body = await res.json();
+        expect(res.status).toBe(201);
+        expect(body.imageUrl).toBe('/placeholder.jpg');
+
+        expect(mockPrisma.product.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              name: 'Test Product',
+              description: 'Desc',
+              price: 19.99,
+              categoryId: 7,
+              imageUrl: '/placeholder.jpg',
+            }),
+            include: expect.objectContaining({category: true}),
+          }),
+        );
+      });
     });
   });
 });
