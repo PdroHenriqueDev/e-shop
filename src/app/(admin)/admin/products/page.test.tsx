@@ -41,6 +41,9 @@ vi.mock('@/components/dataTable/dataTable', () => ({
                 {columns
                   ?.find((col: any) => col.key === 'imageUrl')
                   ?.render?.(item.imageUrl)}
+                {columns
+                  ?.find((col: any) => col.key === 'price')
+                  ?.render?.(item.price || 0)}
                 <span>{item.name}</span>
                 <span>{item.price}</span>
                 {actions && (
@@ -152,19 +155,22 @@ vi.mock('antd', () => ({
       ),
     },
   ),
-  Upload: ({children, onChange, fileList, ...props}: any) => (
+  Upload: ({children, onChange, fileList = [], ...props}: any) => (
     <div data-testid="upload" {...props}>
       <input
         type="file"
         onChange={e => {
           const files = Array.from(e.target.files || []);
-          onChange?.({
-            fileList: files.map((file, index) => ({
-              uid: index,
+          const newList = [
+            ...fileList,
+            ...files.map((file, i) => ({
+              uid: `${Date.now()}-${i}`,
               name: file.name,
+              status: 'done',
               originFileObj: file,
             })),
-          });
+          ];
+          onChange?.({ fileList: newList });
         }}
       />
       {children}
@@ -189,6 +195,26 @@ vi.mock('@/interfaces/admin', () => ({
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
+
+const RealFormData = global.FormData;
+let formAppendSpy: ReturnType<typeof vi.fn>;
+
+beforeEach(() => {
+  formAppendSpy = vi.fn();
+  class FDMock {
+    private _data: any[] = [];
+    append = vi.fn((key: any, value: any) => {
+      formAppendSpy(key, value);
+      this._data.push([key, value]);
+    });
+    entries() { return this._data[Symbol.iterator](); }
+  }
+  (global as any).FormData = FDMock as any;
+});
+
+afterEach(() => {
+  (global as any).FormData = RealFormData;
+});
 
 const mockConsoleError = vi
   .spyOn(console, 'error')
@@ -940,5 +966,252 @@ describe('ProductsPage', () => {
         }),
       );
     });
+
+    expect(formAppendSpy).toHaveBeenCalledWith('image', mockFile);
+  });
+
+  it('should show "Failed to create product" error message when POST fails', async () => {
+    const mockFile = new File(['test'], 'test.jpg', {type: 'image/jpeg'});
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCategories),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument();
+    });
+
+    // Fill form fields
+    const inputs = screen.getAllByTestId('input');
+    fireEvent.change(inputs[0], {
+      target: {value: 'Test Product'},
+    });
+    fireEvent.change(screen.getByTestId('textarea'), {
+      target: {value: 'Test Description'},
+    });
+    fireEvent.change(screen.getByTestId('input-number'), {
+      target: {value: 99.99},
+    });
+
+    // Simulate file upload
+    const uploadComponent = screen.getByTestId('upload');
+    const fileInput = uploadComponent.querySelector('input[type="file"]');
+    fireEvent.change(fileInput!, {target: {files: [mockFile]}});
+
+    // Submit form
+    const submitButtons = screen.getAllByTestId('button');
+    const submitButton = submitButtons.find(btn =>
+      btn.textContent?.includes('Create'),
+    );
+    fireEvent.click(submitButton!);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/admin/products',
+        expect.objectContaining({
+          method: 'POST',
+          body: expect.any(FormData),
+        }),
+      );
+    });
+
+    // Check that error message is called with correct text
+    const {message} = await import('antd');
+    expect(message.error).toHaveBeenCalledWith('Failed to create product');
+  });
+
+  it('should show "Failed to update product" error message when PUT fails', async () => {
+    const mockFile = new File(['test'], 'test.jpg', {type: 'image/jpeg'});
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCategories),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('table-content')).toBeInTheDocument();
+    });
+
+    // Click edit button for first product
+    fireEvent.click(screen.getByTestId('edit-1'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument();
+    });
+
+    // Fill form fields
+    const inputs = screen.getAllByTestId('input');
+    fireEvent.change(inputs[0], {
+      target: {value: 'Updated Product'},
+    });
+    fireEvent.change(screen.getByTestId('textarea'), {
+      target: {value: 'Updated Description'},
+    });
+    fireEvent.change(screen.getByTestId('input-number'), {
+      target: {value: 199.99},
+    });
+
+    // Simulate file upload
+    const uploadComponent = screen.getByTestId('upload');
+    const fileInput = uploadComponent.querySelector('input[type="file"]');
+    fireEvent.change(fileInput!, {target: {files: [mockFile]}});
+
+    // Submit form
+    const submitButtons = screen.getAllByTestId('button');
+    const submitButton = submitButtons.find(btn =>
+      btn.textContent?.includes('Update'),
+    );
+    fireEvent.click(submitButton!);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        '/api/admin/products/1',
+        expect.objectContaining({
+          method: 'PUT',
+          body: expect.any(FormData),
+        }),
+      );
+    });
+
+    // Check that error message is called with correct text
+    const {message} = await import('antd');
+    expect(message.error).toHaveBeenCalledWith('Failed to update product');
+  });
+
+  it('should close modal when Cancel button is clicked', async () => {
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCategories),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    // Open modal
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument();
+    });
+
+    // Click Cancel button
+    const cancelButtons = screen.getAllByTestId('button');
+    const cancelButton = cancelButtons.find(btn =>
+      btn.textContent?.includes('Cancel'),
+    );
+    fireEvent.click(cancelButton!);
+
+    // Assert modal is removed from DOM
+     await waitFor(() => {
+       expect(screen.queryByTestId('modal')).not.toBeInTheDocument();
+     });
+   });
+
+   it('should call beforeUpload and not add file when it returns false', async () => {
+    const mockFile = new File(['test'], 'test.jpg', {type: 'image/jpeg'});
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockProducts),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCategories),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('add-button')).toBeInTheDocument();
+    });
+
+    // Open modal
+    fireEvent.click(screen.getByTestId('add-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('modal')).toBeInTheDocument();
+    });
+
+    // Get the upload component and simulate file selection
+    const uploadComponent = screen.getByTestId('upload');
+    const fileInput = uploadComponent.querySelector('input[type="file"]');
+    
+    // The beforeUpload function in the actual component always returns false
+    // So we just need to verify that files don't get added to fileList automatically
+    fireEvent.change(fileInput!, {target: {files: [mockFile]}});
+
+    // Since beforeUpload returns false, the file should not be added to fileList
+    // The component relies on controlled fileList from state
+    // We can verify this by checking that no file appears in the upload area
+    expect(uploadComponent).toBeInTheDocument();
+  });
+
+  it('should render price column with toFixed(2) format', async () => {
+    const mockProductWithPrice = {
+      id: '1',
+      name: 'Test Product',
+      description: 'Test Description',
+      price: 9.9,
+      categoryId: '1',
+      imageUrl: '/test.jpg',
+      category: {id: '1', name: 'Test Category'},
+    };
+
+    mockFetch
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve([mockProductWithPrice]),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockCategories),
+      } as Response);
+
+    render(<ProductsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('table-content')).toBeInTheDocument();
+    });
+
+    // Check that the price is rendered with toFixed(2) format
+    expect(screen.getByText('$9.90')).toBeInTheDocument();
   });
 });

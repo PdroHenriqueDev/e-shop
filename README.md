@@ -17,7 +17,7 @@ E-Shop is an e-commerce portfolio developed with Next.js.
 - [x] Checkout
 - [x] Admin dashboard
 - [x] Payment system integration (Stripe)
-- [ ] Unit tests
+- [x] Unit tests
 - [ ] Automated tests
 
 ## Payment Flow
