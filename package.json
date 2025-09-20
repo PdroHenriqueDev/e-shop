@@ -9,7 +9,11 @@
     "lint": "next lint",
     "format:fix": "prettier . --write",
     "db": "prisma db push",
-    "test": "vitest run --coverage"
+    "test": "vitest run --coverage",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:debug": "playwright test --debug",
+    "e2e:install-browsers": "playwright install --with-deps"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -34,6 +38,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.3.0",
