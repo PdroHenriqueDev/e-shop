@@ -39,8 +39,15 @@ const CartDrawer = () => {
 
   return (
     <>
-      <Badge count={cartItems.length} className="cursor-pointer mx-5 mt-1">
-        <ShoppingCartOutlined className="text-xl" onClick={showDrawer} />
+      <Badge
+        count={cartItems.length}
+        className="cursor-pointer mx-5 mt-1"
+        data-testid="cart-badge">
+        <ShoppingCartOutlined
+          className="text-xl"
+          onClick={showDrawer}
+          data-testid="cart-button"
+        />
       </Badge>
 
       <Drawer
